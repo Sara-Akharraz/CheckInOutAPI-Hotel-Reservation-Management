@@ -1,6 +1,6 @@
 package com.example.demo.Entity;
 
-<<<<<<< HEAD
+
 import com.example.demo.Enums.ReservationStatus;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -34,7 +34,6 @@ public class Reservation {
 
     @OneToMany(mappedBy = "reservation",cascade = CascadeType.ALL)
     private List<Facture> factureList;
-=======
-public class Reservation {
->>>>>>> 4a817e1248ed02aa1ee292275da3f3f226965c27
+
+
 }
