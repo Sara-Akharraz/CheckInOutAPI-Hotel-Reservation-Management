@@ -1,4 +1,4 @@
-package com.example.demo.Enums;
+package com.api.apicheck_incheck_out.Enums;
 
 public enum ChambreStatut {
     DISPONIBLE,

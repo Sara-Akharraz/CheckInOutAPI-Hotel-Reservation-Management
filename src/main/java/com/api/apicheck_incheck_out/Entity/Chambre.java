@@ -1,6 +1,6 @@
-package com.example.demo.Entity;
+package com.api.apicheck_incheck_out.Entity;
 
-import com.example.demo.Enums.ChambreStatut;
+import com.api.apicheck_incheck_out.Enums.ChambreStatut;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,5 +25,9 @@ public class Chambre {
     @Enumerated(EnumType.STRING)
     @Column(name = "statut", nullable = false)
     private ChambreStatut statut;
+
+    @ManyToOne
+    @JoinColumn(name="reservation_id")
+    private Reservation reservation;
 
 }
