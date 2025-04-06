@@ -1,6 +1,6 @@
-package com.example.demo.Repository;
+package com.api.apicheck_incheck_out.Repository;
 
-import com.example.demo.Entity.Reservation;
+import com.api.apicheck_incheck_out.Entity.Reservation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

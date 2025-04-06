@@ -1,9 +1,14 @@
-package com.example.demo.Service.Impl;
+package com.api.apicheck_incheck_out.Service.Impl;
 
-import com.example.demo.Entity.Reservation;
-import com.example.demo.Enums.ReservationStatus;
-import com.example.demo.Repository.ReservationRepository;
-import com.example.demo.Service.ReservationService;
+import com.api.apicheck_incheck_out.DTO.ReservationDTO;
+import com.api.apicheck_incheck_out.Entity.Reservation;
+import com.api.apicheck_incheck_out.Enums.ReservationStatus;
+import com.api.apicheck_incheck_out.Mapper.ReservationMapper;
+import com.api.apicheck_incheck_out.PMSMock.Service.PMSService;
+import com.api.apicheck_incheck_out.Repository.ReservationRepository;
+import com.api.apicheck_incheck_out.Service.ReservationService;
+import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,8 +17,13 @@ import java.util.Optional;
 @Service
 public class ReservationServiceImpl implements ReservationService {
     private final ReservationRepository reservationRepository;
-    public ReservationServiceImpl(ReservationRepository reservationRepository){
+    private final PMSService pmsService;
+    private final ReservationMapper reservationMapper;
+
+    public ReservationServiceImpl(ReservationRepository reservationRepository, PMSService pmsService, ReservationMapper reservationMapper){
         this.reservationRepository=reservationRepository;
+        this.pmsService = pmsService;
+        this.reservationMapper = reservationMapper;
     }
     @Override
     public Reservation addReservation(Reservation reservation) {
@@ -51,5 +61,19 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public Reservation getReservationById(Long id) {
         return reservationRepository.findById(id).orElseThrow(()->new RuntimeException("Reservation non trouvée pour l'id :"+ id));
+    }
+
+    @Override
+    public Reservation addReservationPMS(Long id) {
+        ReservationDTO pmsReservationDTO=pmsService.getDemandeReservationById(id);
+        if(pmsReservationDTO == null){
+            throw new EntityNotFoundException("Reservation introuvable dans le pms");
+
+        }
+        if(reservationRepository.existsById(pmsReservationDTO.getId())){
+            throw new EntityExistsException("Reservation déja existante en base de donnée");
+        }
+        Reservation reservation = reservationMapper.toEntity(pmsReservationDTO);
+        return reservationRepository.save(reservation);
     }
 }

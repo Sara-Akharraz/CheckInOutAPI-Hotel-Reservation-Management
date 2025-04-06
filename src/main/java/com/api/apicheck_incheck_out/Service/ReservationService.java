@@ -1,7 +1,8 @@
-package com.example.demo.Service;
+package com.api.apicheck_incheck_out.Service;
 
-import com.example.demo.Entity.Reservation;
-import com.example.demo.Enums.ReservationStatus;
+import com.api.apicheck_incheck_out.DTO.ReservationDTO;
+import com.api.apicheck_incheck_out.Entity.Reservation;
+import com.api.apicheck_incheck_out.Enums.ReservationStatus;
 import java.util.List;
 
 
@@ -11,4 +12,5 @@ public interface ReservationService {
     public void deleteReservation(Long id);
     public List<Reservation> getAllReservations();
     public Reservation getReservationById(Long id);
+    public Reservation addReservationPMS(Long id);
 }

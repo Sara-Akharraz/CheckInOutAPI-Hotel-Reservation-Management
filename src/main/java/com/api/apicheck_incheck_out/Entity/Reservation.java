@@ -1,13 +1,19 @@
-package com.example.demo.Entity;
+package com.api.apicheck_incheck_out.Entity;
 
 
-import com.example.demo.Enums.ReservationStatus;
+import com.api.apicheck_incheck_out.Enums.ReservationStatus;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name="reservation")
 public class Reservation {
@@ -34,6 +40,5 @@ public class Reservation {
 
     @OneToMany(mappedBy = "reservation",cascade = CascadeType.ALL)
     private List<Facture> factureList;
-
 
 }
