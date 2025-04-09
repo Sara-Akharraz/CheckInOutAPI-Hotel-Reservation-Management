@@ -1,5 +1,6 @@
 package com.example.demo.Entity;
 
+import com.example.demo.Enum.Role;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -28,9 +29,13 @@ public class User {
     @Column(name="password")
     private String password;
 
+    @Column(name="email", unique = true)
+    private String email;
+
     @OneToMany(mappedBy = "user")
     private List<Notification> notifications;
-    
+
+    private Role role;
     public User() {
 
     }

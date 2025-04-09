@@ -1,5 +1,7 @@
 package com.example.demo.Entity;
 
+import com.example.demo.Enum.ChambreStatut;
+import com.example.demo.Enum.ChambreStatut;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,4 +26,7 @@ public class Chambre {
     @Enumerated(EnumType.STRING)
     @Column(name = "statut", nullable = false)
     private ChambreStatut statut;
+
+    @ManyToOne
+    private User assignedClient;
 }
