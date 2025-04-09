@@ -27,15 +27,31 @@ public class User {
     private Long id;
 
     @Column(name="name")
-    private String name;
+    private String nom;
+
+    @Column(name="prenom")
+    private String prenom;
 
     @Column(name="password")
     private String password;
+    @Column(name="email")
+    private String email;
+    @Column(name="cin")
+    private String cin;
+
+    @Column(name="numeroPassport")
+    private String numeroPassport;
+
+    @Column(name = "stripe_id")
+    private String stripeId;
+
+    @Column(name="papal_id")
+    private String paypalId;
 
     @OneToMany(mappedBy = "user")
     private List<Notification> notifications;
 
-    @OneToMany(mappedBy = "client")
+    @OneToMany(mappedBy = "user")
     private List<Reservation> reservations;
 
 }

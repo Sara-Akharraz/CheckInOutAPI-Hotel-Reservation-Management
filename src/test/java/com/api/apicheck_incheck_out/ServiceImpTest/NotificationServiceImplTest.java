@@ -35,7 +35,7 @@ public class NotificationServiceImplTest {
     private User user;
     @BeforeEach
     public void setup(){
-         user=new User(1L,"aman","123",null,null);
+         user=new User(1L,"aman","123",null,null,null,null,null,null,null,null);
          notification=new Notification(1L,"test notif", LocalDate.now(),user);
     }
     @Test

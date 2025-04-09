@@ -18,9 +18,11 @@ public class Chambre {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
+    private  String Nom;
     @Column(name = "etage", nullable = false)
     private int etage;
+    @Column(name="prix",nullable = false)
+    private double prix;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "statut", nullable = false)
