@@ -38,11 +38,6 @@ public class PMSServiceImpl implements PMSService {
            catch (IOException e){
                System.err.println("Failed to load PMS Data "+e.getMessage());
             }
-        }else{
-                ReservationDTO reservation1= new ReservationDTO(1L, ReservationStatus.En_Attente, LocalDate.now(),LocalDate.now().plusDays(5),10L,List.of(1L,2L),null);
-                ReservationDTO reservation2= new ReservationDTO(2L, ReservationStatus.En_Attente, LocalDate.now(),LocalDate.now().plusDays(5),12L,List.of(3L),null);
-                mockReservations.put(reservation1.getId(),reservation1);
-                mockReservations.put(reservation2.getId(),reservation2);
         }
     }
     @PreDestroy
@@ -79,7 +74,7 @@ public class PMSServiceImpl implements PMSService {
         if(reservationDTOExistante != null){
             reservationDTOExistante.setDate_debut(reservationDTO.getDate_debut());
             reservationDTOExistante.setDate_fin(reservationDTO.getDate_fin());
-            reservationDTOExistante.setClientId(reservationDTO.getClientId());
+            reservationDTOExistante.setUserId(reservationDTO.getUserId());
             reservationDTOExistante.setChambreList(reservationDTO.getChambreList());
             saveMockData();
             return reservationDTOExistante;
