@@ -5,7 +5,7 @@ import com.api.apicheck_incheck_out.Entity.Chambre;
 import com.api.apicheck_incheck_out.Entity.Facture;
 import com.api.apicheck_incheck_out.Entity.Reservation;
 import com.api.apicheck_incheck_out.Entity.User;
-import com.api.apicheck_incheck_out.Repository.ChambreRespository;
+import com.api.apicheck_incheck_out.Repository.ChambreRepository;
 import com.api.apicheck_incheck_out.Repository.FactureRepository;
 import com.api.apicheck_incheck_out.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ public class ReservationMapper {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private ChambreRespository chambreRespository;
+    private ChambreRepository chambreRepository;
     @Autowired
     private FactureRepository factureRepository;
 
@@ -46,7 +46,7 @@ public class ReservationMapper {
     }
     public Reservation toEntity(ReservationDTO reservationDTO){
         User user=userRepository.findById(reservationDTO.getClientId()).orElseThrow(()->new RuntimeException("User non trouve"));
-        List<Chambre> chambreList=chambreRespository.findAllById(reservationDTO.getChambreList());
+        List<Chambre> chambreList=chambreRepository.findAllById(reservationDTO.getChambreList());
         List<Facture> factureList=factureRepository.findAllById(reservationDTO.getFactureList());
         return new Reservation(
                 reservationDTO.getId(),
