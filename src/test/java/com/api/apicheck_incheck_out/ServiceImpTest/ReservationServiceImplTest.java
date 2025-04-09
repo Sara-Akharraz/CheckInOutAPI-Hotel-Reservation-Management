@@ -49,7 +49,7 @@ public class ReservationServiceImplTest {
         user=new User();
         chambre=new Chambre();
         chambres=Arrays.asList(chambre);
-        reservation=new Reservation(1L,user,chambres, LocalDate.of(2025,4,4),LocalDate.of(2025,4,25), ReservationStatus.En_Attente,null);
+        reservation=new Reservation(1L,user,chambres, LocalDate.of(2025,4,4),LocalDate.of(2025,4,25), ReservationStatus.En_Attente,null,null);
     }
 
     @Test
@@ -62,7 +62,7 @@ public class ReservationServiceImplTest {
     }
     @Test
     public void TestgetAllReservations(){
-        List<Reservation> reservations= Arrays.asList(reservation,new Reservation(2L,user,chambres,LocalDate.of(2025,4,10),LocalDate.of(2025,4,18),ReservationStatus.Confirmee,null));
+        List<Reservation> reservations= Arrays.asList(reservation,new Reservation(2L,user,chambres,LocalDate.of(2025,4,10),LocalDate.of(2025,4,18),ReservationStatus.Confirmee,null,null));
         when(reservationRepository.findAll()).thenReturn(reservations);
 
         List<Reservation> reservationList= reservationService.getAllReservations();
@@ -95,7 +95,7 @@ public class ReservationServiceImplTest {
     }
     @Test
     public void TestaddReservationPMS(){
-        ReservationDTO reservationDTO= new ReservationDTO(1L, ReservationStatus.En_Attente, LocalDate.now(),LocalDate.now().plusDays(5),10L,List.of(1L,2L),null);
+        ReservationDTO reservationDTO= new ReservationDTO(1L, ReservationStatus.En_Attente, LocalDate.now(),LocalDate.now().plusDays(5),10L,List.of(1L,2L),null,null);
 
         when(pmsService.getDemandeReservationById(1L)).thenReturn(reservationDTO);
         //Aucune Reservation trouvee pour cette id
