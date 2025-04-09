@@ -2,21 +2,24 @@ package com.api.apicheck_incheck_out.Entity;
 
 import com.api.apicheck_incheck_out.Enum.Role;
 import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import jakarta.persistence.*;
+import lombok.NoArgsConstructor;
 
-import javax.management.Notification;
-import javax.persistence.*;
 import java.util.List;
+
+
 
 @Entity
 @Table(name="user")
 @Data
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class User {
 
     @Id
@@ -34,9 +37,9 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private List<Notification> notifications;
-
+    @Enumerated(EnumType.STRING)
     private Role role;
-    public User() {
+    @OneToMany(mappedBy = "client")
+    private List<Reservation> reservations;
 
-    }
 }

@@ -1,7 +1,8 @@
 package com.api.apicheck_incheck_out.Dto;
 
-import com.example.demo.Entity.User;
-import com.example.demo.Enum.ChambreStatut;
+
+import com.api.apicheck_incheck_out.Entity.User;
+import com.api.apicheck_incheck_out.Enum.ChambreStatut;
 
 public class ChambreDto {
 
