@@ -1,6 +1,6 @@
 package com.api.apicheck_incheck_out.PMSMock.Service;
 
-import com.api.apicheck_incheck_out.DTO.ReservationDTO;
+import com.api.apicheck_incheck_out.Dto.ReservationDTO;
 
 import java.util.List;
 

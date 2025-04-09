@@ -2,6 +2,7 @@ package com.api.apicheck_incheck_out.Entity;
 
 
 import com.api.apicheck_incheck_out.Enums.ReservationStatus;
+import com.api.apicheck_incheck_out.PMSMock.Model.ChambreModel;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,8 +26,8 @@ public class Reservation {
     @JoinColumn(name="client_id",nullable = false)
     private User client;
 
-    @OneToMany(mappedBy = "reservation")
-    private List<Chambre> chambreList;
+    @ElementCollection
+    private List<ChambreModel> chambreList;
 
     @Column(name="date_debut",nullable = false)
     private LocalDate date_debut;

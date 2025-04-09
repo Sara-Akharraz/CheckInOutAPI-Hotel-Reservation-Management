@@ -22,6 +22,17 @@ public class UserServiceImpl implements UserService {
     @Autowired
     UserRepository userRepository;
 
+    private com.api.apicheck_incheck_out.PMSMock.Service.UserService userServiceMock;
+
+    public void loadUsersToDatabase(List<User> users) {
+        if (userRepository.count() == 0) { // Ensure it runs only once
+            userRepository.saveAll(users);
+            System.out.println("Users loaded into the database.");
+        } else {
+            System.out.println("Users already exist in the database. Skipping load.");
+        }
+    }
+
     @Override
     public UserDto logIn(String email, String password) {
         return userRepository.logIn(email, password)
@@ -29,11 +40,6 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
     }
 
-
-    @Override
-    public void logOut(Long id) {
-
-    }
 
     @Override
     public UserDto getUser(Long id) {
@@ -82,19 +88,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(Long id) {
-        if(userRepository.findById(id).isPresent())
+        if(userRepository.findById(id).isPresent()) {
             userRepository.deleteById(id);
-
-        else
+            userServiceMock.deleteUser(id);
+        }else
             throw new RuntimeException("User not found with id: " + id);
     }
 
     @Override
     public UserDto updateUser(Long id, UserDto user) {
         Optional<User> existingUser = userRepository.findById(id);
-        if (existingUser.isPresent())
+        if (existingUser.isPresent()) {
+            userServiceMock.updateUser(id, user);
             return userMapper.toDTO(
                     userRepository.save(userMapper.toEntity(user)));
+        }
         else
             throw new RuntimeException("User not found with id: " + id);
     }

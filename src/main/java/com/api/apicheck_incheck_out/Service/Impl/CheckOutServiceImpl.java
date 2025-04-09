@@ -7,7 +7,6 @@ import com.api.apicheck_incheck_out.Repository.CheckOutRepository;
 import com.api.apicheck_incheck_out.Service.CheckOutService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -62,5 +61,5 @@ public class CheckOutServiceImpl implements CheckOutService {
     public double getTotalPrice(Long id) {
         return extraMockImpl.calculateTotalExtraPrice(id);
     }
-    
+
 }

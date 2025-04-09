@@ -1,4 +1,4 @@
-package com.api.apicheck_incheck_out.DTO;
+package com.api.apicheck_incheck_out.Dto;
 
 import com.api.apicheck_incheck_out.Enums.ReservationStatus;
 import jakarta.validation.constraints.NotBlank;

@@ -1,6 +1,6 @@
 package com.api.apicheck_incheck_out.PMSMock.Service.Impl;
 
-import com.api.apicheck_incheck_out.DTO.ReservationDTO;
+import com.api.apicheck_incheck_out.Dto.ReservationDTO;
 import com.api.apicheck_incheck_out.Enums.ReservationStatus;
 import com.api.apicheck_incheck_out.PMSMock.Service.PMSService;
 import com.fasterxml.jackson.core.type.TypeReference;

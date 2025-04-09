@@ -7,7 +7,7 @@ import com.api.apicheck_incheck_out.Entity.User;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
-public class CheckOutMapper {
+public interface CheckOutMapper {
     Check_Out toEntity(CheckOutDTO dto);
     CheckOutDTO toDTO(Check_Out entity);
 }

@@ -1,4 +1,4 @@
-package com.example.demo.Controller;
+package com.api.apicheck_incheck_out.Controller;
 
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.CrossOrigin;

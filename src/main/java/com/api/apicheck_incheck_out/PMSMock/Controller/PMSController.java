@@ -1,6 +1,6 @@
 package com.api.apicheck_incheck_out.PMSMock.Controller;
 
-import com.api.apicheck_incheck_out.DTO.ReservationDTO;
+import com.api.apicheck_incheck_out.Dto.ReservationDTO;
 import com.api.apicheck_incheck_out.Enums.ReservationStatus;
 import com.api.apicheck_incheck_out.PMSMock.Service.PMSService;
 import org.springframework.beans.factory.annotation.Autowired;

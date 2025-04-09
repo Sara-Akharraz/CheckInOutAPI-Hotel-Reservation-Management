@@ -22,7 +22,7 @@ public class NotificationMapper {
     }
 
     public Notification toEntity(NotificationDTO notificationDTO){
-        User user=userRepository.find(notificationDTO.getUserId()).orElseThrow(()->new RuntimeException("User introuvable"));
+        User user=userRepository.findById(notificationDTO.getUserId()).orElseThrow(()->new RuntimeException("User introuvable"));
         return new Notification(
               notificationDTO.getId(),
               notificationDTO.getMessage(),

@@ -1,11 +1,11 @@
 package com.api.apicheck_incheck_out.Mapper;
 
-import com.api.apicheck_incheck_out.DTO.ReservationDTO;
-import com.api.apicheck_incheck_out.Entity.Chambre;
+import com.api.apicheck_incheck_out.Dto.ReservationDTO;
+import com.api.apicheck_incheck_out.PMSMock.Model.ChambreModel;
+import com.api.apicheck_incheck_out.PMSMock.Service.ChambreService;
 import com.api.apicheck_incheck_out.Entity.Facture;
 import com.api.apicheck_incheck_out.Entity.Reservation;
 import com.api.apicheck_incheck_out.Entity.User;
-import com.api.apicheck_incheck_out.Repository.ChambreRepository;
 import com.api.apicheck_incheck_out.Repository.FactureRepository;
 import com.api.apicheck_incheck_out.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,14 +20,13 @@ public class ReservationMapper {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private ChambreRepository chambreRepository;
-    @Autowired
     private FactureRepository factureRepository;
+    private ChambreService chambreService;
 
 
     public ReservationDTO toDTO(Reservation reservation){
         List<Long> chambresIds = reservation.getChambreList().stream()
-                .map(Chambre::getId)
+                .map(ChambreModel::getId)
                 .collect(Collectors.toList());
 
         List<Long> facturesIds = reservation.getFactureList().stream()
@@ -46,7 +45,7 @@ public class ReservationMapper {
     }
     public Reservation toEntity(ReservationDTO reservationDTO){
         User user=userRepository.findById(reservationDTO.getClientId()).orElseThrow(()->new RuntimeException("User non trouve"));
-        List<Chambre> chambreList=chambreRepository.findAllById(reservationDTO.getChambreList());
+        List<ChambreModel> chambreList=chambreService.getChambresByReservation(reservationDTO.getId());
         List<Facture> factureList=factureRepository.findAllById(reservationDTO.getFactureList());
         return new Reservation(
                 reservationDTO.getId(),
