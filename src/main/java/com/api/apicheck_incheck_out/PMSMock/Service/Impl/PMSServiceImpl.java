@@ -17,7 +17,7 @@ import java.util.*;
 
 @Service
 public class PMSServiceImpl implements PMSService {
-    private static final String FILE_PATH ="src/main/resources/pms_mock_data.json";
+    private static final String FILE_PATH ="/pms_mock_data.json";
     private static final ObjectMapper objectMapper=new ObjectMapper().registerModule(new JavaTimeModule());
     private static final Map<Long,ReservationDTO> mockReservations=new HashMap<>();
     private static Long nextId=1L;

@@ -1,9 +1,9 @@
 package com.api.apicheck_incheck_out.ServiceImpTest;
 
-import com.api.apicheck_incheck_out.DTO.ReservationDTO;
-import com.api.apicheck_incheck_out.Entity.Chambre;
+import com.api.apicheck_incheck_out.Dto.ReservationDTO;
 import com.api.apicheck_incheck_out.Entity.Reservation;
 import com.api.apicheck_incheck_out.Mapper.ReservationMapper;
+import com.api.apicheck_incheck_out.PMSMock.Model.ChambreModel;
 import com.api.apicheck_incheck_out.PMSMock.Service.PMSService;
 import com.api.apicheck_incheck_out.Service.Impl.ReservationServiceImpl;
 import com.api.apicheck_incheck_out.Entity.User;
@@ -42,12 +42,12 @@ public class ReservationServiceImplTest {
 
     private Reservation reservation;
     private User user;
-    private Chambre chambre;
-    List<Chambre> chambres;
+    private ChambreModel chambre;
+    List<ChambreModel> chambres;
     @BeforeEach
     public void setup(){
         user=new User();
-        chambre=new Chambre();
+        chambre=new ChambreModel();
         chambres=Arrays.asList(chambre);
         reservation=new Reservation(1L,user,chambres, LocalDate.of(2025,4,4),LocalDate.of(2025,4,25), ReservationStatus.En_Attente,null);
     }

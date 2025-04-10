@@ -1,6 +1,8 @@
 package com.api.apicheck_incheck_out.Enum;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public enum CheckOutStatut {
-    En_Attente,
-    Confirmée
+    EN_ATTENTE,
+    CONFIRMEE
 }

@@ -20,25 +20,36 @@ import java.util.List;
 public class ExtraMockImpl implements ExtraMock {
 
 
-    private final String JSON_FILE_PATH = "src/main/resources/Extra_Mock_Data.json";
+    private final String JSON_FILE_PATH = "/Extra_Mock_Data.json";
     @Autowired
     private ReservationService reservationService;
+    private List<ReservationExtrasModel> extras;
+
     @PostConstruct
-    public List<ReservationExtrasModel> loadExtas() {
+    public void loadExtas() {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             InputStream inputStream = getClass().getResourceAsStream(JSON_FILE_PATH);
-            return objectMapper.readValue(inputStream, new TypeReference<List<ReservationExtrasModel>>() {});
+            if (inputStream == null) {
+                throw new RuntimeException("JSON file not found: " + JSON_FILE_PATH);
+            }
+            extras = objectMapper.readValue(inputStream, new TypeReference<List<ReservationExtrasModel>>() {});
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Failed to load Extras");
         }
     }
+
     @PreDestroy
-    public void saveReservations(List<ReservationExtrasModel> extras) {
+    public void saveReservations() {
         try {
+            if (extras == null || extras.isEmpty()) {
+                System.out.println("No extras to save.");
+                return;
+            }
             ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(JSON_FILE_PATH), extras);
+            File file = new File(getClass().getResource(JSON_FILE_PATH).toURI());  // Convert URL to File
+            objectMapper.writerWithDefaultPrettyPrinter().writeValue(file, extras);
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Failed to save Extras");
@@ -49,7 +60,6 @@ public class ExtraMockImpl implements ExtraMock {
     public double calculateTotalExtraPrice(Long id_reservation) {
         if (reservationService.getReservationById(id_reservation) != null) {
             ReservationExtrasModel reservation = null;
-            List<ReservationExtrasModel> extras = loadExtas();
             for (ReservationExtrasModel reservationExtra : extras) {
                 if (reservationExtra.getId_reservation() == id_reservation) {
                     reservation = reservationExtra;
@@ -74,7 +84,6 @@ public class ExtraMockImpl implements ExtraMock {
     public List<ExtraModel> getExtrasOfReservation(Long id_reservation) {
         if (reservationService.getReservationById(id_reservation) != null) {
             ReservationExtrasModel reservation = null;
-            List<ReservationExtrasModel> extras = loadExtas();
             for (ReservationExtrasModel reservationExtra : extras) {
                 if (reservationExtra.getId_reservation() == id_reservation) {
                     reservation = reservationExtra;

@@ -11,50 +11,68 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+@Service
 public class ChambreServiceImp implements ChambreService {
 
+    @Autowired
     ReservationService reservationService;
 
-    private final String JSON_FILE_PATH = "src/main/resources/Chambres_mock_data.json";
+    private final String JSON_FILE_PATH = "/Chambres_mock_data.json";
 
-    @PostConstruct
-    public List<ChambreModel> loadChambres() {
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            InputStream inputStream = getClass().getResourceAsStream(JSON_FILE_PATH);
-            return objectMapper.readValue(inputStream, new TypeReference<List<ChambreModel>>() {});
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Failed to load Chambres");
+
+        private List<ChambreModel> chambres;
+
+        @PostConstruct
+        public void loadChambres() {
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                InputStream inputStream = getClass().getResourceAsStream(JSON_FILE_PATH);
+
+                // Check if the file is found
+                if (inputStream == null) {
+                    throw new FileNotFoundException("Could not find the file at " + JSON_FILE_PATH);
+                }
+
+                // Deserialize the JSON into the list
+                this.chambres = objectMapper.readValue(inputStream, new TypeReference<List<ChambreModel>>() {});
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                throw new RuntimeException("JSON file not found: " + JSON_FILE_PATH, e);
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new RuntimeException("Failed to load Chambres from JSON", e);
+            }
         }
-    }
-    @PreDestroy
-    public void saveChambres(List<ChambreModel> chambres) {
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(JSON_FILE_PATH), chambres);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Failed to save Chambres");
+
+        @PreDestroy
+        public void saveChambres() {
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(JSON_FILE_PATH), this.chambres);
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException("Failed to save Chambres", e);
+            }
         }
-    }
 
 
     @Override
     public List<ChambreModel> getChambres() {
-        return loadChambres();
+        return chambres;
     }
 
     @Override
     public ChambreStatut getChambreStatut(Long id) {
-        List<ChambreModel> chambres = loadChambres();
         for (ChambreModel chambre : chambres) {
             if(chambre.getId()==id){
                 return chambre.getStatut();
@@ -65,7 +83,6 @@ public class ChambreServiceImp implements ChambreService {
 
     @Override
     public ChambreModel getChambre(Long id) {
-        List<ChambreModel> chambres = loadChambres();
         for (ChambreModel chambre : chambres) {
             if(chambre.getId()==id){
                 return chambre;
@@ -83,7 +100,6 @@ public class ChambreServiceImp implements ChambreService {
     @Override
     public List<ChambreModel> getChambresDisponibles() {
         List<ChambreModel> chambresDispo = new ArrayList<>();
-        List<ChambreModel> chambres = loadChambres();
         for (ChambreModel chambre : chambres) {
             if(chambre.getStatut().equals("DISPONIBLE")){
                 chambresDispo.add(chambre);
@@ -95,26 +111,24 @@ public class ChambreServiceImp implements ChambreService {
     @Override
     public void setChambreOccupee(Long id, Long id_reservation) {
         Reservation reservation = reservationService.getReservationById(id_reservation);
-        List<ChambreModel> chambres = loadChambres();
         for (ChambreModel chambre : chambres) {
             if (chambre.getId() == id) {
                 chambre.setStatut(ChambreStatut.valueOf("OCCUPEE"));
                 chambre.getId_assignedReservation();
             }
-            saveChambres(chambres);
+            saveChambres();
         }
     }
 
 
 @Override
 public void setChambreDisponible(Long id) {
-    List<ChambreModel> chambres = loadChambres();
     for (ChambreModel chambre : chambres) {
         if (chambre.getId() == id) {
             chambre.setStatut(ChambreStatut.valueOf("DISPONIBLE"));
             chambre.getId_assignedReservation();
         }
-        saveChambres(chambres);
+        saveChambres();
     }
 }
-}}
+}

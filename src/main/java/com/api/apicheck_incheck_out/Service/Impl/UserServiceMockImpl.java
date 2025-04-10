@@ -4,7 +4,7 @@ import com.api.apicheck_incheck_out.Dto.UserDto;
 import com.api.apicheck_incheck_out.Entity.User;
 import com.api.apicheck_incheck_out.Mapper.UserMapper;
 import com.api.apicheck_incheck_out.Repository.UserRepository;
-import com.api.apicheck_incheck_out.Service.UserService;
+import com.api.apicheck_incheck_out.Service.UserServiceMock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +14,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceMockImpl implements UserServiceMock {
 
     @Autowired
     private UserMapper userMapper;

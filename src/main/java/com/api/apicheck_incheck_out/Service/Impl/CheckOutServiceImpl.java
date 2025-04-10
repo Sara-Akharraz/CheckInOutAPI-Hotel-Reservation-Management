@@ -15,14 +15,14 @@ public class CheckOutServiceImpl implements CheckOutService {
 
     @Autowired
     CheckOutRepository checkOutRepository;
-    @Autowired
+
     private ExtraMockImpl extraMockImpl;
 
     public Check_Out addCheckOut(Check_Out checkout) {
         if (checkout == null) {
             throw new IllegalArgumentException("Check_Out object cannot be null");
         }
-        checkout.setCheckOutStatut(CheckOutStatut.En_Attente);
+        checkout.setCheckOutStatut(CheckOutStatut.EN_ATTENTE);
         return checkOutRepository.save(checkout);
     }
 

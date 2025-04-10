@@ -1,18 +1,14 @@
 [
   {
   "id": 1,
-  "name": "Hasnae",
-  "email": "Hasnae@example.com",
-  "password": "Hasnae",
-  "cin": "CIN12345678",
-  "numeroPassport": "P123456789"
+  "name": "B1",
+  "statut": "DISPONIBLE",
+  "id_assignedReservation": "1"
   },
   {
     "id": 2,
-    "name": "Sara",
-    "email": "Sara@example.com",
-    "password": "Sara",
-    "cin": "CIN12345678",
-    "numeroPassport": "P123456789"
+    "name": "A1",
+    "statut": "OCCUPEE",
+    "id_assignedReservation": "1"
   }
 ]

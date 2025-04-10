@@ -7,31 +7,37 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 
+@Service
 public class UserServiceImpl implements UserService {
 
-    private final String JSON_FILE_PATH = "src/main/resources/Users_mock_data.json";
-
+    private final String JSON_FILE_PATH = "/User_mock_data.json";
+    private List<UserDto> users;
     @PostConstruct
-    public List<UserDto> loadUsers() {
+    public void loadUsers() {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             InputStream inputStream = getClass().getResourceAsStream(JSON_FILE_PATH);
-            return objectMapper.readValue(inputStream, new TypeReference<List<UserDto>>() {});
+            this.users = objectMapper.readValue(inputStream, new TypeReference<List<UserDto>>() {});
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Failed to load Users");
         }
     }
+
+    // PreDestroy method to save users without parameters
     @PreDestroy
-    public void saveUsers(List<UserDto> users) {
+    public void saveUsers() {
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(JSON_FILE_PATH), users);
+            if (this.users != null) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(JSON_FILE_PATH), this.users);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Failed to save Users");
@@ -41,12 +47,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> getUsers() {
-        return loadUsers();
+        return users;
     }
 
     @Override
     public UserDto getUser(Long id) {
-        List<UserDto> users = loadUsers();
         for (UserDto user : users) {
             if(user.getId()==id){
                 return user;
@@ -58,34 +63,31 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto addUser(UserDto userDto) {
-        List<UserDto> users = loadUsers();
         users.add(userDto);
-        saveUsers(users);
+        saveUsers();
         return userDto;
     }
 
     @Override
     public void deleteUser(Long id) {
-        List<UserDto> users = loadUsers();
         for(UserDto userDto : users) {
             if(userDto.getId() == id) {
                 users.remove(userDto);
             }
             break;
         }
-        saveUsers(users);
+        saveUsers();
     }
     @Override
     public void updateUser(Long id, UserDto userDto) {
         if(getUser(id)!=null) {
-            List<UserDto> users = loadUsers();
             for(UserDto user : users) {
                 if(user.getId() == id) {
                     user=userDto;
                 }
                 break;
             }
-            saveUsers(users);
+            saveUsers();
         }else{
             throw new RuntimeException("User does not exist in PMS");
         }

@@ -1,6 +1,6 @@
 [
             {
-                "reserv_id": 1,
+                "id_reservation": 1,
                 "extras": [
                     { "service": "WiFi", "price": 10.0 },
                     { "service": "Breakfast", "price": 15.0 },
@@ -8,7 +8,7 @@
                 ]
             },
             {
-                "reserv_id": 2,
+                "id_reservation": 2,
                 "extras": [
                     { "service": "Gym Access", "price": 20.0 },
                     { "service": "Spa", "price": 50.0 },
@@ -16,7 +16,7 @@
                 ]
             },
             {
-                "reserv_id": 3,
+                "id_reservation": 3,
                 "extras": [
                     { "service": "Dinner", "price": 25.0 },
                     { "service": "Laundry", "price": 15.0 },

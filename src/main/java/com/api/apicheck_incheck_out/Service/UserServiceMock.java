@@ -5,7 +5,7 @@ import com.api.apicheck_incheck_out.Dto.UserDto;
 
 import java.util.List;
 
-public interface UserService {
+public interface UserServiceMock {
     public UserDto logIn(String username, String password);
     public UserDto getUser(Long id);
     public List<UserDto> getAllUsers();
