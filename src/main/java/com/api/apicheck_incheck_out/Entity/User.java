@@ -1,6 +1,7 @@
 package com.api.apicheck_incheck_out.Entity;
 
 
+import com.api.apicheck_incheck_out.Enums.Role;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -53,5 +54,7 @@ public class User {
 
     @OneToMany(mappedBy = "user")
     private List<Reservation> reservations;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
 }
