@@ -4,12 +4,13 @@ import com.api.apicheck_incheck_out.DocumentScanMock.DTO.DocumentScanDTO;
 import com.api.apicheck_incheck_out.DocumentScanMock.Entity.DocumentScan;
 import com.api.apicheck_incheck_out.DocumentScanMock.Repository.DocumentScanRepository;
 import com.api.apicheck_incheck_out.DocumentScanMock.Service.DocumentScanService;
+import com.api.apicheck_incheck_out.Entity.Chambre;
 import com.api.apicheck_incheck_out.Entity.Check_In;
 import com.api.apicheck_incheck_out.Entity.Reservation;
-import com.api.apicheck_incheck_out.Enums.CheckInStatus;
-import com.api.apicheck_incheck_out.Enums.DocumentScanType;
-import com.api.apicheck_incheck_out.Enums.PaiementMethod;
-import com.api.apicheck_incheck_out.Enums.ReservationStatus;
+import com.api.apicheck_incheck_out.Enums.*;
+
+
+import com.api.apicheck_incheck_out.Repository.ChambreRepository;
 import com.api.apicheck_incheck_out.Repository.CheckInRepository;
 import com.api.apicheck_incheck_out.Repository.ReservationRepository;
 import com.api.apicheck_incheck_out.Service.CheckInService;
@@ -17,6 +18,7 @@ import com.api.apicheck_incheck_out.Service.FactureService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -25,12 +27,15 @@ public class CheckInServiceImpl implements CheckInService {
     private final DocumentScanRepository documentScanRepository;
     private final FactureService factureService;
     private final ReservationRepository reservationRepository;
+    private final ChambreRepository chambreRepository;
 
-    public CheckInServiceImpl(CheckInRepository checkInRepository, DocumentScanRepository documentScanRepository, FactureService factureService, ReservationRepository reservationRepository) {
+    public CheckInServiceImpl(CheckInRepository checkInRepository, DocumentScanRepository documentScanRepository, FactureService factureService, ReservationRepository reservationRepository, ChambreRepository chambreRepository) {
         this.checkInRepository = checkInRepository;
         this.documentScanRepository = documentScanRepository;
         this.factureService = factureService;
         this.reservationRepository = reservationRepository;
+        this.chambreRepository = chambreRepository;
+
     }
 
     @Override
@@ -74,7 +79,7 @@ public class CheckInServiceImpl implements CheckInService {
     }
 
     @Override
-    public DocumentScan getDocumentByChekin(Long id) {
+    public DocumentScan getDocumentByCheckin(Long id) {
         Optional<Check_In> checkIn=checkInRepository.findById(id);
         if(checkIn.isPresent()){
             return checkIn.get().getDocumentScan();
@@ -98,11 +103,28 @@ public class CheckInServiceImpl implements CheckInService {
         if(!paiement){
             throw new RuntimeException("Echec du paiement.");
         }
+
         checkIn.setStatus(CheckInStatus.Validé);
         checkInRepository.save(checkIn);
 
         reservation.setStatus(ReservationStatus.Confirmee);
         reservationRepository.save(reservation);
+
+        List<Chambre> chambres = chambreRepository.findByReservation(reservation);
+
+
+        for (Chambre chambre : chambres) {
+
+            if (chambre.getReservation() != null && chambre.getReservation().getId().equals(reservation.getId())) {
+
+                chambre.setStatut(ChambreStatut.OCCUPEE);
+            }
+        }
+
+
+        chambreRepository.saveAll(chambres);
+
+
         return true;
     }
 }

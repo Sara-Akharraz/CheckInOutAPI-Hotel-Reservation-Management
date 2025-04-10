@@ -78,7 +78,7 @@ public class CheckInServiceImplTest {
         checkIn.setDocumentScan(doc);
         when(checkInRepository.findById(1L)).thenReturn(Optional.of(checkIn));
 
-        DocumentScan result=checkInService.getDocumentByChekin(1L);
+        DocumentScan result=checkInService.getDocumentByCheckin(1L);
         assertEquals(doc,result);
     }
     @Test

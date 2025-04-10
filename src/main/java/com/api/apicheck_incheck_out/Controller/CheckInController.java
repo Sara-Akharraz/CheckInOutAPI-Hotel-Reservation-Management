@@ -43,7 +43,7 @@ public class CheckInController {
     @GetMapping("/{id}/document")
     public ResponseEntity<DocumentScanDTO> getDocumentScanByCheckIn(@PathVariable Long id){
         try{
-            DocumentScanDTO doc=documentScanMapper.toDTO(checkInService.getDocumentByChekin(id));
+            DocumentScanDTO doc=documentScanMapper.toDTO(checkInService.getDocumentByCheckin(id));
             return ResponseEntity.ok(doc);
         }catch(RuntimeException e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
