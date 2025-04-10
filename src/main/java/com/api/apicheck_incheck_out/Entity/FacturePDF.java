@@ -5,7 +5,6 @@ import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.List;
 import java.util.Optional;
@@ -84,7 +83,7 @@ public class FacturePDF {
             chambreTable.addCell(new Phrase("Prix (MAD)", bodyFont));
 
             reservation.getChambreList().forEach(chambre -> {
-                chambreTable.addCell(new Phrase("  - " + chambre.getNom(), bodyFont));
+                chambreTable.addCell(new Phrase("  - " + chambre.getName(), bodyFont));
                 chambreTable.addCell(new Phrase(String.valueOf(chambre.getPrix()), bodyFont));
             });
 
