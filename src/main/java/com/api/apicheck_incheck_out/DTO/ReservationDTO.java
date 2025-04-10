@@ -2,7 +2,6 @@ package com.api.apicheck_incheck_out.DTO;
 
 import com.api.apicheck_incheck_out.Enums.ReservationStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,5 +30,8 @@ public class ReservationDTO {
     private List<Long> chambreList;
     @JsonIgnore
     private Long checkinId;
+    @JsonIgnore
+    private Long checkoutId;
+    @JsonIgnore
     private List<Long> factureList;
 }

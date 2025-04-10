@@ -25,7 +25,7 @@ public class Reservation {
     @JoinColumn(name="user_id",nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "reservation")
+    @OneToMany(mappedBy = "reservation",cascade = CascadeType.ALL)
     private List<Chambre> chambreList;
 
     @Column(name="date_debut",nullable = false)
@@ -43,4 +43,7 @@ public class Reservation {
 
     @OneToOne(mappedBy = "reservation")
     private Check_In checkIn;
+
+    @OneToOne(mappedBy = "reservation")
+    private Check_Out checkOut;
 }
