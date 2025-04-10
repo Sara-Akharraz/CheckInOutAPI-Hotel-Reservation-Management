@@ -39,7 +39,7 @@ public class FactureController {
             return ResponseEntity.internalServerError().body("Erreur lors du processus paiement :" +e.getMessage());
         }
     }
-    @GetMapping("/checkin/{reservationId}")
+    @GetMapping("/checkinfacture/{reservationId}")
     public ResponseEntity<byte[]> afficherFactureDansNavigateur(@PathVariable Long reservationId) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new RuntimeException("Réservation introuvable avec ID : " + reservationId));
