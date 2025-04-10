@@ -20,7 +20,7 @@ public class Chambre {
     private Long id;
     private  String Nom;
     @Column(name = "etage", nullable = false)
-    private int etage;
+    private String etage;
     @Column(name="prix",nullable = false)
     private double prix;
 
