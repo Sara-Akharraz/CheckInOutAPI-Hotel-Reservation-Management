@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ReservationServiceImpl implements ReservationService {
@@ -34,6 +35,40 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public Reservation addReservation(Reservation reservation) {
 
+        List<Long> chambreIds = reservation.getChambreList().stream()
+                .map(Chambre::getId)
+                .collect(Collectors.toList());
+
+        // Vérification de l'existence d'une réservation avec les mêmes chambres et dates
+        List<Reservation> existingReservations = reservationRepository.findExistingReservation(
+                reservation.getUser().getId(),
+                chambreIds,
+                reservation.getDate_debut(),
+                reservation.getDate_fin()
+        );
+
+        if (!existingReservations.isEmpty()) {
+            throw new EntityExistsException("Une réservation existe déjà pour ce Client avec les mêmes chambres et dans les mêmes dates.");
+        }
+
+
+        for (Long chambreId : chambreIds) {
+            Chambre chambreEntity = chambreRepository.findById(chambreId)
+                    .orElseThrow(() -> new RuntimeException("Chambre non trouvée dans la base de données : " + chambreId));
+
+
+            if (chambreEntity.getStatut() != ChambreStatut.DISPONIBLE) {
+                throw new RuntimeException("La chambre " + chambreId + " est déjà réservée");
+            }
+
+            chambreEntity.setStatut(ChambreStatut.RESERVED);
+            chambreEntity.setReservation(reservation);
+
+
+            chambreRepository.save(chambreEntity);
+        }
+
+
         return reservationRepository.save(reservation);
     }
 
@@ -43,6 +78,23 @@ public class ReservationServiceImpl implements ReservationService {
         if(prevReservation.isPresent()){
             Reservation reservation=prevReservation.get();
             reservation.setStatus(status);
+            if(status==ReservationStatus.Confirmee){
+                List<Long> chambreIds = reservation.getChambreList().stream()
+                        .map(Chambre::getId)
+                        .collect(Collectors.toList());
+
+                for (Long chambreId : chambreIds) {
+                    Chambre chambreEntity = chambreRepository.findById(chambreId)
+                            .orElseThrow(() -> new RuntimeException("Chambre non trouvée dans la base de données : " + chambreId));
+
+
+                    chambreEntity.setStatut(ChambreStatut.OCCUPEE);
+                    chambreEntity.setReservation(reservation);
+
+
+                    chambreRepository.save(chambreEntity);
+                }
+            }
             return reservationRepository.save(reservation);
         }
         else{
