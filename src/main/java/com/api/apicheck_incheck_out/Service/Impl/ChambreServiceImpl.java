@@ -3,6 +3,7 @@ package com.api.apicheck_incheck_out.Service.Impl;
 import com.api.apicheck_incheck_out.Entity.Chambre;
 import com.api.apicheck_incheck_out.Entity.Reservation; // Import Reservation entity
 import com.api.apicheck_incheck_out.Enums.ChambreStatut;
+import com.api.apicheck_incheck_out.Enums.ReservationStatus;
 import com.api.apicheck_incheck_out.Repository.ChambreRepository;
 import com.api.apicheck_incheck_out.Service.ChambreService;
 import com.api.apicheck_incheck_out.Repository.ReservationRepository; // Import ReservationRepository for fetching Reservation
@@ -60,10 +61,15 @@ public class ChambreServiceImpl implements ChambreService {
         Reservation reservation = reservationRepository.findById(id_reservation)
                 .orElseThrow(() -> new RuntimeException("Réservation non trouvée avec l'id : " + id_reservation));
 
-        chambre.setStatut(ChambreStatut.OCCUPEE);
-        chambre.setReservation(reservation);
+        if(reservation.getStatus()==ReservationStatus.Confirmee){
+            chambre.setStatut(ChambreStatut.OCCUPEE);
+            chambre.setReservation(reservation);
 
-        chambreRepository.save(chambre);
+            chambreRepository.save(chambre);
+        }else{
+            throw new RuntimeException("La réservation est non confirmée , le statut actuel :"+reservation.getStatus());
+        }
+
     }
 
     @Override
@@ -76,5 +82,18 @@ public class ChambreServiceImpl implements ChambreService {
         chambre.setReservation(null);
 
         chambreRepository.save(chambre);
+    }
+
+    @Override
+    public void setChambreReserved(Long id, Long id_reservation) {
+        Chambre chambre=chambreRepository.findById(id).orElseThrow(()->new RuntimeException("chambre non trouvée avec l'id :"+id));
+        Reservation reservation=reservationRepository.findById(id_reservation).orElseThrow(()->new RuntimeException("Reservation non trouvée avec l'id "+id));
+        if(reservation.getStatus()== ReservationStatus.En_Attente) {
+            chambre.setStatut(ChambreStatut.RESERVED);
+            chambre.setReservation(reservation);
+            chambreRepository.save(chambre);
+        }else{
+            throw new RuntimeException("La réservation n'est pas en En attente, statut actuel: "+reservation.getStatus());
+        }
     }
 }

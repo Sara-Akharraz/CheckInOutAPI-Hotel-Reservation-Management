@@ -73,4 +73,9 @@ public class ChambreController {
 
         return new ResponseEntity<>(chambreDTOList, HttpStatus.OK);
     }
+    @PutMapping("/reservée/{id}")
+    public ResponseEntity<Void> setChambreReserved(@PathVariable Long id,@RequestParam Long id_reservation){
+        chambreService.setChambreReserved(id,id_reservation);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

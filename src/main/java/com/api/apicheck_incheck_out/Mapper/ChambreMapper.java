@@ -18,17 +18,21 @@ public class ChambreMapper {
 
     public ChambreDTO toDTO(Chambre chambre){
 
+        Long id_reservation=(chambre.getReservation() !=null)? chambre.getReservation().getId():null;
+
         return new ChambreDTO(
               chambre.getId(),
               chambre.getNom(),
               chambre.getEtage(),
               chambre.getStatut(),
               chambre.getPrix(),
-              chambre.getReservation().getId()
+              id_reservation
         );
     }
     public Chambre toEntity(ChambreDTO chambreDTO){
-        Reservation reservation=reservationRepository.findById(chambreDTO.getId()).orElseThrow(()->new RuntimeException("Chambre non trouve"));
+        Reservation reservation=(chambreDTO.getId_reservation()!=null)
+                ?reservationRepository.findById(chambreDTO.getId())
+                .orElseThrow(()->new RuntimeException("Reservation non trouve")):null;
 
         return new Chambre(
                 chambreDTO.getId(),
