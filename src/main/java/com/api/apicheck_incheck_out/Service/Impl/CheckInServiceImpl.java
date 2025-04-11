@@ -6,15 +6,18 @@ import com.api.apicheck_incheck_out.DocumentScanMock.Repository.DocumentScanRepo
 import com.api.apicheck_incheck_out.DocumentScanMock.Service.DocumentScanService;
 import com.api.apicheck_incheck_out.Entity.Chambre;
 import com.api.apicheck_incheck_out.Entity.Check_In;
+import com.api.apicheck_incheck_out.Entity.Facture;
 import com.api.apicheck_incheck_out.Entity.Reservation;
 import com.api.apicheck_incheck_out.Enums.*;
 
 
 import com.api.apicheck_incheck_out.Repository.ChambreRepository;
 import com.api.apicheck_incheck_out.Repository.CheckInRepository;
+import com.api.apicheck_incheck_out.Repository.FactureRepository;
 import com.api.apicheck_incheck_out.Repository.ReservationRepository;
 import com.api.apicheck_incheck_out.Service.CheckInService;
 import com.api.apicheck_incheck_out.Service.FactureService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -28,14 +31,16 @@ public class CheckInServiceImpl implements CheckInService {
     private final FactureService factureService;
     private final ReservationRepository reservationRepository;
     private final ChambreRepository chambreRepository;
+    private final FactureRepository factureRepository;
 
-    public CheckInServiceImpl(CheckInRepository checkInRepository, DocumentScanRepository documentScanRepository, FactureService factureService, ReservationRepository reservationRepository, ChambreRepository chambreRepository) {
+    public CheckInServiceImpl(CheckInRepository checkInRepository, DocumentScanRepository documentScanRepository, FactureService factureService, ReservationRepository reservationRepository, ChambreRepository chambreRepository, FactureRepository factureRepository) {
         this.checkInRepository = checkInRepository;
         this.documentScanRepository = documentScanRepository;
         this.factureService = factureService;
         this.reservationRepository = reservationRepository;
         this.chambreRepository = chambreRepository;
 
+        this.factureRepository = factureRepository;
     }
 
     @Override
@@ -99,10 +104,21 @@ public class CheckInServiceImpl implements CheckInService {
             throw new RuntimeException("Le check-in n'est pas en attente.");
 
         }
-        boolean paiement=factureService.payerFactureCheckIn(reservation,method);
-        if(!paiement){
-            throw new RuntimeException("Echec du paiement.");
+//        boolean paiement=factureService.payerFactureCheckIn(reservation,method);
+//        if(!paiement){
+//            throw new RuntimeException("Echec du paiement.");
+//        }
+        Facture facture = factureRepository.findByReservationAndType(reservation, FactureType.Check_In);
+        if (facture == null) {
+            throw new RuntimeException("Aucune facture trouvée pour cette réservation.");
         }
+
+
+        if (facture.getStatus() != PaiementStatus.paye) {
+
+            throw new RuntimeException("Le paiement de la facture n'a pas été effectué. Le check-in est refusé.");
+        }
+
 
         checkIn.setStatus(CheckInStatus.Validé);
         checkInRepository.save(checkIn);
@@ -127,4 +143,25 @@ public class CheckInServiceImpl implements CheckInService {
 
         return true;
     }
+    @Override
+    public Check_In getCheckInByReservation(Long Id_reservation) {
+        Reservation reservation = reservationRepository.findById(Id_reservation)
+                .orElseThrow(() -> new EntityNotFoundException("Réservation non trouvée avec l'id : " + Id_reservation));
+
+        return checkInRepository.findByReservation(reservation)
+                .orElseThrow(() -> new EntityNotFoundException("Aucun check-in trouvé pour la réservation avec l'id : " + Id_reservation));
+    }
+
+
+    @Override
+    public CheckInStatus getStatusCheckIn(Long Id_reservation) {
+        Reservation reservation = reservationRepository.findById(Id_reservation)
+                .orElseThrow(() -> new EntityNotFoundException("Réservation non trouvée avec l'id : " + Id_reservation));
+
+        Check_In checkIn = checkInRepository.findByReservation(reservation)
+                .orElseThrow(() -> new EntityNotFoundException("Aucun check-in trouvé pour la réservation avec l'id : " + Id_reservation));
+
+        return checkIn.getStatus();
+    }
+
 }

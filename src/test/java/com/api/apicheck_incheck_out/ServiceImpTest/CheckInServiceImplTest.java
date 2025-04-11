@@ -3,13 +3,11 @@ package com.api.apicheck_incheck_out.ServiceImpTest;
 import com.api.apicheck_incheck_out.DocumentScanMock.DTO.DocumentScanDTO;
 import com.api.apicheck_incheck_out.DocumentScanMock.Entity.DocumentScan;
 import com.api.apicheck_incheck_out.DocumentScanMock.Repository.DocumentScanRepository;
-import com.api.apicheck_incheck_out.Entity.Check_In;
-import com.api.apicheck_incheck_out.Entity.Reservation;
-import com.api.apicheck_incheck_out.Entity.User;
-import com.api.apicheck_incheck_out.Enums.CheckInStatus;
-import com.api.apicheck_incheck_out.Enums.DocumentScanType;
-import com.api.apicheck_incheck_out.Enums.PaiementMethod;
+import com.api.apicheck_incheck_out.Entity.*;
+import com.api.apicheck_incheck_out.Enums.*;
+import com.api.apicheck_incheck_out.Repository.ChambreRepository;
 import com.api.apicheck_incheck_out.Repository.CheckInRepository;
+import com.api.apicheck_incheck_out.Repository.FactureRepository;
 import com.api.apicheck_incheck_out.Repository.ReservationRepository;
 import com.api.apicheck_incheck_out.Service.FactureService;
 import com.api.apicheck_incheck_out.Service.Impl.CheckInServiceImpl;
@@ -21,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,6 +40,10 @@ public class CheckInServiceImplTest {
     private ReservationRepository reservationRepository;
     @InjectMocks
     private CheckInServiceImpl checkInService;
+    @Mock
+    private ChambreRepository chambreRepository;
+    @Mock
+    private FactureRepository factureRepository;
 
     private Reservation reservation;
     private User user;
@@ -82,20 +85,46 @@ public class CheckInServiceImplTest {
         assertEquals(doc,result);
     }
     @Test
-    public void TestValiderCheckIn(){
-        DocumentScan doc=new DocumentScan();
-        Check_In checkIn=new Check_In();
+    public void TestValiderCheckIn() {
+
+        reservation.setId(1L);
+        user.setId(1L);
+        reservation.setUser(user);
+
+        DocumentScan documentScan = new DocumentScan();
+        Check_In checkIn = new Check_In();
+        checkIn.setId(1L);
         checkIn.setStatus(CheckInStatus.En_Attente);
-        checkIn.setDocumentScan(doc);
+        checkIn.setDocumentScan(documentScan);
         checkIn.setReservation(reservation);
 
-        when(checkInRepository.findByReservation(reservation)).thenReturn(Optional.of(checkIn));
-        when(factureService.payerFactureCheckIn(reservation, PaiementMethod.STRIPE)).thenReturn(true);
+        Facture facture = new Facture();
+        facture.setStatus(PaiementStatus.paye);
 
-        boolean result=checkInService.validerCheckIn(reservation,PaiementMethod.STRIPE);
+        Chambre chambre = new Chambre();
+        chambre.setId(1L);
+        chambre.setStatut(ChambreStatut.RESERVED);
+        chambre.setReservation(reservation);
+
+        List<Chambre> chambres = List.of(chambre);
+
+
+        when(checkInRepository.findByReservation(reservation)).thenReturn(Optional.of(checkIn));
+        when(factureRepository.findByReservationAndType(reservation, FactureType.Check_In)).thenReturn(facture);
+        when(chambreRepository.findByReservation(reservation)).thenReturn(chambres);
+
+
+        boolean result = checkInService.validerCheckIn(reservation, PaiementMethod.STRIPE);
+
 
         assertTrue(result);
-        assertEquals(CheckInStatus.Validé,checkIn.getStatus());
+        assertEquals(CheckInStatus.Validé, checkIn.getStatus());
+        assertEquals(ReservationStatus.Confirmee, reservation.getStatus());
+        assertEquals(ChambreStatut.OCCUPEE, chambre.getStatut());
+
+
+        verify(checkInRepository).save(checkIn);
         verify(reservationRepository).save(reservation);
+        verify(chambreRepository).saveAll(chambres);
     }
 }

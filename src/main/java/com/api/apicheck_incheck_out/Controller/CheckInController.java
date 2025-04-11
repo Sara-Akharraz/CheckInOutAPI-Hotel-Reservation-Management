@@ -1,10 +1,14 @@
 package com.api.apicheck_incheck_out.Controller;
 
+import com.api.apicheck_incheck_out.DTO.CheckInDTO;
 import com.api.apicheck_incheck_out.DocumentScanMock.DTO.DocumentScanDTO;
 import com.api.apicheck_incheck_out.DocumentScanMock.Mapper.DocumentScanMapper;
 import com.api.apicheck_incheck_out.DocumentScanMock.Service.DocumentScanService;
+import com.api.apicheck_incheck_out.Entity.Check_In;
 import com.api.apicheck_incheck_out.Entity.Reservation;
+import com.api.apicheck_incheck_out.Enums.CheckInStatus;
 import com.api.apicheck_incheck_out.Enums.PaiementMethod;
+import com.api.apicheck_incheck_out.Mapper.CheckInMapper;
 import com.api.apicheck_incheck_out.Service.CheckInService;
 import com.api.apicheck_incheck_out.Service.ReservationService;
 import org.springframework.http.HttpStatus;
@@ -71,5 +75,23 @@ public class CheckInController {
 
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Une erreur interne s'est produite.");
         }
+    }
+    @GetMapping("/b-=y-reservation/{Id_reservation}")
+    public ResponseEntity<CheckInDTO> getCheckInByReservation(@PathVariable Long Id_reservation) {
+        try {
+            Check_In checkIn = checkInService.getCheckInByReservation(Id_reservation);
+            CheckInDTO checkInDTO = CheckInMapper.toDTO(checkIn);
+            return ResponseEntity.ok(checkInDTO);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(null);
+        }
+    }
+
+
+    @GetMapping("/status/{Id_reservation}")
+    public ResponseEntity<CheckInStatus> getStatusCheckIn(@PathVariable Long Id_reservation) {
+        CheckInStatus status = checkInService.getStatusCheckIn(Id_reservation);
+        return ResponseEntity.ok(status);
     }
 }
