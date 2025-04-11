@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -59,7 +60,7 @@ public class FactureServiceImpl implements FactureService {
         facture.setStatus(PaiementStatus.en_attente);
         facture.setType(FactureType.Check_In);
         facture.setReservation(reservation);
-        facture = factureRepository.save(facture);
+
 
         boolean paymentStatus = true;
 
@@ -82,10 +83,11 @@ public class FactureServiceImpl implements FactureService {
     @Override
     public double calculerMontantCheckIn(Reservation reservation) {
         double montantcheckIn = 0;
+        long duree =Duration.between(reservation.getDate_debut().atStartOfDay(), reservation.getDate_fin().atStartOfDay()).toDays();
         for (Chambre chambre : reservation.getChambreList()) {
             montantcheckIn += chambre.getPrix();
         }
-        return montantcheckIn * (1 + tva) + tax;
+        return montantcheckIn* duree * (1 + tva) + tax;
     }
 
     @Override
