@@ -21,6 +21,21 @@ public class ChambreController {
     @Autowired
     private ChambreMapper chambreMapper;
 
+    @PostMapping
+    public ResponseEntity<ChambreDTO> addChambre(@RequestParam ChambreDTO chambreDTO){
+        Chambre chambre=chambreService.addChambre(chambreMapper.toEntity(chambreDTO));
+        return ResponseEntity.ok(chambreMapper.toDTO(chambre));
+    }
+    @PutMapping("/update/{id}")
+    public ResponseEntity<ChambreDTO> updateChambre(@PathVariable Long id,@RequestBody ChambreDTO chambreDTO){
+        Chambre chambre=chambreService.updateChambre(id,chambreMapper.toEntity(chambreDTO));
+        return ResponseEntity.ok(chambreMapper.toDTO(chambre));
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteChambre(@PathVariable Long id){
+        chambreService.deleteChambre(id);
+        return ResponseEntity.noContent().build();
+    }
     @GetMapping
     public ResponseEntity<List<ChambreDTO>> getAllChambres() {
         List<Chambre> chambres = chambreService.getChambres();

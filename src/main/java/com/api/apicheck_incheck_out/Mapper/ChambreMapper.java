@@ -26,7 +26,9 @@ public class ChambreMapper {
               chambre.getEtage(),
               chambre.getStatut(),
               chambre.getPrix(),
-              id_reservation
+              id_reservation,
+              chambre.getType(),
+              chambre.getCapacite()
         );
     }
     public Chambre toEntity(ChambreDTO chambreDTO){
@@ -40,7 +42,9 @@ public class ChambreMapper {
                 chambreDTO.getEtage(),
                 chambreDTO.getPrix(),
                 chambreDTO.getStatut(),
-                reservation
+                reservation,
+                chambreDTO.getType(),
+                chambreDTO.getCapacite()
         );
     }
 }

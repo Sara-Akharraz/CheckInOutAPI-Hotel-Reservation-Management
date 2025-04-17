@@ -7,6 +7,9 @@ import java.util.List;
 
 
 public interface ChambreService {
+    public Chambre addChambre(Chambre chambre);
+    public Chambre updateChambre(Long id_chambre,Chambre updateChambre);
+    public void deleteChambre(Long id);
     public List<Chambre> getChambres();
     public ChambreStatut getChambreStatut(Long id);
     public Chambre getChambre(Long id);
