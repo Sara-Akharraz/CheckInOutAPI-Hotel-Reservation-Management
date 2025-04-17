@@ -4,6 +4,7 @@ import com.api.apicheck_incheck_out.Entity.Notification;
 import com.api.apicheck_incheck_out.Entity.User;
 import com.api.apicheck_incheck_out.Repository.NotificationRepository;
 import com.api.apicheck_incheck_out.Repository.UserRepository;
+import com.api.apicheck_incheck_out.Service.Impl.EmailSenderService;
 import com.api.apicheck_incheck_out.Service.Impl.NotificationServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -32,6 +34,7 @@ public class NotificationServiceImplTest {
     private NotificationServiceImpl notificationService;
     private Notification notification;
 
+
     private User user;
     @BeforeEach
     public void setup(){
@@ -42,14 +45,24 @@ public class NotificationServiceImplTest {
          notification=new Notification(1L,"test notif", LocalDate.now(),user);
     }
     @Test
-    public void notifier(){
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
-        when(notificationRepository.save(any(Notification.class))).thenReturn(notification);
-        Notification createdNotif=notificationService.notifier(user.getId(),notification);
+    public void notifier() {
+        Long userId = user.getId();
+        String message = "test notif";
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(notificationRepository.save(any(Notification.class))).thenAnswer(invocation -> {
+            Notification notifArg = invocation.getArgument(0);
+            notifArg.setId(1L);
+            return notifArg;
+        });
+
+        Notification createdNotif = notificationService.notifier(userId, message);
 
         assertNotNull(createdNotif);
-        assertEquals("test notif",createdNotif.getMessage());
+        assertEquals(message, createdNotif.getMessage());
+        assertEquals(user, createdNotif.getUser());
     }
+
     @Test
     public void getAllNotificationByUser(){
         List<Notification> notificationList= Arrays.asList(notification,
