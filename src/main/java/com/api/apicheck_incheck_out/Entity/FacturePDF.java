@@ -82,9 +82,9 @@ public class FacturePDF {
             chambreTable.addCell(new Phrase("Chambre", bodyFont));
             chambreTable.addCell(new Phrase("Prix (MAD)", bodyFont));
 
-            reservation.getChambreList().forEach(chambre -> {
-                chambreTable.addCell(new Phrase("  - " + chambre.getNom(), bodyFont));
-                chambreTable.addCell(new Phrase(String.valueOf(chambre.getPrix()), bodyFont));
+            reservation.getChambreReservations().forEach(chambre -> {
+                chambreTable.addCell(new Phrase("  - " + chambre.getChambre().getNom(), bodyFont));
+                chambreTable.addCell(new Phrase(String.valueOf(chambre.getChambre().getPrix()), bodyFont));
             });
 
             document.add(chambreTable);

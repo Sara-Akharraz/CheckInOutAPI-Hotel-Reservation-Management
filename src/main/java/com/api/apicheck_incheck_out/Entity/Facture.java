@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name="facture")
@@ -17,21 +18,27 @@ public class Facture {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(name="checkInMontant")
     private double checkInMontant;
+
     @Column(name="checkOutMontant")
     private double checkOutMontant;
+
     @Column(name="tax")
     private double tax;
+
     @Enumerated(EnumType.STRING)
     @Column(name="status")
     private PaiementStatus status;
+
     @Enumerated(EnumType.STRING)
     @Column(name="facture_type")
     private FactureType type;
 
     @ManyToOne
     @JoinColumn(name="reservation_id")
+    @ToString.Exclude
     private Reservation reservation;
 
 }

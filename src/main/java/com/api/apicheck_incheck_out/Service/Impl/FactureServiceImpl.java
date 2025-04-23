@@ -1,13 +1,13 @@
 package com.api.apicheck_incheck_out.Service.Impl;
 
-import com.api.apicheck_incheck_out.Entity.Chambre;
-import com.api.apicheck_incheck_out.Entity.Facture;
-import com.api.apicheck_incheck_out.Entity.Reservation;
+import com.api.apicheck_incheck_out.Entity.*;
 import com.api.apicheck_incheck_out.Enums.FactureType;
 import com.api.apicheck_incheck_out.Enums.PaiementMethod;
 import com.api.apicheck_incheck_out.Enums.PaiementStatus;
+import com.api.apicheck_incheck_out.Enums.PhaseAjoutService;
 import com.api.apicheck_incheck_out.Repository.FactureRepository;
 import com.api.apicheck_incheck_out.Repository.ReservationRepository;
+import com.api.apicheck_incheck_out.Repository.ReservationServiceRepository;
 import com.api.apicheck_incheck_out.Service.FactureService;
 import com.paypal.api.payments.*;
 import com.paypal.base.rest.APIContext;
@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class FactureServiceImpl implements FactureService {
@@ -34,6 +35,8 @@ public class FactureServiceImpl implements FactureService {
 
     @Autowired
     private ReservationRepository reservationRepository;
+    @Autowired
+    private ReservationServiceRepository reservationServiceRepository;
 
 
     private static final String STRIPE_SECRET_KEY = "a_sercret_key";
@@ -84,10 +87,18 @@ public class FactureServiceImpl implements FactureService {
     public double calculerMontantCheckIn(Reservation reservation) {
         double montantcheckIn = 0;
         long duree =Duration.between(reservation.getDate_debut().atStartOfDay(), reservation.getDate_fin().atStartOfDay()).toDays();
-        for (Chambre chambre : reservation.getChambreList()) {
+        for (Chambre chambre : reservation.getChambreReservations().stream()
+                .map(ChambreReservation::getChambre)
+                .collect(Collectors.toList())) {
             montantcheckIn += chambre.getPrix();
         }
-        return montantcheckIn* duree * (1 + tva) + tax;
+        double montantTotal= montantcheckIn* duree * (1 + tva) + tax;
+        List<ReservationServices> servicesCheckin = reservationServiceRepository.findByReservationAndPhase(reservation.getId(), PhaseAjoutService.check_in);
+
+        for (ReservationServices service : servicesCheckin) {
+            montantTotal += service.getService().getPrix();
+        }
+        return montantTotal;
     }
 
     @Override
