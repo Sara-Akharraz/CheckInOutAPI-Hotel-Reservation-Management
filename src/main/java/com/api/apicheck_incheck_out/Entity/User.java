@@ -5,11 +5,8 @@ import com.api.apicheck_incheck_out.Enums.Role;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import jakarta.persistence.*;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -37,6 +34,8 @@ public class User {
     private String password;
     @Column(name="email")
     private String email;
+    @Column(name="telephone")
+    private String telephone;
     @Column(name="cin")
     private String cin;
 
@@ -49,11 +48,14 @@ public class User {
     @Column(name="papal_id")
     private String paypalId;
 
+
     @OneToMany(mappedBy = "user")
+    @ToString.Exclude
     private List<Notification> notifications;
 
     @OneToMany(mappedBy = "user")
     private List<Reservation> reservations;
+
     @Enumerated(EnumType.STRING)
     private Role role;
 
