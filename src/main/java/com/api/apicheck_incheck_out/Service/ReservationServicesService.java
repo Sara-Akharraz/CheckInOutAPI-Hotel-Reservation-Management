@@ -8,5 +8,5 @@ import java.util.List;
 public interface ReservationServicesService {
     public List<ReservationServices> getAllServicesByReservation(Long id_reservation);
     public List<ReservationServices> getServicesByPhase(Long id_reservation, PhaseAjoutService phase);
-
+    public List<ReservationServices> addResService(Long id_reservation,List<Long> serviceIds);
 }

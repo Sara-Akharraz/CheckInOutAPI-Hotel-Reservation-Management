@@ -7,10 +7,10 @@ import java.util.List;
 
 
 public interface ReservationService {
-    public Reservation addReservation(Reservation reservation);
+    public Reservation addReservation(Reservation reservation,List<Long> chambreIds);
     public Reservation updateReservationStatus(Long id, ReservationStatus status);
     public void deleteReservation(Long id);
     public List<Reservation> getAllReservations();
     public Reservation getReservationById(Long id);
-    public Reservation addReservationPMS(Long id);
+//    public Reservation addReservationPMS(Long id);
 }

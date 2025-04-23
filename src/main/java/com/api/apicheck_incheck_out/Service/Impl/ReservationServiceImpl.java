@@ -1,19 +1,24 @@
 package com.api.apicheck_incheck_out.Service.Impl;
 
 import com.api.apicheck_incheck_out.DTO.ReservationDTO;
-import com.api.apicheck_incheck_out.Entity.Chambre;
-import com.api.apicheck_incheck_out.Entity.Reservation;
+import com.api.apicheck_incheck_out.Entity.*;
 import com.api.apicheck_incheck_out.Enums.ChambreStatut;
+import com.api.apicheck_incheck_out.Enums.PaiementStatus;
+import com.api.apicheck_incheck_out.Enums.PhaseAjoutService;
 import com.api.apicheck_incheck_out.Enums.ReservationStatus;
 import com.api.apicheck_incheck_out.Mapper.ReservationMapper;
 import com.api.apicheck_incheck_out.PMSMock.Service.PMSService;
-import com.api.apicheck_incheck_out.Repository.ChambreRepository;
-import com.api.apicheck_incheck_out.Repository.ReservationRepository;
+import com.api.apicheck_incheck_out.Repository.*;
+import com.api.apicheck_incheck_out.Service.NotificationService;
 import com.api.apicheck_incheck_out.Service.ReservationService;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -25,51 +30,68 @@ public class ReservationServiceImpl implements ReservationService {
     private final ReservationMapper reservationMapper;
     private final ChambreRepository chambreRepository;
 
-    public ReservationServiceImpl(ReservationRepository reservationRepository, PMSService pmsService, ReservationMapper reservationMapper, ChambreRepository chambreRepository){
+    private final NotificationRepository notificationRepository;
+
+    private final NotificationService notificationService;
+    private final ChambreReservationRepository chambreReservationRepository;
+
+
+    public ReservationServiceImpl(ReservationRepository reservationRepository, PMSService pmsService, ReservationMapper reservationMapper, ChambreRepository chambreRepository, NotificationRepository notificationRepository, NotificationService notificationService, ChambreReservationRepository chambreReservationRepository){
         this.reservationRepository=reservationRepository;
         this.pmsService = pmsService;
         this.reservationMapper = reservationMapper;
         this.chambreRepository = chambreRepository;
 
+        this.notificationRepository = notificationRepository;
+        this.notificationService = notificationService;
+        this.chambreReservationRepository = chambreReservationRepository;
     }
     @Override
-    public Reservation addReservation(Reservation reservation) {
+    public Reservation addReservation(Reservation reservation,List<Long> chambreIds) {
 
-        List<Long> chambreIds = reservation.getChambreList().stream()
-                .map(Chambre::getId)
-                .collect(Collectors.toList());
+//        List<Long> chambreIds = reservation.getChambreList().stream()
+//                .map(Chambre::getId)
+//                .collect(Collectors.toList());
 
         // Vérification de l'existence d'une réservation avec les mêmes chambres et dates
-        List<Reservation> existingReservations = reservationRepository.findExistingReservation(
-                reservation.getUser().getId(),
-                chambreIds,
-                reservation.getDate_debut(),
-                reservation.getDate_fin()
-        );
+        List<ChambreReservation> existingChambreReservations = chambreReservationRepository.findByChambre_IdInAndReservation_DateDebutAndReservation_DateFin(
+                chambreIds, reservation.getDate_debut(), reservation.getDate_fin());
 
-        if (!existingReservations.isEmpty()) {
-            throw new EntityExistsException("Une réservation existe déjà pour ce Client avec les mêmes chambres et dans les mêmes dates.");
+        if (!existingChambreReservations.isEmpty()) {
+            throw new EntityExistsException("Une réservation existe déjà pour ces chambres avec les mêmes dates.");
         }
 
+        reservation.setStatus(ReservationStatus.En_Attente);
+        Reservation savedReservation = reservationRepository.save(reservation);
 
+//        System.out.println("Services reçus côté backend : " + reservation.getServiceList());
+
+        List<String> ListchambreNoms = new ArrayList<>();
         for (Long chambreId : chambreIds) {
             Chambre chambreEntity = chambreRepository.findById(chambreId)
                     .orElseThrow(() -> new RuntimeException("Chambre non trouvée dans la base de données : " + chambreId));
 
+//            List<ChambreReservation> existingChambreReservationsForThisRoom  = chambreReservationRepository.findByChambre_IdAndReservation_StatusAndReservation_IdNot(
+//                    chambreId, ReservationStatus.En_Attente, reservation.getId());
 
-            if (chambreEntity.getStatut() != ChambreStatut.DISPONIBLE) {
-                throw new RuntimeException("La chambre " + chambreId + " est déjà réservée");
-            }
+//            if (!existingChambreReservationsForThisRoom .isEmpty()) {
+//                throw new RuntimeException("La chambre " + chambreId + " est déjà réservée dans une autre réservation en attente.");
+//            }
 
-            chambreEntity.setStatut(ChambreStatut.RESERVED);
-            chambreEntity.setReservation(reservation);
+            ChambreReservation chambreReservation = new ChambreReservation();
+            chambreReservation.setChambre(chambreEntity);
+            chambreReservation.setReservation(savedReservation);
+            chambreReservation.setStatut(ChambreStatut.RESERVED);
+
+            chambreReservationRepository.save(chambreReservation);
 
 
-            chambreRepository.save(chambreEntity);
+            ListchambreNoms.add(chambreEntity.getNom());
+
         }
 
 
-        return reservationRepository.save(reservation);
+        return savedReservation;
     }
 
     @Override
@@ -79,12 +101,12 @@ public class ReservationServiceImpl implements ReservationService {
             Reservation reservation=prevReservation.get();
             reservation.setStatus(status);
             if(status==ReservationStatus.Confirmee){
-                List<Long> chambreIds = reservation.getChambreList().stream()
-                        .map(Chambre::getId)
+                List<Long> chambreIds = reservation.getChambreReservations().stream()
+                        .map(ChambreReservation::getId)
                         .collect(Collectors.toList());
 
                 for (Long chambreId : chambreIds) {
-                    Chambre chambreEntity = chambreRepository.findById(chambreId)
+                    ChambreReservation chambreEntity = chambreReservationRepository.findById(chambreId)
                             .orElseThrow(() -> new RuntimeException("Chambre non trouvée dans la base de données : " + chambreId));
 
 
@@ -92,7 +114,7 @@ public class ReservationServiceImpl implements ReservationService {
                     chambreEntity.setReservation(reservation);
 
 
-                    chambreRepository.save(chambreEntity);
+                    chambreReservationRepository.save(chambreEntity);
                 }
             }
             return reservationRepository.save(reservation);
@@ -122,38 +144,38 @@ public class ReservationServiceImpl implements ReservationService {
         return reservationRepository.findById(id).orElseThrow(()->new RuntimeException("Reservation non trouvée pour l'id :"+ id));
     }
 
-    @Override
-    public Reservation addReservationPMS(Long id) {
-        ReservationDTO pmsReservationDTO=pmsService.getDemandeReservationById(id);
-        if(pmsReservationDTO == null){
-            throw new EntityNotFoundException("Reservation introuvable dans le pms");
-
-        }
-        if(reservationRepository.existsById(pmsReservationDTO.getId())){
-            throw new EntityExistsException("Reservation déja existante en base de donnée");
-        }
-
-        Reservation reservation = reservationMapper.toEntity(pmsReservationDTO);
-        reservation.setStatus(ReservationStatus.En_Attente);
-        reservation=reservationRepository.save(reservation);
-
-        List<Chambre> chambresDisponibles = chambreRepository.findAll();
-
-        for (Long chambreId : pmsReservationDTO.getChambreList()) {
-
-            Chambre chambreEntity = chambreRepository.findById(chambreId)
-                    .orElseThrow(() -> new RuntimeException("Chambre non trouvée dans la base de données : " + chambreId));
-
-            if (chambreEntity.getStatut() != ChambreStatut.DISPONIBLE) {
-                throw new RuntimeException("La chambre " + chambreId + " est déjà réservée");
-            }
-
-            chambreEntity.setStatut(ChambreStatut.RESERVED);
-            chambreEntity.setReservation(reservation);
-
-            chambreRepository.save(chambreEntity);
-        }
-
-        return reservationRepository.save(reservation);
-    }
+//    @Override
+//    public Reservation addReservationPMS(Long id) {
+//        ReservationDTO pmsReservationDTO=pmsService.getDemandeReservationById(id);
+//        if(pmsReservationDTO == null){
+//            throw new EntityNotFoundException("Reservation introuvable dans le pms");
+//
+//        }
+//        if(reservationRepository.existsById(pmsReservationDTO.getId())){
+//            throw new EntityExistsException("Reservation déja existante en base de donnée");
+//        }
+//
+//        Reservation reservation = reservationMapper.toEntity(pmsReservationDTO);
+//        reservation.setStatus(ReservationStatus.En_Attente);
+//        reservation=reservationRepository.save(reservation);
+//
+//        List<Chambre> chambresDisponibles = chambreRepository.findAll();
+//
+//        for (Long chambreId : pmsReservationDTO.getChambreList()) {
+//
+//            Chambre chambreEntity = chambreRepository.findById(chambreId)
+//                    .orElseThrow(() -> new RuntimeException("Chambre non trouvée dans la base de données : " + chambreId));
+//
+//            if (chambreEntity.getStatut() != ChambreStatut.DISPONIBLE) {
+//                throw new RuntimeException("La chambre " + chambreId + " est déjà réservée");
+//            }
+//
+//            chambreEntity.setStatut(ChambreStatut.RESERVED);
+//            chambreEntity.setReservation(reservation);
+//
+//            chambreRepository.save(chambreEntity);
+//        }
+//
+//        return reservationRepository.save(reservation);
+//    }
 }

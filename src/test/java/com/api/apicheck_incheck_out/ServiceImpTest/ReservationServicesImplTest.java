@@ -3,7 +3,9 @@ package com.api.apicheck_incheck_out.ServiceImpTest;
 import com.api.apicheck_incheck_out.Entity.Reservation;
 import com.api.apicheck_incheck_out.Entity.ReservationServices;
 import com.api.apicheck_incheck_out.Enums.PhaseAjoutService;
+import com.api.apicheck_incheck_out.Repository.ReservationRepository;
 import com.api.apicheck_incheck_out.Repository.ReservationServiceRepository;
+import com.api.apicheck_incheck_out.Repository.ServiceRepository;
 import com.api.apicheck_incheck_out.Service.Impl.ReservationServicesServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +25,10 @@ import static org.mockito.Mockito.*;
 public class ReservationServicesImplTest {
     @Mock
     private ReservationServiceRepository reservationServiceRepository;
+    @Mock
+    private ReservationRepository reservationRepository;
+    @Mock
+    private ServiceRepository serviceRepository;
 
     @InjectMocks
     private ReservationServicesServiceImpl reservationService;
