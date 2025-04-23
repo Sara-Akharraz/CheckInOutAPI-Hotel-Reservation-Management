@@ -1,6 +1,7 @@
 package com.api.apicheck_incheck_out.Controller;
 
 import com.api.apicheck_incheck_out.DTO.ReservationDTO;
+import com.api.apicheck_incheck_out.DTO.ReservationRequestDTO;
 import com.api.apicheck_incheck_out.Entity.Reservation;
 import com.api.apicheck_incheck_out.Enums.ReservationStatus;
 import com.api.apicheck_incheck_out.Mapper.ReservationMapper;
@@ -26,17 +27,24 @@ public class ReservationController {
         this.pmsService = pmsService;
     }
     @PostMapping
-    public ResponseEntity<ReservationDTO> addReservation(@RequestBody ReservationDTO reservationDTO){
-        Reservation reservation=reservationMapper.toEntity(reservationDTO);
-        Reservation newReservation =reservationService.addReservation(reservation);
+    public ResponseEntity<ReservationDTO> addReservation(@RequestBody ReservationRequestDTO reservationRequestDTO){
+        ReservationDTO reservationDTO = reservationRequestDTO.getReservationDTO();
+        List<Long> chambresId = reservationRequestDTO.getChambresId();
+
+        System.out.println("Données reçues : " + reservationDTO);
+        System.out.println("Données reçues chambres : " + chambresId);
+
+        Reservation reservation = reservationMapper.toEntity(reservationDTO);
+        Reservation newReservation = reservationService.addReservation(reservation, chambresId);
+
         return new ResponseEntity<>(reservationMapper.toDTO(newReservation), HttpStatus.CREATED);
     }
-    @PostMapping("/fromPMS/{id}")
-    public ResponseEntity<ReservationDTO> addReservationFromPMS(@PathVariable Long id){
-        Reservation pmsReservation=reservationService.addReservationPMS(id);
-        return new ResponseEntity<>(reservationMapper.toDTO(pmsReservation),HttpStatus.CREATED) ;
-
-    }
+//    @PostMapping("/fromPMS/{id}")
+//    public ResponseEntity<ReservationDTO> addReservationFromPMS(@PathVariable Long id){
+//        Reservation pmsReservation=reservationService.addReservationPMS(id);
+//        return new ResponseEntity<>(reservationMapper.toDTO(pmsReservation),HttpStatus.CREATED) ;
+//
+//    }
     @GetMapping("/{id}")
     public ResponseEntity<ReservationDTO> getReservationById(@PathVariable Long id){
         Reservation reservation =reservationService.getReservationById(id);

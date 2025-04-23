@@ -13,13 +13,13 @@ import java.util.List;
 
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation,Long> {
-    @Query("SELECT r FROM Reservation r JOIN r.chambreList c WHERE r.user.id = :userId " +
-            "AND c.id IN :chambreIds " +
-            "AND r.date_debut < :dateFin " +
-            "AND r.date_fin > :dateDebut")
-    List<Reservation> findExistingReservation(@Param("userId") Long userId,
-                                              @Param("chambreIds") List<Long> chambreIds,
-                                              @Param("dateDebut") LocalDate dateDebut,
-                                              @Param("dateFin") LocalDate dateFin);
+//    @Query("SELECT r FROM Reservation r JOIN r.chambreList c WHERE r.user.id = :userId " +
+//            "AND c.id IN :chambreIds " +
+//            "AND r.date_debut < :dateFin " +
+//            "AND r.date_fin > :dateDebut")
+//    List<Reservation> findExistingReservation(@Param("userId") Long userId,
+//                                              @Param("chambreIds") List<Long> chambreIds,
+//                                              @Param("dateDebut") LocalDate dateDebut,
+//                                              @Param("dateFin") LocalDate dateFin);
 
 }
