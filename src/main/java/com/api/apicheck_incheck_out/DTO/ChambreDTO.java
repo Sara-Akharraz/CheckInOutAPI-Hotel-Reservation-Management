@@ -10,6 +10,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -25,12 +27,7 @@ public class ChambreDTO {
         private String etage;
 
         @NotNull
-        private ChambreStatut statut;
-
-        @NotNull
         private double prix;
-
-        private Long id_reservation;
 
         @NotNull
         private ChambreType type;
@@ -38,5 +35,5 @@ public class ChambreDTO {
         @NotNull
         private int capacite;
 
-
+        private List<Long> chambreReservationIds;
 }

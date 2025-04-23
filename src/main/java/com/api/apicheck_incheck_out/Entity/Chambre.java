@@ -3,10 +3,9 @@ package com.api.apicheck_incheck_out.Entity;
 import com.api.apicheck_incheck_out.Enums.ChambreStatut;
 import com.api.apicheck_incheck_out.Enums.ChambreType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Table(name = "chambre")
@@ -19,19 +18,15 @@ public class Chambre {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name="Nom",nullable = false)
     private  String Nom;
+
     @Column(name = "etage", nullable = false)
     private String etage;
+
     @Column(name="prix",nullable = false)
     private double prix;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "statut", nullable = false)
-    private ChambreStatut statut;
-
-    @ManyToOne
-    @JoinColumn(name="reservation_id")
-    private Reservation reservation;
 
     @Enumerated(EnumType.STRING)
     @Column(name="type",nullable = false)
@@ -39,5 +34,8 @@ public class Chambre {
 
     @Column(name="capacité")
     private int capacite;
+
+    @OneToMany(mappedBy = "chambre", cascade = CascadeType.ALL)
+    private List<ChambreReservation> chambreReservations;
 
 }
