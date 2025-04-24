@@ -1,16 +1,17 @@
 package com.api.apicheck_incheck_out.Controller;
 
-import com.api.apicheck_incheck_out.Dto.CheckOutDTO;
+import com.api.apicheck_incheck_out.DTO.CheckOutDTO;
 import com.api.apicheck_incheck_out.Entity.Check_Out;
 import com.api.apicheck_incheck_out.Enum.CheckOutStatut;
 import com.api.apicheck_incheck_out.Mapper.CheckOutMapper;
 import com.api.apicheck_incheck_out.Service.CheckOutService;
-import com.api.apicheck_incheck_out.Service.Impl.CheckOutServiceImpl;
+import com.api.apicheck_incheck_out.Service.StripePayment.StripeResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -67,8 +68,16 @@ public class CheckOutController {
         return checkOutService.isValidCheckOut(id);
     }
     @GetMapping("/amount/{id}")
-    public double getTotalPrice(@PathVariable("id") Long id){
-        return checkOutService.getTotalPrice(id);
+    public Long getAmount(@PathVariable("id") Long id){
+        return checkOutService.getAmount(id);
     }
 
+    @PostMapping("/payer/{id_checkout}")
+    public StripeResponse payer(@PathVariable("id_checkout") Long id){
+        try{
+            return checkOutService.payer(id);
+        }catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,e.getMessage());
+        }
+    }
 }

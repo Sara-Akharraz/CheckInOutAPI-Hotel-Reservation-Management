@@ -1,6 +1,6 @@
 package com.api.apicheck_incheck_out.PMSMock.Service.Impl;
 
-import com.api.apicheck_incheck_out.Dto.ReservationDTO;
+import com.api.apicheck_incheck_out.DTO.ReservationDTO;
 import com.api.apicheck_incheck_out.Enums.ReservationStatus;
 import com.api.apicheck_incheck_out.PMSMock.Service.PMSService;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -17,7 +17,7 @@ import java.util.*;
 
 @Service
 public class PMSServiceImpl implements PMSService {
-    private static final String FILE_PATH ="/pms_mock_data.json";
+    private static final String FILE_PATH ="src/main/resources/pms_mock_data.json";
     private static final ObjectMapper objectMapper=new ObjectMapper().registerModule(new JavaTimeModule());
     private static final Map<Long,ReservationDTO> mockReservations=new HashMap<>();
     private static Long nextId=1L;
@@ -35,14 +35,9 @@ public class PMSServiceImpl implements PMSService {
                 mockReservations.putAll(reservations);
                 System.out.println("PMS Mock Data loaded from file");
             }
-           catch (IOException e){
-               System.err.println("Failed to load PMS Data "+e.getMessage());
+            catch (IOException e){
+                System.err.println("Failed to load PMS Data "+e.getMessage());
             }
-        }else{
-                ReservationDTO reservation1= new ReservationDTO(1L, ReservationStatus.En_Attente, LocalDate.now(),LocalDate.now().plusDays(5),10L,List.of(1L,2L),null);
-                ReservationDTO reservation2= new ReservationDTO(2L, ReservationStatus.En_Attente, LocalDate.now(),LocalDate.now().plusDays(5),12L,List.of(3L),null);
-                mockReservations.put(reservation1.getId(),reservation1);
-                mockReservations.put(reservation2.getId(),reservation2);
         }
     }
     @PreDestroy
@@ -79,7 +74,7 @@ public class PMSServiceImpl implements PMSService {
         if(reservationDTOExistante != null){
             reservationDTOExistante.setDate_debut(reservationDTO.getDate_debut());
             reservationDTOExistante.setDate_fin(reservationDTO.getDate_fin());
-            reservationDTOExistante.setClientId(reservationDTO.getClientId());
+            reservationDTOExistante.setUserId(reservationDTO.getUserId());
             reservationDTOExistante.setChambreList(reservationDTO.getChambreList());
             saveMockData();
             return reservationDTOExistante;

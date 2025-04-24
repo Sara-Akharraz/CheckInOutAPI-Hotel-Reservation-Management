@@ -26,20 +26,24 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name="name")
-    private String name;
-
+    @Column(name="nom")
+    private String nom;
+    @Column(name="prenom")
+    private String prenom;
     @Column(name="password")
     private String password;
 
     @Column(name="email", unique = true)
     private String email;
-
+    @Column(name="cin")
+    private String cin;
+    @Column(name="numeroPassport")
+    private String numeroPassport;
     @OneToMany(mappedBy = "user")
     private List<Notification> notifications;
     @Enumerated(EnumType.STRING)
     private Role role;
-    @OneToMany(mappedBy = "client")
+    @OneToMany(mappedBy = "user")
     private List<Reservation> reservations;
 
 }

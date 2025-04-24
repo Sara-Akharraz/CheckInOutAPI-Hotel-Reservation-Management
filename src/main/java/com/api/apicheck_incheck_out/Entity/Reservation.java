@@ -2,7 +2,6 @@ package com.api.apicheck_incheck_out.Entity;
 
 
 import com.api.apicheck_incheck_out.Enums.ReservationStatus;
-import com.api.apicheck_incheck_out.PMSMock.Model.ChambreModel;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,11 +22,11 @@ public class Reservation {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name="client_id",nullable = false)
-    private User client;
+    @JoinColumn(name="user_id",nullable = false)
+    private User user;
 
-    @ElementCollection
-    private List<ChambreModel> chambreList;
+    @OneToMany(mappedBy = "reservation",cascade = CascadeType.ALL)
+    private List<Chambre> chambreList;
 
     @Column(name="date_debut",nullable = false)
     private LocalDate date_debut;
@@ -42,4 +41,12 @@ public class Reservation {
     @OneToMany(mappedBy = "reservation",cascade = CascadeType.ALL)
     private List<Facture> factureList;
 
+    @OneToOne(mappedBy = "reservation")
+    private Check_In checkIn;
+
+    @OneToOne(mappedBy = "reservation")
+    private Check_Out checkOut;
+
+    @ManyToMany
+    private List<ExtraService> services;
 }

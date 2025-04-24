@@ -1,7 +1,8 @@
-package com.api.apicheck_incheck_out.Dto;
+package com.api.apicheck_incheck_out.DTO;
 
+import com.api.apicheck_incheck_out.Entity.ExtraService;
 import com.api.apicheck_incheck_out.Enums.ReservationStatus;
-import jakarta.validation.constraints.NotBlank;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,16 +19,22 @@ import java.util.List;
 public class ReservationDTO {
     @NotNull(message="ID Ne doit pas etre null")
     private Long id;
-    @NotBlank()
+
     private ReservationStatus status;
 
     private LocalDate date_debut;
 
     private LocalDate date_fin;
     @NotNull(message="ID client ne doit pas etre null")
-    private Long clientId;
+    private Long userId;
     @NotNull()
     private List<Long> chambreList;
-
+    @JsonIgnore
+    private Long checkinId;
+    @JsonIgnore
+    private Long checkoutId;
+    @JsonIgnore
     private List<Long> factureList;
+    @JsonIgnore
+    private List<ExtraService> services;
 }

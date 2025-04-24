@@ -1,10 +1,18 @@
 package com.api.apicheck_incheck_out.Service.Impl;
 
 import com.api.apicheck_incheck_out.Entity.Check_Out;
+import com.api.apicheck_incheck_out.Entity.Facture;
+import com.api.apicheck_incheck_out.Entity.FacturePDF;
+import com.api.apicheck_incheck_out.Entity.Reservation;
 import com.api.apicheck_incheck_out.Enum.CheckOutStatut;
-import com.api.apicheck_incheck_out.PMSMock.Service.Impl.ExtraMockImpl;
 import com.api.apicheck_incheck_out.Repository.CheckOutRepository;
 import com.api.apicheck_incheck_out.Service.CheckOutService;
+import com.api.apicheck_incheck_out.Service.ExtraServicesService;
+import com.api.apicheck_incheck_out.Service.FactureService;
+import com.api.apicheck_incheck_out.Service.ReservationService;
+import com.api.apicheck_incheck_out.Service.StripePayment.CheckOutRequest;
+import com.api.apicheck_incheck_out.Service.StripePayment.StripeResponse;
+import com.api.apicheck_incheck_out.Service.StripePayment.StripeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -16,7 +24,18 @@ public class CheckOutServiceImpl implements CheckOutService {
     @Autowired
     CheckOutRepository checkOutRepository;
 
-    private ExtraMockImpl extraMockImpl;
+    @Autowired
+    ReservationService reservationService;
+
+    @Autowired
+    StripeService stripeService;
+
+    @Autowired
+    FactureService factureService;
+
+    @Autowired
+    ExtraServicesService extraServicesService;
+
 
     public Check_Out addCheckOut(Check_Out checkout) {
         if (checkout == null) {
@@ -54,12 +73,30 @@ public class CheckOutServiceImpl implements CheckOutService {
         Check_Out checkout = checkOutRepository.findById(id)
                 .orElseThrow( () -> new RuntimeException("Check Out not found with id: " + id));
         Long id_reservation = checkout.getReservation().getId();
-        return extraMockImpl.calculateTotalExtraPrice(id_reservation)==0;
+        return extraServicesService.calculateTotalExtraPrice(id_reservation)==0;
     }
 
     @Override
-    public double getTotalPrice(Long id) {
-        return extraMockImpl.calculateTotalExtraPrice(id);
+    public Long getAmount(Long id) {
+        double amount = extraServicesService.calculateTotalExtraPrice(id);
+        return Long.valueOf((long) amount);
     }
 
+    @Override
+    public StripeResponse payer(Long id) {
+        Check_Out checkOut = getCheckOutById(id);
+        CheckOutRequest checkoutRequest = CheckOutRequest.builder()
+                .checkOutName("Extra Services Payment")
+                .amount(this.getAmount(checkOut.getReservation().getId()))
+                .build();
+        StripeResponse stripeResponse = stripeService.checkoutServices(checkoutRequest);
+        if (stripeResponse != null && "SUCCESS".equals(stripeResponse.getStatus())) {
+            factureService.validerPaiementCheckOut(checkOut.getReservation());
+            FacturePDF.gerercheckOutFacturePDF(checkOut.getReservation(),
+                    extraServicesService.getExtrasOfReservation(checkOut.getReservation().getId()));
+            System.out.println(extraServicesService.getExtrasOfReservation(checkOut.getReservation().getId()));
+            return stripeResponse;
+        }else
+            throw new RuntimeException("Stripe payment failed");
+}
 }

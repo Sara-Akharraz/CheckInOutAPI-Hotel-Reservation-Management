@@ -1,6 +1,6 @@
 package com.api.apicheck_incheck_out.Controller;
 
-import com.api.apicheck_incheck_out.Dto.ReservationDTO;
+import com.api.apicheck_incheck_out.DTO.ReservationDTO;
 import com.api.apicheck_incheck_out.Entity.Reservation;
 import com.api.apicheck_incheck_out.Enums.ReservationStatus;
 import com.api.apicheck_incheck_out.Mapper.ReservationMapper;
@@ -9,6 +9,7 @@ import com.api.apicheck_incheck_out.Service.ReservationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -60,5 +61,13 @@ public class ReservationController {
         return ResponseEntity.noContent().build();
     }
 
-
+//    @PostMapping("/extras/{id}")
+//    public ResponseEntity<List<ExtraModel>> getReservationServices(@PathVariable("id") Long id){
+//        try{
+//            return ResponseEntity.ok(reservationService.getReservationServices(id));
+//        }catch(Exception e){
+//            e.printStackTrace();
+//            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+//        }
+//    }
 }

@@ -1,41 +1,62 @@
-//package com.api.apicheck_incheck_out.Security;
-//
-//import com.example.demo.Enum.Role;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.context.annotation.Bean;
-//import org.springframework.context.annotation.Configuration;
-//import org.springframework.http.HttpMethod;
-//import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-//import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-//import org.springframework.security.core.userdetails.UserDetails;
-//import org.springframework.security.core.userdetails.UserDetailsService;
-//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-//import org.springframework.security.crypto.password.PasswordEncoder;
-//import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-//import org.springframework.security.web.SecurityFilterChain;
-//
-//@Configuration
-//@EnableWebSecurity
-//public class SecurityConfig {
-//    @Autowired
-//    private CustomUserDetailsService userDetailsService;
-//    @Bean
-//    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//        http
-//                .authorizeHttpRequests(auth ->
-//                        auth.anyRequest().authenticated()
-//                                .requestMatchers("/api/**").hasRole("CLIENT")
-//                                .requestMatchers("/api/**").hasRole("RECEPCIONISTE")
-//                                .anyRequest().authenticated()
-//                )
-//                .httpBasic(customizer -> {});
-//
-//        return http.build();
-//    }
-//
-//
-//    @Bean
-//    public PasswordEncoder passwordEncoder() {
-//        return new BCryptPasswordEncoder();
-//    }
-//}
+package com.api.apicheck_incheck_out.Security;
+
+import com.api.apicheck_incheck_out.Enum.Role;
+import org.springdoc.core.service.RequestBodyService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Autowired
+    CustomUserDetailsService userDetailsService;
+    @Autowired
+    private JWTFilter jwtFilter;
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, RequestBodyService requestBodyBuilder) throws Exception {
+        return http
+                .csrf(customizer -> customizer.disable())
+                .authorizeHttpRequests(request -> request
+                        .requestMatchers("/api/user/register", "/api/user/login").permitAll()
+                        .requestMatchers("/api/user/**", "/api/reservation/**",
+                                "/api/chambre/**", "/api/notification/**")
+                        .hasRole(Role.ADMIN.name())
+                        .requestMatchers("/api/user/**", "/api/reservation/**",
+                                "/api/checkin/**", "/api/checkout/**")
+                        .hasAnyRole(Role.CLIENT.name(), Role.RECEPTIONIST.name())
+                        .anyRequest().authenticated())
+                //.formLogin(Customizer.withDefaults())
+                .httpBasic(Customizer.withDefaults())
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setPasswordEncoder(new BCryptPasswordEncoder(12));
+        provider.setUserDetailsService(userDetailsService);
+        return provider;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+}

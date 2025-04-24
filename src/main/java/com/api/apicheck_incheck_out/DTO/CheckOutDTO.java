@@ -1,8 +1,6 @@
-package com.api.apicheck_incheck_out.Dto;
+package com.api.apicheck_incheck_out.DTO;
 
-import com.api.apicheck_incheck_out.Entity.Reservation;
 import com.api.apicheck_incheck_out.Enum.CheckOutStatut;
-import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
 

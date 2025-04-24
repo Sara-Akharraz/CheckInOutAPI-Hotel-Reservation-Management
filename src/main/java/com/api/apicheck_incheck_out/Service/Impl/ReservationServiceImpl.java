@@ -1,6 +1,6 @@
 package com.api.apicheck_incheck_out.Service.Impl;
 
-import com.api.apicheck_incheck_out.Dto.ReservationDTO;
+import com.api.apicheck_incheck_out.DTO.ReservationDTO;
 import com.api.apicheck_incheck_out.Entity.Reservation;
 import com.api.apicheck_incheck_out.Enums.ReservationStatus;
 import com.api.apicheck_incheck_out.Mapper.ReservationMapper;
@@ -9,6 +9,7 @@ import com.api.apicheck_incheck_out.Repository.ReservationRepository;
 import com.api.apicheck_incheck_out.Service.ReservationService;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -76,4 +77,14 @@ public class ReservationServiceImpl implements ReservationService {
         Reservation reservation = reservationMapper.toEntity(pmsReservationDTO);
         return reservationRepository.save(reservation);
     }
+
+//    @Override
+//    public List<ExtraModel> getReservationServices(Long id) {
+//        try {
+//            return extraMock.getExtrasOfReservation(id);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            throw new RuntimeException(e.getMessage());
+//        }
+//    }
 }

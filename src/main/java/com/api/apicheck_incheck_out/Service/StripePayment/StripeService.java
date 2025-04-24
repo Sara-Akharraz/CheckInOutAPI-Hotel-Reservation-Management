@@ -17,7 +17,7 @@ public class StripeService {
    public StripeResponse checkoutServices(CheckOutRequest checkOutRequest) {
        Stripe.apiKey=secretKey;
        SessionCreateParams.LineItem.PriceData.ProductData checkOutData = SessionCreateParams.LineItem.PriceData.ProductData.builder()
-               .setName(checkOutRequest.getCheckOutName()).build();
+               .setName(checkOutRequest.getCheckOutName()==null ? "Extras Services":checkOutRequest.getCheckOutName()).build();
 
        SessionCreateParams.LineItem.PriceData priceData = SessionCreateParams.LineItem.PriceData.builder()
                .setUnitAmount(checkOutRequest.getAmount())
@@ -30,8 +30,8 @@ public class StripeService {
                         .build();
        SessionCreateParams params = SessionCreateParams.builder()
                .setMode(SessionCreateParams.Mode.PAYMENT)
-               .setSuccessUrl("http://localhost:8080/checkout/payment/success")
-               .setCancelUrl("http://localhost:8080/checkout/payment/cancel")
+//               .setSuccessUrl("http://localhost:8080/checkout/payment/success")
+               .setCancelUrl("http://localhost:8080/checkout/payment")
                .addLineItem(lineItem)
                .build();
        Session session = null;

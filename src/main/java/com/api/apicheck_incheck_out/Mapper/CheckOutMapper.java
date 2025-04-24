@@ -1,13 +1,9 @@
 package com.api.apicheck_incheck_out.Mapper;
 
-import com.api.apicheck_incheck_out.Dto.CheckOutDTO;
-import com.api.apicheck_incheck_out.Dto.UserDto;
+import com.api.apicheck_incheck_out.DTO.CheckOutDTO;
 import com.api.apicheck_incheck_out.Entity.Check_Out;
 import com.api.apicheck_incheck_out.Entity.Reservation;
-import com.api.apicheck_incheck_out.Entity.User;
 import com.api.apicheck_incheck_out.Service.ReservationService;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
