@@ -1,10 +1,8 @@
 package com.api.apicheck_incheck_out.Service.Impl;
 
 import com.api.apicheck_incheck_out.Entity.Check_Out;
-import com.api.apicheck_incheck_out.Entity.Facture;
 import com.api.apicheck_incheck_out.Entity.FacturePDF;
-import com.api.apicheck_incheck_out.Entity.Reservation;
-import com.api.apicheck_incheck_out.Enum.CheckOutStatut;
+import com.api.apicheck_incheck_out.Enums.CheckOutStatut;
 import com.api.apicheck_incheck_out.Repository.CheckOutRepository;
 import com.api.apicheck_incheck_out.Service.CheckOutService;
 import com.api.apicheck_incheck_out.Service.ExtraServicesService;

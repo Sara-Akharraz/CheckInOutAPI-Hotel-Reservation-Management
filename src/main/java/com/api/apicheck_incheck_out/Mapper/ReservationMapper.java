@@ -23,15 +23,23 @@ public class ReservationMapper {
     private CheckInRepository checkInRepository;
     @Autowired
     private CheckOutRepository checkOutRepository;
+    @Autowired
+    private ReservationServiceRepository reservationServiceRepository;
+    @Autowired
+    private ChambreReservationRepository chambreReservationRepository;
 
 
     public ReservationDTO toDTO(Reservation reservation){
-        List<Long> chambresIds = reservation.getChambreList().stream()
-                .map(Chambre::getId)
+        List<Long> chambresIds = reservation.getChambreReservations().stream()
+                .map(ChambreReservation::getId)
                 .collect(Collectors.toList());
 
         List<Long> facturesIds = reservation.getFactureList().stream()
                 .map(Facture::getId)
+                .collect(Collectors.toList());
+
+        List<Long> services =reservation.getServiceList().stream()
+                .map(ReservationServices::getId)
                 .collect(Collectors.toList());
 
         return new ReservationDTO(
@@ -44,22 +52,24 @@ public class ReservationMapper {
                 reservation.getCheckIn()!=null? reservation.getCheckIn().getId():null,
                 reservation.getCheckOut()!=null? reservation.getCheckOut().getId():null,
                 facturesIds,
-                reservation.getServices()
-
+                services
         );
     }
     public Reservation toEntity(ReservationDTO reservationDTO) {
         User user = userRepository.findById(reservationDTO.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + reservationDTO.getUserId()));
 
-        List<Chambre> chambreList = (reservationDTO.getChambreList() != null && !reservationDTO.getChambreList().isEmpty())
-                ? chambreRespository.findAllById(reservationDTO.getChambreList())
+        List<ChambreReservation> chambreList = (reservationDTO.getChambreList() != null && !reservationDTO.getChambreList().isEmpty())
+                ? chambreReservationRepository.findAllById(reservationDTO.getChambreList())
                 : new ArrayList<>();
 
         List<Facture> factureList = (reservationDTO.getFactureList() != null && !reservationDTO.getFactureList().isEmpty())
                 ? factureRepository.findAllById(reservationDTO.getFactureList())
                 : new ArrayList<>();
 
+        List<ReservationServices> services=(reservationDTO.getServices()!=null && !reservationDTO.getServices().isEmpty())
+                ?reservationServiceRepository.findAllById(reservationDTO.getServices())
+                :new ArrayList<>();
         Check_In checkIn = null;
         if (reservationDTO.getCheckinId() != null) {
             checkIn = checkInRepository.findById(reservationDTO.getCheckinId())
@@ -81,7 +91,7 @@ public class ReservationMapper {
                 factureList,
                 checkIn,
                 checkOut,
-                reservationDTO.getServices()
+                services
         );
 
     }

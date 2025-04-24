@@ -1,8 +1,7 @@
 package com.api.apicheck_incheck_out.Service;
 
 import com.api.apicheck_incheck_out.Entity.Check_Out;
-import com.api.apicheck_incheck_out.Enum.CheckOutStatut;
-import com.api.apicheck_incheck_out.Service.StripePayment.CheckOutRequest;
+import com.api.apicheck_incheck_out.Enums.CheckOutStatut;
 import com.api.apicheck_incheck_out.Service.StripePayment.StripeResponse;
 
 import java.util.List;

@@ -4,5 +4,5 @@ public enum ReservationStatus {
     En_Attente,
     Confirmee,
     Annulee,
-    TERMINEE
+    Terminee
 }

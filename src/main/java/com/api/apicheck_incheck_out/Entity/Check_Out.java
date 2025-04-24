@@ -1,7 +1,7 @@
 package com.api.apicheck_incheck_out.Entity;
 
 
-import com.api.apicheck_incheck_out.Enum.CheckOutStatut;
+import com.api.apicheck_incheck_out.Enums.CheckOutStatut;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

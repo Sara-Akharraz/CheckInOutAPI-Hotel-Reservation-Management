@@ -2,12 +2,15 @@ package com.api.apicheck_incheck_out.DTO;
 
 import com.api.apicheck_incheck_out.Entity.Reservation;
 import com.api.apicheck_incheck_out.Enum.ChambreStatut;
+import com.api.apicheck_incheck_out.Enums.ChambreType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -24,12 +27,13 @@ public class ChambreDTO {
     private String etage;
 
     @NotNull
-    private ChambreStatut statut;
-
-    @NotNull
     private double prix;
 
-    private Long id_reservation;
+    @NotNull
+    private ChambreType type;
 
+    @NotNull
+    private int capacite;
 
+    private List<Long> chambreReservationIds;
 }

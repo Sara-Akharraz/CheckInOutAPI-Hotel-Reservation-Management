@@ -1,6 +1,6 @@
 package com.api.apicheck_incheck_out.DTO;
 
-import com.api.apicheck_incheck_out.Enum.CheckOutStatut;
+import com.api.apicheck_incheck_out.Enums.CheckOutStatut;
 import lombok.Builder;
 import lombok.Data;
 

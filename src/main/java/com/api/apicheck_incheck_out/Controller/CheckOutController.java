@@ -2,7 +2,7 @@ package com.api.apicheck_incheck_out.Controller;
 
 import com.api.apicheck_incheck_out.DTO.CheckOutDTO;
 import com.api.apicheck_incheck_out.Entity.Check_Out;
-import com.api.apicheck_incheck_out.Enum.CheckOutStatut;
+import com.api.apicheck_incheck_out.Enums.CheckOutStatut;
 import com.api.apicheck_incheck_out.Mapper.CheckOutMapper;
 import com.api.apicheck_incheck_out.Service.CheckOutService;
 import com.api.apicheck_incheck_out.Service.StripePayment.StripeResponse;

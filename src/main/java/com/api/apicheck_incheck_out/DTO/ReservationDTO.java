@@ -1,8 +1,8 @@
 package com.api.apicheck_incheck_out.DTO;
 
-import com.api.apicheck_incheck_out.Entity.ExtraService;
 import com.api.apicheck_incheck_out.Enums.ReservationStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class ReservationDTO {
-    @NotNull(message="ID Ne doit pas etre null")
+    //    @NotNull(message="ID Ne doit pas etre null")
     private Long id;
 
     private ReservationStatus status;
@@ -36,5 +36,6 @@ public class ReservationDTO {
     @JsonIgnore
     private List<Long> factureList;
     @JsonIgnore
-    private List<ExtraService> services;
+    @JsonProperty("serviceList")
+    private List<Long> services;
 }

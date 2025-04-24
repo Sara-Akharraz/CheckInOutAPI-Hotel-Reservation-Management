@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 public interface ChambreRepository extends JpaRepository<Chambre,Long> {
-    List<Chambre> findByReservation(Reservation reservation);
-    List<Chambre> findByReservation_Id(Long id);
-    List<Chambre> findByStatut(ChambreStatut statut);
+    //List<Chambre> findByReservation(Reservation reservation);
+    //List<Chambre> findByReservation_Id(Long id);
+    //List<Chambre> findByStatut(ChambreStatut statut);
 }

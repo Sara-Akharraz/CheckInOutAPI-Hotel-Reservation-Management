@@ -1,7 +1,7 @@
 package com.api.apicheck_incheck_out.DTO;
 
 import com.api.apicheck_incheck_out.Entity.Notification;
-import com.api.apicheck_incheck_out.Enum.Role;
+import com.api.apicheck_incheck_out.Enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
