@@ -1,6 +1,7 @@
 package com.api.apicheck_incheck_out.Service;
 
 
+import com.api.apicheck_incheck_out.DTO.AuthUser;
 import com.api.apicheck_incheck_out.DTO.UserDto;
 
 import java.util.List;
@@ -15,5 +16,5 @@ public interface UserService {
     public void deleteUser(Long id);
     public UserDto updateUser(Long id, UserDto user);
 
-    String verify(UserDto user);
+    String verify(AuthUser user);
 }

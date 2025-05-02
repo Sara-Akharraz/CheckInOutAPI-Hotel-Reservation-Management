@@ -1,5 +1,6 @@
 package com.api.apicheck_incheck_out.Service.Impl;
 
+import com.api.apicheck_incheck_out.DTO.AuthUser;
 import com.api.apicheck_incheck_out.DTO.UserDto;
 import com.api.apicheck_incheck_out.Entity.User;
 import com.api.apicheck_incheck_out.Mapper.UserMapper;
@@ -134,7 +135,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String verify(UserDto user) {
+    public String verify(AuthUser user) {
         Authentication authentication = authManager
                 .authenticate(new UsernamePasswordAuthenticationToken(
                 user.getEmail(), user.getPassword()

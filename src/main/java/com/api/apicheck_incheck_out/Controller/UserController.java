@@ -1,5 +1,6 @@
 package com.api.apicheck_incheck_out.Controller;
 
+import com.api.apicheck_incheck_out.DTO.AuthUser;
 import com.api.apicheck_incheck_out.DTO.UserDto;
 import com.api.apicheck_incheck_out.Service.UserService;
 import lombok.AllArgsConstructor;
@@ -31,7 +32,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody UserDto user){
+    public String login(@RequestBody AuthUser user){
 //        try {
 //            return ResponseEntity.ok(userService.logIn(user.getEmail(), user.getPassword()));
 //        }catch(Exception e){
