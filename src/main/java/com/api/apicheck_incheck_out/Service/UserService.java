@@ -2,6 +2,7 @@ package com.api.apicheck_incheck_out.Service;
 
 
 import com.api.apicheck_incheck_out.DTO.UserDto;
+import com.api.apicheck_incheck_out.Entity.User;
 
 import java.util.List;
 

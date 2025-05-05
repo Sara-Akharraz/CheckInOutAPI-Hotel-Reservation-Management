@@ -1,14 +1,15 @@
 package com.api.apicheck_incheck_out.Security;
+import com.api.apicheck_incheck_out.Entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Date;
@@ -19,7 +20,8 @@ import java.util.function.Function;
 @Service
 public class JWTService {
 
-    private String secretKey = "";
+    @Value("${jwt.secret}")
+    private String secretKey;
 
     public JWTService(){
         try {
@@ -31,13 +33,18 @@ public class JWTService {
         }
     }
 
-    public String generateToken(String email){
+    public String generateToken(User user){
         Map<String, Object> claims = new HashMap<>();
+        claims.put("id", user.getId());
+        claims.put("nom", user.getNom());
+        claims.put("prenom", user.getPrenom());
+        claims.put("role", user.getRole().name());
+        claims.put("email", user.getEmail());
         return Jwts.builder()
                 .setClaims(claims)
-                .setSubject(email)
+                .setSubject(user.getEmail())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis()+60*60*30))
+                .setExpiration(new Date(System.currentTimeMillis()+60*60*1000))
                 .signWith(getKey())
                 .compact();
     }

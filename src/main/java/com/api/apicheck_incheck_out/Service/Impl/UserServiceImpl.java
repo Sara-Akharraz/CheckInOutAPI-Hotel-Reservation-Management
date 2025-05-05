@@ -139,8 +139,10 @@ public class UserServiceImpl implements UserService {
                 .authenticate(new UsernamePasswordAuthenticationToken(
                 user.getEmail(), user.getPassword()
         ));
-        if(authentication.isAuthenticated())
-            return jwtService.generateToken(user.getEmail());
+        if(authentication.isAuthenticated()) {
+            User authenticatedUser = userRepository.findByEmail(authentication.getName());
+            return jwtService.generateToken(authenticatedUser);
+        }
         else
             return "fail";
     }

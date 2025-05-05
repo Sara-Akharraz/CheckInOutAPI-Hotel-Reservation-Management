@@ -26,22 +26,28 @@ public class SecurityConfig {
     @Autowired
     private JWTFilter jwtFilter;
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, RequestBodyService requestBodyBuilder) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .csrf(customizer -> customizer.disable())
-                .authorizeHttpRequests(request -> request
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/user/register", "/api/user/login").permitAll()
-                        .requestMatchers("/api/user/**", "/api/reservation/**",
-                                "/api/chambre/**", "/api/notification/**")
-                        .hasRole(Role.ADMIN.name())
-                        .requestMatchers("/api/user/**", "/api/reservation/**",
-                                "/api/checkin/**", "/api/checkout/**")
-                        .hasAnyRole(Role.CLIENT.name(), Role.RECEPTIONIST.name())
-                        .anyRequest().authenticated())
-                //.formLogin(Customizer.withDefaults())
-                .httpBasic(Customizer.withDefaults())
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        .requestMatchers(
+                                "/api/user/**",
+                                "/api/reservation/**",
+                                "/api/chambre/**",
+                                "/api/notification/**"
+                        ).hasAuthority("ADMIN")
+                        .requestMatchers(
+                                "/api/user/**",
+                                "/api/reservation/**",
+                                "/api/checkin/**",
+                                "/api/checkout/**"
+                        ).hasRole("CLIENT")
+                        .anyRequest().authenticated()
+                )
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

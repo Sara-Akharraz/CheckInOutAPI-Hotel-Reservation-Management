@@ -23,9 +23,8 @@ public class Check_Out {
 
     @OneToOne
     private Reservation reservation;
-    @Column(name="date_checkIn")
+    @Column(name="date_checkOut")
     private LocalDate dateCheckOut;
     @Enumerated(EnumType.STRING)
     private CheckOutStatut checkOutStatut;
-
 }
