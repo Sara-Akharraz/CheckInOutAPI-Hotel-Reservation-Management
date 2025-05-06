@@ -23,11 +23,11 @@ public class ChambreController {
     private ChambreMapper chambreMapper;
 
     @PostMapping
-    public ResponseEntity<ChambreDTO> addChambre(@RequestParam ChambreDTO chambreDTO){
+    public ResponseEntity<ChambreDTO> addChambre(@RequestBody ChambreDTO chambreDTO){
         Chambre chambre=chambreService.addChambre(chambreMapper.toEntity(chambreDTO));
         return ResponseEntity.ok(chambreMapper.toDTO(chambre));
     }
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<ChambreDTO> updateChambre(@PathVariable Long id,@RequestBody ChambreDTO chambreDTO){
         Chambre chambre=chambreService.updateChambre(id,chambreMapper.toEntity(chambreDTO));
         return ResponseEntity.ok(chambreMapper.toDTO(chambre));
