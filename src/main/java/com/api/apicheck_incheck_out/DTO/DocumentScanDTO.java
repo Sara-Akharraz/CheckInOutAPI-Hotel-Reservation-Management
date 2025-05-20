@@ -1,4 +1,4 @@
-package com.api.apicheck_incheck_out.DocumentScanMock.DTO;
+package com.api.apicheck_incheck_out.DTO;
 
 import com.api.apicheck_incheck_out.Entity.Check_In;
 import com.api.apicheck_incheck_out.Enums.DocumentScanType;
@@ -26,5 +26,11 @@ public class DocumentScanDTO {
     private String cin;
 
     private String passport;
+
+    private byte[] image;
+
+    private String fileName;
+
+    private String fileType;
 
 }

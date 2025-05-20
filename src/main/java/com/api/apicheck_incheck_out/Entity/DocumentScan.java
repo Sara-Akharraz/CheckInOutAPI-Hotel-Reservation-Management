@@ -1,4 +1,4 @@
-package com.api.apicheck_incheck_out.DocumentScanMock.Entity;
+package com.api.apicheck_incheck_out.Entity;
 
 import com.api.apicheck_incheck_out.Entity.Check_In;
 import com.api.apicheck_incheck_out.Enums.DocumentScanType;
@@ -30,6 +30,14 @@ public class DocumentScan {
 
     @OneToOne(mappedBy = "documentScan")
     private Check_In checkIn;
+
+    @Lob
+    @Column(name="image",length = 10000000)
+    private byte[] image;
+
+    private String fileName;
+
+    private String fileType;
 
 
 
