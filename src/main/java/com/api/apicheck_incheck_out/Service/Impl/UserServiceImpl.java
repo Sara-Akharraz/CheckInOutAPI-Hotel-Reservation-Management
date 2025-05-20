@@ -23,7 +23,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     UserRepository userRepository;
 
-    private com.api.apicheck_incheck_out.PMSMock.Service.UserService userServiceMock;
+
 
     public void loadUsersToDatabase(List<User> users) {
         if (userRepository.count() == 0) { // Ensure it runs only once
@@ -87,24 +87,31 @@ public class UserServiceImpl implements UserService {
     }
 
 
-    @Override
-    public void deleteUser(Long id) {
-        if(userRepository.findById(id).isPresent()) {
-            userRepository.deleteById(id);
-            userServiceMock.deleteUser(id);
-        }else
-            throw new RuntimeException("User not found with id: " + id);
-    }
+//    @Override
+//    public void deleteUser(Long id) {
+//        if(userRepository.findById(id).isPresent()) {
+//            userRepository.deleteById(id);
+//            userServiceMock.deleteUser(id);
+//        }else
+//            throw new RuntimeException("User not found with id: " + id);
+//    }
+//
+//    @Override
+//    public UserDto updateUser(Long id, UserDto user) {
+//        Optional<User> existingUser = userRepository.findById(id);
+//        if (existingUser.isPresent()) {
+//            userServiceMock.updateUser(id, user);
+//            return userMapper.toDTO(
+//                    userRepository.save(userMapper.toEntity(user)));
+//        }
+//        else
+//            throw new RuntimeException("User not found with id: " + id);
+//    }
 
     @Override
-    public UserDto updateUser(Long id, UserDto user) {
-        Optional<User> existingUser = userRepository.findById(id);
-        if (existingUser.isPresent()) {
-            userServiceMock.updateUser(id, user);
-            return userMapper.toDTO(
-                    userRepository.save(userMapper.toEntity(user)));
-        }
-        else
-            throw new RuntimeException("User not found with id: " + id);
+    public String getUserNameById(Long userId) {
+        Optional<User> user = userRepository.findById(userId);
+        return user.map(User::getNom).orElse("Nom inconnu");
     }
+
 }

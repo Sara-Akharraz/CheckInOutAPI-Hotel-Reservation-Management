@@ -11,6 +11,8 @@ public interface UserService {
     public List<UserDto> getAllUsers();
     public List<UserDto> getReceptionists();
     public List<UserDto> getClients();
-    public void deleteUser(Long id);
-    public UserDto updateUser(Long id, UserDto user);
+//    public void deleteUser(Long id);
+//    public UserDto updateUser(Long id, UserDto user);
+    public String getUserNameById(Long userId);
+
 }

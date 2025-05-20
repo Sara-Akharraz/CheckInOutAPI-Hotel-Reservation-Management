@@ -2,6 +2,9 @@ package com.api.apicheck_incheck_out.Entity;
 
 
 import com.api.apicheck_incheck_out.Enums.Role;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -18,6 +21,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties({"reservations"})
 public class User {
 
     @Id
@@ -54,6 +58,7 @@ public class User {
     private List<Notification> notifications;
 
     @OneToMany(mappedBy = "user")
+    @JsonBackReference
     private List<Reservation> reservations;
 
     @Enumerated(EnumType.STRING)
