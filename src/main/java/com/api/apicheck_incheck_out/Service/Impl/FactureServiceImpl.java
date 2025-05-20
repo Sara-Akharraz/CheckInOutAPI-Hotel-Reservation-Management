@@ -1,5 +1,6 @@
 package com.api.apicheck_incheck_out.Service.Impl;
 
+import com.api.apicheck_incheck_out.DTO.PaiementRequestDTO;
 import com.api.apicheck_incheck_out.Entity.*;
 import com.api.apicheck_incheck_out.Enums.FactureType;
 import com.api.apicheck_incheck_out.Enums.PaiementMethod;
@@ -9,11 +10,13 @@ import com.api.apicheck_incheck_out.Repository.FactureRepository;
 import com.api.apicheck_incheck_out.Repository.ReservationRepository;
 import com.api.apicheck_incheck_out.Repository.ReservationServiceRepository;
 import com.api.apicheck_incheck_out.Service.FactureService;
+import com.api.apicheck_incheck_out.Stripe.Service.Impl.StripeServiceImpl;
 import com.paypal.api.payments.*;
 import com.paypal.base.rest.APIContext;
 import com.paypal.base.rest.OAuthTokenCredential;
 import com.paypal.base.rest.PayPalRESTException;
 import com.stripe.Stripe;
+import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
 import com.stripe.param.PaymentIntentCreateParams;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +40,8 @@ public class FactureServiceImpl implements FactureService {
     private ReservationRepository reservationRepository;
     @Autowired
     private ReservationServiceRepository reservationServiceRepository;
+    @Autowired
+    private StripeServiceImpl stripeService;
 
 
     private static final String STRIPE_SECRET_KEY = "a_sercret_key";
@@ -53,7 +58,7 @@ public class FactureServiceImpl implements FactureService {
     private String paypalMode;
 
     @Override
-    public Boolean payerFactureCheckIn(Reservation reservation, PaiementMethod method) {
+    public void payerFactureCheckIn(Reservation reservation) {
 
         double montantCheckIn = calculerMontantCheckIn(reservation);
 
@@ -64,35 +69,23 @@ public class FactureServiceImpl implements FactureService {
         facture.setType(FactureType.Check_In);
         facture.setReservation(reservation);
 
-
-        boolean paymentStatus = true;
-
-        if (method.equals(PaiementMethod.STRIPE)) {
-            paymentStatus = validerPaiementStripe(montantCheckIn, reservation);
-        } else if (method.equals(PaiementMethod.PAYPAL)) {
-            paymentStatus = validerPaiementPaypal(montantCheckIn, reservation);
-        }
-        paymentStatus = true;
-        if (paymentStatus) {
             facture.setStatus(PaiementStatus.paye);
             factureRepository.save(facture);
             reservation.getFactureList().add(facture);
             reservationRepository.save(reservation);
-        }
 
-        return true;
     }
 
     @Override
     public double calculerMontantCheckIn(Reservation reservation) {
         double montantcheckIn = 0;
-        long duree =Duration.between(reservation.getDate_debut().atStartOfDay(), reservation.getDate_fin().atStartOfDay()).toDays();
+        long duree = Duration.between(reservation.getDate_debut().atStartOfDay(), reservation.getDate_fin().atStartOfDay()).toDays();
         for (Chambre chambre : reservation.getChambreReservations().stream()
                 .map(ChambreReservation::getChambre)
                 .collect(Collectors.toList())) {
             montantcheckIn += chambre.getPrix();
         }
-        double montantTotal= montantcheckIn* duree * (1 + tva) + tax;
+        double montantTotal = montantcheckIn * duree * (1 + tva) + tax;
         List<ReservationServices> servicesCheckin = reservationServiceRepository.findByReservationAndPhase(reservation.getId(), PhaseAjoutService.check_in);
 
         for (ReservationServices service : servicesCheckin) {
@@ -101,25 +94,21 @@ public class FactureServiceImpl implements FactureService {
         return montantTotal;
     }
 
-    @Override
-    public Boolean validerPaiementStripe(double montant, Reservation reservation) {
-        Stripe.apiKey = STRIPE_SECRET_KEY;
-        try {
-            PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
-                    .setAmount((long) montant)
-                    .setCurrency("MAD")
-                    .setCustomer(reservation.getUser().getStripeId())
-                    .build();
-
-            PaymentIntent paymentIntent = PaymentIntent.create(params);
-
-            return "succeeded".equals(paymentIntent.getStatus());
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
+    //    @Override
+//    public Boolean validerPaiementStripe(double montant, Reservation reservation) {
+//
+//        try {
+//            return stripeService.processPayment(
+//                    montant,
+//                    reservation.getUser().getStripeId(),
+//                    "MAD"
+//            );
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return false;
+//        }
+//    }
     @Override
     public Boolean validerPaiementPaypal(double montant, Reservation reservation) {
         try {
@@ -165,4 +154,121 @@ public class FactureServiceImpl implements FactureService {
             return false;
         }
     }
+
+
+    public Boolean payerFactureCheckIn(PaiementRequestDTO paiementRequest) {
+
+        Reservation reservation = reservationRepository.findById(paiementRequest.getReservationId())
+                .orElseThrow(() -> new RuntimeException("Reservation not found"));
+
+
+        double montantCheckIn = calculerMontantCheckIn(reservation);
+
+
+        Facture facture = new Facture();
+        facture.setCheckInMontant(montantCheckIn);
+        facture.setTax(tax);
+        facture.setStatus(PaiementStatus.en_attente);
+        facture.setType(FactureType.Check_In);
+        facture.setReservation(reservation);
+
+
+        boolean paymentStatus = false;
+
+        if (PaiementMethod.STRIPE.equals(paiementRequest.getMethod())) {
+
+            paymentStatus = validerPaiementStripe(paiementRequest);
+        }
+
+        // else if (PaiementMethod.PAYPAL.equals(paiementRequest.getMethod())) {
+        //     paymentStatus = validerPaiementPaypal(montantCheckIn, reservation);
+        // }
+
+        if (paymentStatus) {
+            facture.setStatus(PaiementStatus.paye);
+            factureRepository.save(facture);
+
+            reservation.getFactureList().add(facture);
+
+            for (ReservationServices service : reservation.getServiceList()) {
+                service.setPaiementStatus(PaiementStatus.paye);
+                reservationServiceRepository.save(service);
+            }
+
+            reservationRepository.save(reservation);
+        }
+
+        return paymentStatus;
+    }
+
+    public boolean validerPaiementStripe(PaiementRequestDTO paiementRequest) {
+        try {
+            // Appeler l'API Stripe pour valider le paiement avec le clientSecret
+            PaymentIntent paymentIntent = PaymentIntent.retrieve(paiementRequest.getClientSecret());
+
+            // Vérifier si le paiement a été validé
+            if ("succeeded".equals(paymentIntent.getStatus())) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (StripeException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+//        public Boolean validerPaiementStripe (PaiementRequestDTO paiementRequest){
+//            String cardNumber = paiementRequest.getCardNumber().replaceAll("\\s", "");
+//
+//            switch (cardNumber) {
+//                case "4242424242424242":
+//                    System.out.println("Paiement réussi");
+//                    return true;
+//                case "4000000000000069":
+//                    throw new RuntimeException("Échec du paiement, carte expirée");
+//                case "4000000000009995":
+//                    throw new RuntimeException("Échec du paiement, fonds insuffisants");
+//                case "4000000000000002":
+//                    throw new RuntimeException("Échec du paiement, carte signalée pour fraude");
+//                case "4000000000000044":
+//                    throw new RuntimeException("Échec du paiement, code postal invalide");
+//                case "4000000000000036":
+//                    throw new RuntimeException("Échec du paiement, erreur de réseau");
+//                default:
+//                    throw new RuntimeException("Paiement échoué, numéro de carte invalide");
+//            }
+//        }
+
+
+    @Override
+    public void payerFactureCheckInCache(Reservation reservation) {
+
+
+
+        double montantCheckIn = calculerMontantCheckIn(reservation);
+
+
+        Facture facture = new Facture();
+        facture.setCheckInMontant(montantCheckIn);
+        facture.setTax(tax);
+        facture.setStatus(PaiementStatus.paye);
+        facture.setType(FactureType.Check_In);
+        facture.setReservation(reservation);
+
+            factureRepository.save(facture);
+
+            reservation.getFactureList().add(facture);
+
+            for (ReservationServices service : reservation.getServiceList()) {
+                service.setPaiementStatus(PaiementStatus.paye);
+                reservationServiceRepository.save(service);
+            }
+
+            reservationRepository.save(reservation);
+        }
+
+
+
 }
+

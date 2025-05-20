@@ -3,6 +3,7 @@ package com.api.apicheck_incheck_out.Entity;
 import com.api.apicheck_incheck_out.Enums.FactureType;
 import com.api.apicheck_incheck_out.Enums.PaiementMethod;
 import com.api.apicheck_incheck_out.Enums.PaiementStatus;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -39,6 +40,7 @@ public class Facture {
     @ManyToOne
     @JoinColumn(name="reservation_id")
     @ToString.Exclude
+    @JsonBackReference
     private Reservation reservation;
 
 }

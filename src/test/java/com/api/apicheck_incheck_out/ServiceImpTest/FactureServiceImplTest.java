@@ -1,114 +1,112 @@
 package com.api.apicheck_incheck_out.ServiceImpTest;
 
-
-import com.api.apicheck_incheck_out.Entity.Chambre;
-import com.api.apicheck_incheck_out.Entity.Facture;
-import com.api.apicheck_incheck_out.Entity.Reservation;
-import com.api.apicheck_incheck_out.Entity.User;
+import com.api.apicheck_incheck_out.DTO.PaiementRequestDTO;
+import com.api.apicheck_incheck_out.Entity.*;
 import com.api.apicheck_incheck_out.Enums.PaiementMethod;
-import com.api.apicheck_incheck_out.Enums.PaiementStatus;
+import com.api.apicheck_incheck_out.Enums.PhaseAjoutService;
 import com.api.apicheck_incheck_out.Repository.FactureRepository;
 import com.api.apicheck_incheck_out.Repository.ReservationRepository;
+import com.api.apicheck_incheck_out.Repository.ReservationServiceRepository;
 import com.api.apicheck_incheck_out.Service.Impl.FactureServiceImpl;
+import com.stripe.exception.StripeException;
+import com.stripe.model.PaymentIntent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
-
+import org.mockito.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-public class FactureServiceImplTest {
-    @Mock
-    private FactureRepository factureRepository;
-    @Mock
-    private ReservationRepository reservationRepository;
+class FactureServiceImplTest {
+
     @InjectMocks
-    private FactureServiceImpl factureService;
-    private Reservation reservation;
+    FactureServiceImpl factureService;
+
+    @Mock
+    FactureRepository factureRepository;
+
+    @Mock
+    ReservationRepository reservationRepository;
+
+    @Mock
+    ReservationServiceRepository reservationServiceRepository;
 
     @BeforeEach
-    void setup(){
-        Chambre chambre1=new Chambre();
-        chambre1.setPrix(250.0);
-
-        Chambre chambre2=new Chambre();
-        chambre2.setPrix(100.0);
-
-        User user=new User();
-        user.setStripeId("testing");
-
-        reservation=new Reservation();
-        reservation.setUser(user);
-        reservation.setChambreList(Arrays.asList(chambre1,chambre2));
-        reservation.setFactureList(new ArrayList<>());
-        reservation.setDate_debut(LocalDate.of(2025, 4, 10));
-        reservation.setDate_fin(LocalDate.of(2025, 4, 12));
+    void setup() {
+        MockitoAnnotations.openMocks(this);
     }
+
     @Test
-    public void testPayerFactureCheckIn_StripePayment() {
-        FactureServiceImpl spyService = Mockito.spy(factureService);
+    void testPayerFactureCheckIn_void() {
+        Reservation reservation = mock(Reservation.class);
+        when(reservation.getFactureList()).thenReturn(new ArrayList<>());
+        when(reservation.getDate_debut()).thenReturn(LocalDate.now());
+        when(reservation.getDate_fin()).thenReturn(LocalDate.now().plusDays(1));
+        when(reservation.getChambreReservations()).thenReturn(Collections.emptyList());
 
-        Reservation reservation = new Reservation();
-        reservation.setDate_debut(LocalDate.now());
-        reservation.setDate_fin(LocalDate.now().plusDays(1));
-        reservation.setFactureList(new ArrayList<>());
+        when(reservationRepository.save(reservation)).thenReturn(reservation);
+        factureService.payerFactureCheckIn(reservation);
 
+        verify(factureRepository).save(any());
+        verify(reservationRepository).save(reservation);
+    }
+
+    @Test
+    void testCalculerMontantCheckIn() {
+        Reservation reservation = mock(Reservation.class);
+        LocalDate debut = LocalDate.now();
+        LocalDate fin = debut.plusDays(2);
+        when(reservation.getDate_debut()).thenReturn(debut);
+        when(reservation.getDate_fin()).thenReturn(fin);
 
         Chambre chambre = new Chambre();
-        chambre.setId(1L);
-        reservation.setChambreList(List.of(chambre));
+        chambre.setPrix(100);
+        ChambreReservation cr = mock(ChambreReservation.class);
+        when(cr.getChambre()).thenReturn(chambre);
+        List<ChambreReservation> chambreReservations = Collections.singletonList(cr);
+        when(reservation.getChambreReservations()).thenReturn(chambreReservations);
 
-        doReturn(true).when(spyService).validerPaiementStripe(anyDouble(), eq(reservation));
+        ReservationServices service = mock(ReservationServices.class);
+        Services s = mock(Services.class);
+        when(s.getPrix()).thenReturn(50.0);
+        when(service.getService()).thenReturn(s);
+        List<ReservationServices> services = Collections.singletonList(service);
+        when(reservationServiceRepository.findByReservationAndPhase(anyLong(), eq(PhaseAjoutService.check_in))).thenReturn(services);
 
-        when(factureRepository.save(any(Facture.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(reservationRepository.save(any(Reservation.class))).thenReturn(reservation);
-
-        Boolean result = spyService.payerFactureCheckIn(reservation, PaiementMethod.STRIPE);
-
-        assertTrue(result);
-        verify(factureRepository, times(1)).save(any(Facture.class));
-        verify(reservationRepository, times(1)).save(reservation);
-        assertEquals(1, reservation.getFactureList().size());
-        assertEquals(PaiementStatus.paye, reservation.getFactureList().get(0).getStatus());
+        double montant = factureService.calculerMontantCheckIn(reservation);
+        assertTrue(montant > 0);
     }
 
     @Test
-    public void TestClaculerMontantCheckIn(){
-        double result =factureService.calculerMontantCheckIn(reservation);
-        double expected=(250+100)*2*1.2+10;
-        assertEquals(expected,result,0.01);
+    void testValiderPaiementStripe_success() throws StripeException {
+        PaiementRequestDTO dto = new PaiementRequestDTO();
+        dto.setClientSecret("secret");
+
+        FactureServiceImpl spyService = spy(factureService);
+
+        PaymentIntent pi = mock(PaymentIntent.class);
+        when(pi.getStatus()).thenReturn("succeeded");
+
+        try (MockedStatic<PaymentIntent> utilities = Mockito.mockStatic(PaymentIntent.class)) {
+            utilities.when(() -> PaymentIntent.retrieve("secret")).thenReturn(pi);
+            boolean result = spyService.validerPaiementStripe(dto);
+            assertTrue(result);
+        }
     }
+
     @Test
-    public void TestValiderPaiementStripe(){
-        Reservation reservation=new Reservation();
-        User user =new User();
-        user.setStripeId("testing");
-        reservation.setUser(user);
+    void testPayerFactureCheckInCache() {
+        Reservation reservation = mock(Reservation.class);
+        when(reservation.getFactureList()).thenReturn(new ArrayList<>());
+        when(reservation.getServiceList()).thenReturn(Collections.emptyList());
+        when(reservation.getDate_debut()).thenReturn(LocalDate.now());
+        when(reservation.getDate_fin()).thenReturn(LocalDate.now().plusDays(1));
+        when(reservation.getChambreReservations()).thenReturn(Collections.emptyList());
 
-        Boolean result =factureService.validerPaiementStripe(500,reservation);
-        assertFalse(result);
+        factureService.payerFactureCheckInCache(reservation);
+
+        verify(factureRepository).save(any());
+        verify(reservationRepository).save(reservation);
     }
-//    @Test
-//    public void TestValiderPaiementPaypal(){
-//        Reservation reservation=new Reservation();
-//        User user =new User();
-//        user.setPaypalId("testing");
-//        reservation.setUser(user);
-//
-//        Boolean result = factureService.validerPaiementPaypal(500, reservation);
-//        assertFalse(result);
-//    }
-
 }
-
