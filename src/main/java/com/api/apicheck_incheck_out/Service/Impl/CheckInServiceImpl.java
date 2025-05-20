@@ -1,22 +1,17 @@
 package com.api.apicheck_incheck_out.Service.Impl;
 
-import com.api.apicheck_incheck_out.DocumentScanMock.DTO.DocumentScanDTO;
-import com.api.apicheck_incheck_out.DocumentScanMock.Entity.DocumentScan;
-import com.api.apicheck_incheck_out.DocumentScanMock.Repository.DocumentScanRepository;
-import com.api.apicheck_incheck_out.DocumentScanMock.Service.DocumentScanService;
-import com.api.apicheck_incheck_out.Entity.Chambre;
-import com.api.apicheck_incheck_out.Entity.Check_In;
-import com.api.apicheck_incheck_out.Entity.Facture;
-import com.api.apicheck_incheck_out.Entity.Reservation;
+import com.api.apicheck_incheck_out.DTO.DocumentScanDTO;
+import com.api.apicheck_incheck_out.Entity.DocumentScan;
+import com.api.apicheck_incheck_out.Mapper.DocumentScanMapper;
+import com.api.apicheck_incheck_out.Repository.DocumentScanRepository;
+import com.api.apicheck_incheck_out.Entity.*;
 import com.api.apicheck_incheck_out.Enums.*;
 
 
-import com.api.apicheck_incheck_out.Repository.ChambreRepository;
-import com.api.apicheck_incheck_out.Repository.CheckInRepository;
-import com.api.apicheck_incheck_out.Repository.FactureRepository;
-import com.api.apicheck_incheck_out.Repository.ReservationRepository;
+import com.api.apicheck_incheck_out.Repository.*;
 import com.api.apicheck_incheck_out.Service.CheckInService;
 import com.api.apicheck_incheck_out.Service.FactureService;
+import com.api.apicheck_incheck_out.Service.NotificationService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -29,18 +24,25 @@ public class CheckInServiceImpl implements CheckInService {
     private final CheckInRepository checkInRepository;
     private final DocumentScanRepository documentScanRepository;
     private final FactureService factureService;
+    private final NotificationService notificationService;
     private final ReservationRepository reservationRepository;
     private final ChambreRepository chambreRepository;
     private final FactureRepository factureRepository;
+    private final NotificationRepository notificationRepository;
+    private final ChambreReservationRepository chambreReservationRepository;
+    private final DocumentScanMapper documentScanMapper;
 
-    public CheckInServiceImpl(CheckInRepository checkInRepository, DocumentScanRepository documentScanRepository, FactureService factureService, ReservationRepository reservationRepository, ChambreRepository chambreRepository, FactureRepository factureRepository) {
+    public CheckInServiceImpl(CheckInRepository checkInRepository, DocumentScanRepository documentScanRepository, FactureService factureService, NotificationService notificationService, ReservationRepository reservationRepository, ChambreRepository chambreRepository, FactureRepository factureRepository, NotificationRepository notificationRepository, ChambreReservationRepository chambreReservationRepository, DocumentScanMapper documentScanMapper) {
         this.checkInRepository = checkInRepository;
         this.documentScanRepository = documentScanRepository;
         this.factureService = factureService;
+        this.notificationService = notificationService;
         this.reservationRepository = reservationRepository;
         this.chambreRepository = chambreRepository;
-
         this.factureRepository = factureRepository;
+        this.notificationRepository = notificationRepository;
+        this.chambreReservationRepository = chambreReservationRepository;
+        this.documentScanMapper = documentScanMapper;
     }
 
     @Override
@@ -50,16 +52,17 @@ public class CheckInServiceImpl implements CheckInService {
         {
             throw new RuntimeException("Nom ou prénom incorrect !");
         }
-        if(doc.getType()== DocumentScanType.CIN){
-            if(reservation.getUser().getCin()==null|| !reservation.getUser().getCin().equalsIgnoreCase(doc.getCin())){
+        if(doc.getType()== DocumentScanType.CIN) {
+            if (reservation.getUser().getCin() == null || !reservation.getUser().getCin().equalsIgnoreCase(doc.getCin())) {
                 throw new RuntimeException("CIN non valide !");
-            }else if(doc.getType()== DocumentScanType.PASSPORT) {
+            }
+        }else if(doc.getType()== DocumentScanType.PASSPORT) {
                 if (reservation.getUser().getNumeroPassport() == null || !reservation.getUser().getNumeroPassport().equalsIgnoreCase(doc.getPassport())) {
                     throw new RuntimeException("Passport non valide !");
                 }
             }
 
-        }
+
         //2: Apres la verification on enregistre le documentScan dans la bd
         DocumentScan documentScan=new DocumentScan();
         documentScan.setNom(doc.getNom());
@@ -67,6 +70,9 @@ public class CheckInServiceImpl implements CheckInService {
         documentScan.setCin(doc.getCin());
         documentScan.setPassport(doc.getPassport());
         documentScan.setType(doc.getType());
+        documentScan.setImage(doc.getImage());
+        documentScan.setFileName(doc.getFileName());
+        documentScan.setFileType(doc.getFileType());
 
         documentScanRepository.save(documentScan);
 
@@ -79,6 +85,7 @@ public class CheckInServiceImpl implements CheckInService {
         documentScan.setCheckIn(checkIn);
 
         checkInRepository.save(checkIn);
+        notificationService.notifier(reservation.getUser().getId(),"Votre check-in est en attente. Merci de procéder au paiement demandé.");
 
         return true;
     }
@@ -93,7 +100,7 @@ public class CheckInServiceImpl implements CheckInService {
     }
 
     @Override
-    public Boolean validerCheckIn(Reservation reservation, PaiementMethod method) {
+    public Boolean validerCheckIn(Reservation reservation) {
         Check_In checkIn = checkInRepository.findByReservation(reservation)
                 .orElseThrow(() -> new RuntimeException("Aucun check-in trouvé pour cette réservation."));
 
@@ -104,20 +111,9 @@ public class CheckInServiceImpl implements CheckInService {
             throw new RuntimeException("Le check-in n'est pas en attente.");
 
         }
-//        boolean paiement=factureService.payerFactureCheckIn(reservation,method);
-//        if(!paiement){
-//            throw new RuntimeException("Echec du paiement.");
-//        }
-        Facture facture = factureRepository.findByReservationAndType(reservation, FactureType.Check_In);
-        if (facture == null) {
-            throw new RuntimeException("Aucune facture trouvée pour cette réservation.");
-        }
 
 
-        if (facture.getStatus() != PaiementStatus.paye) {
-
-            throw new RuntimeException("Le paiement de la facture n'a pas été effectué. Le check-in est refusé.");
-        }
+        factureService.payerFactureCheckIn(reservation);
 
 
         checkIn.setStatus(CheckInStatus.Validé);
@@ -126,30 +122,35 @@ public class CheckInServiceImpl implements CheckInService {
         reservation.setStatus(ReservationStatus.Confirmee);
         reservationRepository.save(reservation);
 
-        List<Chambre> chambres = chambreRepository.findByReservation(reservation);
+        notificationService.notifier(reservation.getUser().getId(),"Réservation Confirmée ,Numéro de reservation :"+reservation.getId());
+
+        List<ChambreReservation> chambreReservations = reservation.getChambreReservations();
 
 
-        for (Chambre chambre : chambres) {
+        for (ChambreReservation chambreReservation : chambreReservations) {
 
-            if (chambre.getReservation() != null && chambre.getReservation().getId().equals(reservation.getId())) {
+            if (chambreReservation.getReservation().getId().equals(reservation.getId())) {
 
-                chambre.setStatut(ChambreStatut.OCCUPEE);
+                chambreReservation.setStatut(ChambreStatut.OCCUPEE);
             }
         }
 
 
-        chambreRepository.saveAll(chambres);
+        chambreReservationRepository.saveAll(chambreReservations);
 
 
         return true;
     }
     @Override
     public Check_In getCheckInByReservation(Long Id_reservation) {
-        Reservation reservation = reservationRepository.findById(Id_reservation)
-                .orElseThrow(() -> new EntityNotFoundException("Réservation non trouvée avec l'id : " + Id_reservation));
 
-        return checkInRepository.findByReservation(reservation)
-                .orElseThrow(() -> new EntityNotFoundException("Aucun check-in trouvé pour la réservation avec l'id : " + Id_reservation));
+        Optional<Reservation> reservation = reservationRepository.findById(Id_reservation);
+        if (reservation.isEmpty()) {
+            throw new EntityNotFoundException("Réservation non trouvée avec l'id : " + Id_reservation);
+        }
+
+        return checkInRepository.findByReservation(reservation.get()).orElse(null);
+
     }
 
 
@@ -162,6 +163,41 @@ public class CheckInServiceImpl implements CheckInService {
                 .orElseThrow(() -> new EntityNotFoundException("Aucun check-in trouvé pour la réservation avec l'id : " + Id_reservation));
 
         return checkIn.getStatus();
+    }
+    @Override
+    public void validerCheckinReception(Long id_checkin){
+        Check_In checkIn=checkInRepository.findById(id_checkin).orElseThrow(()->new RuntimeException("check_in non effectué!"));
+
+        Reservation reservation = reservationRepository.findById(checkIn.getReservation().getId())
+                .orElseThrow(() -> new RuntimeException("Reservation non trouvée"));
+
+        factureService.payerFactureCheckInCache(reservation);
+
+        checkIn.setStatus(CheckInStatus.Validé);
+
+        checkInRepository.save(checkIn);
+
+    }
+
+    @Override
+    public void ajoutercheckinReception(Long id_reservation,DocumentScan documentScan){
+        Reservation reservation = reservationRepository.findById(id_reservation)
+                .orElseThrow(() -> new RuntimeException("Reservation non trouvée"));
+
+        documentScanRepository.save(documentScan);
+        factureService.payerFactureCheckInCache(reservation);
+
+        Check_In checkIn=new Check_In();
+        checkIn.setReservation(reservation);
+        checkIn.setDocumentScan(documentScan);
+        checkIn.setDateCheckIn(LocalDate.now());
+        checkIn.setStatus(CheckInStatus.Validé);
+
+        checkInRepository.save(checkIn);
+
+        reservation.setStatus(ReservationStatus.Confirmee);
+        reservationRepository.save(reservation);
+
     }
 
 }

@@ -1,9 +1,7 @@
 package com.api.apicheck_incheck_out.Mapper;
 
 import com.api.apicheck_incheck_out.DTO.CheckInDTO;
-import com.api.apicheck_incheck_out.DocumentScanMock.Entity.DocumentScan;
 import com.api.apicheck_incheck_out.Entity.Check_In;
-import com.api.apicheck_incheck_out.Entity.Reservation;
 import org.springframework.stereotype.Component;
 
 @Component

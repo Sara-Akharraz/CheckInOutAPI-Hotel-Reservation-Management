@@ -1,130 +1,181 @@
 package com.api.apicheck_incheck_out.ServiceImpTest;
 
-import com.api.apicheck_incheck_out.DocumentScanMock.DTO.DocumentScanDTO;
-import com.api.apicheck_incheck_out.DocumentScanMock.Entity.DocumentScan;
-import com.api.apicheck_incheck_out.DocumentScanMock.Repository.DocumentScanRepository;
+import com.api.apicheck_incheck_out.DTO.DocumentScanDTO;
 import com.api.apicheck_incheck_out.Entity.*;
 import com.api.apicheck_incheck_out.Enums.*;
-import com.api.apicheck_incheck_out.Repository.ChambreRepository;
-import com.api.apicheck_incheck_out.Repository.CheckInRepository;
-import com.api.apicheck_incheck_out.Repository.FactureRepository;
-import com.api.apicheck_incheck_out.Repository.ReservationRepository;
+import com.api.apicheck_incheck_out.Mapper.DocumentScanMapper;
+import com.api.apicheck_incheck_out.Repository.*;
 import com.api.apicheck_incheck_out.Service.FactureService;
 import com.api.apicheck_incheck_out.Service.Impl.CheckInServiceImpl;
+import com.api.apicheck_incheck_out.Service.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.*;
+import java.time.LocalDate;
+import java.util.*;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+class CheckInServiceImplTest {
 
-@ExtendWith(MockitoExtension.class)
-public class CheckInServiceImplTest {
     @Mock
-    private CheckInRepository checkInRepository;
+    CheckInRepository checkInRepository;
     @Mock
-    private DocumentScanRepository documentScanRepository;
+    DocumentScanRepository documentScanRepository;
     @Mock
-    private FactureService factureService;
+    FactureService factureService;
     @Mock
-    private ReservationRepository reservationRepository;
+    NotificationService notificationService;
+    @Mock
+    ReservationRepository reservationRepository;
+    @Mock
+    ChambreRepository chambreRepository;
+    @Mock
+    FactureRepository factureRepository;
+    @Mock
+    NotificationRepository notificationRepository;
+    @Mock
+    ChambreReservationRepository chambreReservationRepository;
+    @Mock
+    DocumentScanMapper documentScanMapper;
+
     @InjectMocks
-    private CheckInServiceImpl checkInService;
-    @Mock
-    private ChambreRepository chambreRepository;
-    @Mock
-    private FactureRepository factureRepository;
+    CheckInServiceImpl checkInService;
 
-    private Reservation reservation;
-    private User user;
+    User user;
+    Reservation reservation;
+
     @BeforeEach
-    void setUp(){
-        user=new User();
-        user.setNom("test");
-        user.setPrenom("test");
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+
+
+        user = new User();
+        user.setId(1L);
+        user.setNom("sara");
+        user.setPrenom("akharraz");
         user.setCin("AA123456");
-        user.setNumeroPassport("P123456");
 
-        reservation =new Reservation();
+
+        reservation = new Reservation();
+        reservation.setId(10L);
         reservation.setUser(user);
-        reservation.setFactureList(Collections.emptyList());
-
+        reservation.setStatus(ReservationStatus.En_Attente);
+        reservation.setChambreReservations(new ArrayList<>());
     }
+
     @Test
-    public void TestvaliderScan(){
-        DocumentScanDTO doc=new DocumentScanDTO();
-        doc.setNom("test");
-        doc.setPrenom("test");
+    void testValiderScan_Success() {
+        DocumentScanDTO doc = new DocumentScanDTO();
+        doc.setNom("sara");
+        doc.setPrenom("akharraz");
         doc.setCin("AA123456");
         doc.setType(DocumentScanType.CIN);
 
-        boolean result= checkInService.validerScan(reservation,doc);
+
+        when(documentScanRepository.save(any(DocumentScan.class))).thenAnswer(i -> i.getArgument(0));
+        when(checkInRepository.save(any(Check_In.class))).thenAnswer(i -> i.getArgument(0));
+
+        Boolean result = checkInService.validerScan(reservation, doc);
 
         assertTrue(result);
-        verify(documentScanRepository).save(any(DocumentScan.class));
-        verify(checkInRepository).save(any(Check_In.class));
+        verify(documentScanRepository, times(1)).save(any(DocumentScan.class));
+        verify(checkInRepository, times(1)).save(any(Check_In.class));
+        verify(notificationService, times(1)).notifier(eq(user.getId()), anyString());
     }
+
     @Test
-    public void TestgetDocScanByCheckin(){
-        DocumentScan doc=new DocumentScan();
-        Check_In checkIn=new Check_In();
+    void testGetDocumentByCheckin_Success() {
+        DocumentScan doc = new DocumentScan();
+        doc.setNom("sara");
+
+        Check_In checkIn = new Check_In();
         checkIn.setDocumentScan(doc);
+
         when(checkInRepository.findById(1L)).thenReturn(Optional.of(checkIn));
 
-        DocumentScan result=checkInService.getDocumentByCheckin(1L);
-        assertEquals(doc,result);
+        DocumentScan result = checkInService.getDocumentByCheckin(1L);
+
+        assertNotNull(result);
+        assertEquals("sara", result.getNom());
     }
+
     @Test
-    public void TestValiderCheckIn() {
-
-        reservation.setId(1L);
-        user.setId(1L);
-        reservation.setUser(user);
-
-        DocumentScan documentScan = new DocumentScan();
+    void testValiderCheckIn_Success() {
+        DocumentScan doc = new DocumentScan();
         Check_In checkIn = new Check_In();
-        checkIn.setId(1L);
+        checkIn.setDocumentScan(doc);
         checkIn.setStatus(CheckInStatus.En_Attente);
-        checkIn.setDocumentScan(documentScan);
-        checkIn.setReservation(reservation);
-
-        Facture facture = new Facture();
-        facture.setStatus(PaiementStatus.paye);
-
-        Chambre chambre = new Chambre();
-        chambre.setId(1L);
-        chambre.setStatut(ChambreStatut.RESERVED);
-        chambre.setReservation(reservation);
-
-        List<Chambre> chambres = List.of(chambre);
-
 
         when(checkInRepository.findByReservation(reservation)).thenReturn(Optional.of(checkIn));
-        when(factureRepository.findByReservationAndType(reservation, FactureType.Check_In)).thenReturn(facture);
-        when(chambreRepository.findByReservation(reservation)).thenReturn(chambres);
+        when(checkInRepository.save(any(Check_In.class))).thenAnswer(i -> i.getArgument(0));
+        when(reservationRepository.save(any(Reservation.class))).thenAnswer(i -> i.getArgument(0));
 
-
-        boolean result = checkInService.validerCheckIn(reservation, PaiementMethod.STRIPE);
-
+        Boolean result = checkInService.validerCheckIn(reservation);
 
         assertTrue(result);
+        verify(factureService, times(1)).payerFactureCheckIn(reservation);
+        verify(notificationService, times(1)).notifier(eq(user.getId()), anyString());
+        verify(chambreReservationRepository, times(1)).saveAll(anyList());
+    }
+
+    @Test
+    void testGetCheckInByReservation_Success() {
+        Check_In checkIn = new Check_In();
+
+        when(reservationRepository.findById(10L)).thenReturn(Optional.of(reservation));
+        when(checkInRepository.findByReservation(reservation)).thenReturn(Optional.of(checkIn));
+
+        Check_In result = checkInService.getCheckInByReservation(10L);
+
+        assertNotNull(result);
+    }
+
+    @Test
+    void testGetStatusCheckIn_Success() {
+        Check_In checkIn = new Check_In();
+        checkIn.setStatus(CheckInStatus.En_Attente);
+
+        when(reservationRepository.findById(10L)).thenReturn(Optional.of(reservation));
+        when(checkInRepository.findByReservation(reservation)).thenReturn(Optional.of(checkIn));
+
+        CheckInStatus status = checkInService.getStatusCheckIn(10L);
+
+        assertEquals(CheckInStatus.En_Attente, status);
+    }
+
+    @Test
+    void testValiderCheckinReception_Success() {
+        Check_In checkIn = new Check_In();
+        checkIn.setReservation(reservation);
+
+        when(checkInRepository.findById(1L)).thenReturn(Optional.of(checkIn));
+        when(reservationRepository.findById(reservation.getId())).thenReturn(Optional.of(reservation));
+        when(checkInRepository.save(any(Check_In.class))).thenAnswer(i -> i.getArgument(0));
+
+        checkInService.validerCheckinReception(1L);
+
+        verify(factureService, times(1)).payerFactureCheckInCache(reservation);
+        verify(checkInRepository, times(1)).save(checkIn);
         assertEquals(CheckInStatus.Validé, checkIn.getStatus());
+    }
+
+    @Test
+    void testAjoutercheckinReception_Success() {
+        DocumentScan doc = new DocumentScan();
+
+        when(reservationRepository.findById(10L)).thenReturn(Optional.of(reservation));
+        when(documentScanRepository.save(doc)).thenReturn(doc);
+        when(checkInRepository.save(any(Check_In.class))).thenAnswer(i -> i.getArgument(0));
+        when(reservationRepository.save(reservation)).thenReturn(reservation);
+
+        checkInService.ajoutercheckinReception(10L, doc);
+
+        verify(factureService, times(1)).payerFactureCheckInCache(reservation);
+        verify(documentScanRepository, times(1)).save(doc);
+        verify(checkInRepository, times(1)).save(any(Check_In.class));
+        verify(reservationRepository, times(1)).save(reservation);
         assertEquals(ReservationStatus.Confirmee, reservation.getStatus());
-        assertEquals(ChambreStatut.OCCUPEE, chambre.getStatut());
-
-
-        verify(checkInRepository).save(checkIn);
-        verify(reservationRepository).save(reservation);
-        verify(chambreRepository).saveAll(chambres);
     }
 }
