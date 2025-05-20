@@ -1,5 +1,6 @@
 package com.api.apicheck_incheck_out.Controller;
 
+import com.api.apicheck_incheck_out.DTO.ReservationServiceRequestDTO;
 import com.api.apicheck_incheck_out.DTO.ReservationServicesDTO;
 import com.api.apicheck_incheck_out.Entity.*;
 import com.api.apicheck_incheck_out.Enums.PaiementStatus;
@@ -10,9 +11,13 @@ import com.api.apicheck_incheck_out.Repository.ReservationRepository;
 import com.api.apicheck_incheck_out.Repository.ServiceRepository;
 import com.api.apicheck_incheck_out.Service.Impl.EmailSenderService;
 import com.api.apicheck_incheck_out.Service.NotificationService;
+import com.api.apicheck_incheck_out.Service.ReservationService;
 import com.api.apicheck_incheck_out.Service.ReservationServicesService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +34,9 @@ public class ReservationServicesController {
     private final NotificationRepository notificationRepository;
 
 
-    public ReservationServicesController(ReservationServicesService reservationServicesService, ReservationServicesMapper reservationServicesMapper, ReservationRepository reservationRepository, EmailSenderService emailSenderService, NotificationService notificationService, NotificationRepository notificationRepository) {
+
+
+    public ReservationServicesController(ReservationServicesService reservationServicesService, ReservationServicesMapper reservationServicesMapper, ReservationRepository reservationRepository, EmailSenderService emailSenderService, NotificationService notificationService, NotificationRepository notificationRepository, ReservationService reservationService, ReservationService reservationServ) {
         this.reservationServicesService = reservationServicesService;
         this.reservationServicesMapper = reservationServicesMapper;
         this.reservationRepository = reservationRepository;
@@ -38,17 +45,44 @@ public class ReservationServicesController {
         this.notificationRepository = notificationRepository;
     }
 
-    @GetMapping("by-reservation/{id_reservation}")
+    @GetMapping("by-reservation/{id_reservation}/user/{id_user}")
+    public ResponseEntity<List<ReservationServiceRequestDTO>> getServicesByReservation(@PathVariable Long id_reservation, @PathVariable Long id_user) {
 
-    public ResponseEntity<List<ReservationServicesDTO>> getServicesByReservation(@PathVariable Long id_reservation){
-        List<ReservationServices> reservationServices=reservationServicesService.getAllServicesByReservation(id_reservation);
+        Reservation reservation = reservationRepository.findById(id_reservation)
+                .orElseThrow(() -> new RuntimeException("Réservation non trouvée avec l'id : " + id_reservation));
 
-        List<ReservationServicesDTO> dtoList=reservationServices.stream()
-                .map(reservationServicesMapper::toDTO)
-                .toList();
+        if (reservation == null || !reservation.getUser().getId().equals(id_user)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Vous n'avez pas accès à cette réservation !");
+        }
+
+        List<ReservationServices> reservationServices = reservationServicesService.getAllServicesByReservation(id_reservation);
+
+
+        List<ReservationServiceRequestDTO> dtoList = reservationServices.stream()
+                .map(reservationService -> {
+
+                    Services service = reservationService.getService();
+
+
+                    return new ReservationServiceRequestDTO(
+                            reservation.getId(),
+                            service.getId(),
+                            service.getNom(),
+                            service.getDescription(),
+                            service.getPrix(),
+                            reservationService.getPaiementStatus()
+                    );
+                })
+                .collect(Collectors.toList());
 
         return ResponseEntity.ok(dtoList);
-
+    }
+    @PostMapping("/addSejourService")
+    public ResponseEntity<?> addSejourServices(
+            @RequestParam Long id_reservation,
+            @RequestBody List<Long> serviceIds) {
+        reservationServicesService.addSejourServicesToReservation(id_reservation, serviceIds);
+        return ResponseEntity.ok("Services ajoutés avec succès !");
     }
 
     @GetMapping("by-reservation/{id_reservation}/phase")
@@ -75,9 +109,7 @@ public class ReservationServicesController {
 
         if(!serviceIds.isEmpty()){
             reservationServices=reservationServicesService.addResService(id_reservation, serviceIds);
-            servicesNames=reservationServices.stream()
-                    .map(rs -> rs.getService().getNom())
-                    .collect(Collectors.toList());
+
         }
 
         List<String> chambresNames = reservation.getChambreReservations().stream()
@@ -99,5 +131,10 @@ public class ReservationServicesController {
         Notification notif= notificationService.notifier(reservation.getUser().getId(),"Vous avez une réservation En attente de check-in ,Numéro réservation :"+ reservation.getId());
         notificationRepository.save(notif);
         return ResponseEntity.ok("Services traités et email envoyé.");
+    }
+    @GetMapping("/available-services/{id_reservation}")
+    public ResponseEntity<List<Services>> getAvailableServices(@PathVariable Long id_reservation) {
+        List<Services> availableServices = reservationServicesService.getAvailableServices(id_reservation);
+        return ResponseEntity.ok(availableServices);
     }
 }

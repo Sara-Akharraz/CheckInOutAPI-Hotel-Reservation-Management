@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 @Repository
 public interface ReservationServiceRepository extends JpaRepository<ReservationServices,Long> {
-    List<ReservationServices> findByReservationId(Long id_reservation);
+    List<ReservationServices> findByReservationId(Long idReservation);
     List<ReservationServices> findByReservationAndService(Reservation reservation, Services service);
 
     @Query("SELECT rs FROM ReservationServices rs WHERE rs.reservation.id = :reservationId AND rs.phaseAjoutService = :phase")

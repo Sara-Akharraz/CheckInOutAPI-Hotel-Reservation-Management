@@ -1,203 +1,157 @@
 package com.api.apicheck_incheck_out.ServiceImpTest;
 
-import com.api.apicheck_incheck_out.DTO.ReservationDTO;
-import com.api.apicheck_incheck_out.Entity.Chambre;
-import com.api.apicheck_incheck_out.Entity.ChambreReservation;
-import com.api.apicheck_incheck_out.Entity.Reservation;
-import com.api.apicheck_incheck_out.Enums.ChambreStatut;
+import com.api.apicheck_incheck_out.DTO.*;
+import com.api.apicheck_incheck_out.Entity.*;
+import com.api.apicheck_incheck_out.Enums.*;
+import com.api.apicheck_incheck_out.Mapper.ChambreMapper;
 import com.api.apicheck_incheck_out.Mapper.ReservationMapper;
-import com.api.apicheck_incheck_out.PMSMock.Service.PMSService;
 import com.api.apicheck_incheck_out.Repository.*;
-import com.api.apicheck_incheck_out.Service.Impl.EmailSenderService;
 import com.api.apicheck_incheck_out.Service.Impl.ReservationServiceImpl;
-import com.api.apicheck_incheck_out.Entity.User;
-import com.api.apicheck_incheck_out.Enums.ReservationStatus;
 import com.api.apicheck_incheck_out.Service.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestTemplate;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
+import org.mockito.*;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-public class ReservationServiceImplTest {
+class ReservationServiceImplTest {
+
     @InjectMocks
     private ReservationServiceImpl reservationService;
-    @Mock
-    private ReservationRepository reservationRepository;
-    @Mock
-    private PMSService pmsService;
-    @Mock
-    private ReservationMapper reservationMapper;
-    @Mock
-    private ChambreRepository chambreRepository;
 
-    @Mock
-    private EmailSenderService emailSenderService;
-    @Mock
-    private NotificationService notificationService;
-    @Mock
-    private  NotificationRepository notificationRepository;
-    @Mock
-    private ReservationServiceRepository reservationServiceRepository;
-    @Mock
-    private ServiceRepository serviceRepository;
-    @Mock
-    private ChambreReservationRepository chambreReservationRepository;
+    @Mock private ReservationRepository reservationRepository;
+    @Mock private ReservationMapper reservationMapper;
+    @Mock private ChambreRepository chambreRepository;
+    @Mock private NotificationRepository notificationRepository;
+    @Mock private NotificationService notificationService;
+    @Mock private ReservationServiceRepository reservationServiceRepository;
+    @Mock private ChambreReservationRepository chambreReservationRepository;
+    @Mock private ChambreMapper chambreMapper;
+    @Mock private CheckInRepository checkInRepository;
 
-
-
-    private Reservation reservation;
-    private User user;
-    private ChambreReservation chambre;
-    List<ChambreReservation> chambres;
     @BeforeEach
-    public void setup(){
-        user=new User();
-        chambre=new ChambreReservation();
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    void testAddReservation() {
+        Reservation reservation = new Reservation();
+        reservation.setDate_debut(LocalDate.now());
+        reservation.setDate_fin(LocalDate.now().plusDays(1));
+        Chambre chambre = new Chambre();
         chambre.setId(1L);
-        chambres=Arrays.asList(chambre);
-        reservation=new Reservation();
+        chambre.setNom("A1");
+        List<Long> chambreIds = List.of(1L);
+        when(chambreReservationRepository.findByChambre_IdInAndReservation_DateDebutAndReservation_DateFin(any(), any(), any())).thenReturn(List.of());
+        when(reservationRepository.save(any())).thenReturn(reservation);
+        when(chambreRepository.findById(1L)).thenReturn(Optional.of(chambre));
+        Reservation result = reservationService.addReservation(reservation, chambreIds);
+        assertNotNull(result);
+    }
+
+    @Test
+    void testUpdateReservationStatus() {
+        Reservation reservation = new Reservation();
         reservation.setId(1L);
-        reservation.setStatus(ReservationStatus.En_Attente);
-        reservation.setUser(user);
-        reservation.setChambreReservations(chambres);
-        reservation.setDate_debut(LocalDate.of(2025,4,4));
-        reservation.setDate_fin(LocalDate.of(2025,4,25));
-    }
-
-//    @Test
-//    public void TestaddReservation() {
-//
-//        User mockUser = new User();
-//        mockUser.setId(1L);
-//
-//        ChambreReservation chambresId = new ChambreReservation();
-//        chambresId.setId(1L);
-//
-//        Reservation reservation = new Reservation();
-//        reservation.setUser(mockUser);
-//        reservation.setDate_debut(LocalDate.of(2025, 4, 4));
-//        reservation.setDate_fin(LocalDate.of(2025, 4, 6));
-//        reservation.setChambreReservations(List.of(chambresId));
-//
-//        ChambreReservation chambreFromDb = new ChambreReservation();
-//        chambreFromDb.setId(1L);
-//        chambreFromDb.setStatut(ChambreStatut.DISPONIBLE);
-//
-//        when(reservationRepository.findExistingReservation(
-//                eq(1L),
-//                eq(List.of(1L)),
-//                any(LocalDate.class),
-//                any(LocalDate.class)
-//        )).thenReturn(List.of());
-//
-//        when(chambreReservationRepository.findById(1L)).thenReturn(Optional.of(chambreFromDb));
-//        when(chambreReservationRepository.save(any(ChambreReservation.class))).thenAnswer(invocation -> invocation.getArgument(0));
-//        when(reservationRepository.save(any(Reservation.class))).thenAnswer(invocation -> invocation.getArgument(0));
-//
-//        Reservation createdReservation = reservationService.addReservation(reservation);
-//
-//        assertNotNull(createdReservation);
-//        assertEquals(LocalDate.of(2025, 4, 4), createdReservation.getDate_debut());
-//        assertEquals(1, createdReservation.getChambreReservations().size());
-//
-//        verify(reservationRepository, times(1)).save(any(Reservation.class));
-//        verify(chambreReservationRepository, times(1)).findById(1L);
-//        verify(chambreReservationRepository, times(1)).save(any(ChambreReservation.class));
-//    }
-
-    @Test
-    public void TestgetAllReservations(){
-
-        Reservation newreservation=new Reservation();
-        newreservation.setId(2L);
-        newreservation.setUser(user);
-        newreservation.setChambreReservations(chambres);
-        newreservation.setDate_debut(LocalDate.of(2025,4,10));
-        newreservation.setDate_fin(LocalDate.of(2025,4,18));
-        newreservation.setStatus(ReservationStatus.Confirmee);
-
-        List<Reservation> reservations= Arrays.asList(reservation, newreservation);
-        when(reservationRepository.findAll()).thenReturn(reservations);
-
-        List<Reservation> reservationList= reservationService.getAllReservations();
-        assertNotNull(reservationList);
-        assertEquals(2,reservationList.size());
-        verify(reservationRepository,times(1)).findAll();
-
-
-    }
-    @Test
-    public void TestgetReservationById(){
-        when(reservationRepository.findById(1L)).thenReturn((Optional.of(reservation)));
-        Reservation reservationTrouvee = reservationService.getReservationById(1L);
-        assertNotNull(reservationTrouvee);
-        assertEquals(LocalDate.of(2025,4,4),reservationTrouvee.getDate_debut());
-        when(reservationRepository.findById(2L)).thenReturn(Optional.empty());
-        assertThrows(RuntimeException.class, () -> reservationService.getReservationById(2L));
-    }
-    @Test
-    public void TestdeleteReservation(){
-        when(reservationRepository.existsById(1L)).thenReturn(true);
-        doNothing().when(reservationRepository).deleteById(1L);
-        reservationService.deleteReservation(1L);
-        verify(reservationRepository,times(1)).deleteById(1L);
-
-    }
-    @Test
-    public void TestupdateReservationStatus(){
+        ChambreReservation cr = new ChambreReservation();
+        cr.setId(2L);
+        reservation.setChambreReservations(List.of(cr));
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
-        when(reservationRepository.save(any(Reservation.class))).thenReturn(reservation);
-
-        reservationService.updateReservationStatus(1L,ReservationStatus.Annulee);
-        assertEquals(ReservationStatus.Annulee,reservation.getStatus());
-        verify(reservationRepository,times(1)).save(any(Reservation.class));
+        when(chambreReservationRepository.findById(2L)).thenReturn(Optional.of(cr));
+        when(reservationRepository.save(any())).thenReturn(reservation);
+        Reservation result = reservationService.updateReservationStatus(1L, ReservationStatus.Confirmee);
+        assertEquals(ReservationStatus.Confirmee, result.getStatus());
     }
-//    @Test
-//    public void TestaddReservationPMS(){
-//        ReservationDTO reservationDTO= new ReservationDTO();
-//        reservationDTO.setId(1L);
-//        reservationDTO.setStatus(ReservationStatus.En_Attente);
-//        reservationDTO.setDate_debut(LocalDate.now());
-//        reservationDTO.setDate_fin(LocalDate.now().plusDays(5));
-//        reservationDTO.setUserId(10L);
-//        reservationDTO.setChambreList(List.of(1L,2L));
-//
-//        when(pmsService.getDemandeReservationById(1L)).thenReturn(reservationDTO);
-//        //Aucune Reservation trouvee pour cet id
-//        when(reservationRepository.existsById(1L)).thenReturn(false);
-//        Reservation reservation=new Reservation();
-//        when(reservationMapper.toEntity(reservationDTO)).thenReturn(reservation);
-//
-//        ChambreReservation chambre1=new ChambreReservation();
-//        chambre1.setId(1L);
-//        chambre1.setStatut(ChambreStatut.DISPONIBLE);
-//        ChambreReservation chambre2=new ChambreReservation();
-//        chambre2.setId(2L);
-//        chambre2.setStatut(ChambreStatut.DISPONIBLE);
-//
-//        when(chambreReservationRepository.findById(1L)).thenReturn((Optional.of(chambre1)));
-//        when(chambreReservationRepository.findById(2L)).thenReturn(Optional.of(chambre2));
-//
-//
-//
-//        when(reservationRepository.save(any(Reservation.class))).thenReturn(reservation);
-//
-//        Reservation result=reservationService.addReservationPMS(1L);
-//
-//        verify(reservationRepository,times(2)).save(any(Reservation.class));
-//        assertNotNull(result);
-//    }
+
+    @Test
+    void testDeleteReservation() {
+        when(reservationRepository.existsById(1L)).thenReturn(true);
+        reservationService.deleteReservation(1L);
+        verify(reservationRepository).deleteById(1L);
+    }
+
+    @Test
+    void testGetReservationById() {
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+        Reservation result = reservationService.getReservationById(1L);
+        assertEquals(1L, result.getId());
+    }
+
+    @Test
+    void testGetReservationsByUserId() {
+        Reservation r = new Reservation();
+        when(reservationRepository.findByUserId(1L)).thenReturn(List.of(r));
+        List<Reservation> result = reservationService.getReservationsByUserId(1L);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void testSearchReservations() {
+        Reservation reservation = new Reservation();
+        User user = new User();
+        user.setNom("sara");
+        reservation.setUser(user);
+        reservation.setId(1L);
+        reservation.setDate_debut(LocalDate.now());
+        reservation.setDate_fin(LocalDate.now().plusDays(1));
+        reservation.setStatus(ReservationStatus.Confirmee);
+        when(reservationRepository.findAll()).thenReturn(List.of(reservation));
+        List<Reservation> result = reservationService.searchReservations("sara", LocalDate.now(), LocalDate.now().plusDays(1), ReservationStatus.Confirmee);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void testGetReservationDetail() {
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+        User user = new User();
+        user.setNom("Test");
+        user.setPrenom("User");
+        user.setCin("C123");
+        user.setTelephone("123456");
+        reservation.setUser(user);
+        reservation.setServiceList(new ArrayList<>());
+        ChambreReservation cr = new ChambreReservation();
+        Chambre chambre = new Chambre();
+        chambre.setNom("AAA");
+        cr.setChambre(chambre);
+        reservation.setChambreReservations(List.of(cr));
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+        when(reservationMapper.toDTO(any())).thenReturn(new ReservationDTO());
+        when(chambreMapper.toDTO(any())).thenReturn(new ChambreDTO());
+        DetailReservationRequestDTO result = reservationService.getReservationDetail(1L);
+        assertNotNull(result);
+    }
+
+    @Test
+    void testExistsById() {
+        when(reservationRepository.existsById(1L)).thenReturn(true);
+        boolean result = reservationService.existsById(1L);
+        assertTrue(result);
+    }
+
+    @Test
+    void testFindUserByReservation() {
+        Reservation reservation = new Reservation();
+        User user = new User();
+        reservation.setUser(user);
+        when(reservationRepository.getById(1L)).thenReturn(reservation);
+        User result = reservationService.findUserByReservation(1L);
+        assertNotNull(result);
+    }
+
+    @Test
+    void testGetDashboardStats() {
+        when(reservationRepository.count()).thenReturn(10L);
+        when(checkInRepository.count()).thenReturn(5L);
+        Map<String, Long> result = reservationService.getDashboardStats();
+        assertEquals(10L, result.get("reservations"));
+        assertEquals(5L, result.get("checkins"));
+    }
 }

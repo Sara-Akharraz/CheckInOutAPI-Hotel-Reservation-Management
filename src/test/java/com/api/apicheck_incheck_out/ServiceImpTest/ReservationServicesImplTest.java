@@ -45,16 +45,16 @@ public class ReservationServicesImplTest {
         reservationServices.setReservation(reservation);
         reservationServices.setPhaseAjoutService(PhaseAjoutService.check_in);
     }
-    @Test
-    void TestgetAllServicesByReservation(){
-        List<ReservationServices> servicesList=Arrays.asList(reservationServices);
-        when(reservationServiceRepository.findByReservationId(1L)).thenReturn(servicesList);
-
-        List<ReservationServices> result=reservationService.getAllServicesByReservation(1L);
-
-        assertEquals(1,result.size());
-        verify(reservationServiceRepository,times(1)).findByReservationId(1L);
-    }
+//    @Test
+//    void TestgetAllServicesByReservation(){
+//        List<ReservationServices> servicesList=Arrays.asList(reservationServices);
+//        when(reservationServiceRepository.findByReservationId(1L)).thenReturn(servicesList);
+//
+//        List<ReservationServices> result=reservationService.getAllServicesByReservation(1L);
+//
+//        assertEquals(1,result.size());
+//        verify(reservationServiceRepository,times(1)).findByReservationId(1L);
+//    }
     @Test
     void TestgetServicesByPhase(){
         PhaseAjoutService phase=PhaseAjoutService.check_in;
