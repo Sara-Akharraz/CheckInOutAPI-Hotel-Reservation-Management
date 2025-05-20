@@ -1,6 +1,8 @@
 package com.api.apicheck_incheck_out.Entity;
 
 import com.api.apicheck_incheck_out.Enums.ChambreStatut;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,6 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"reservation"})
 public class ChambreReservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,6 +20,7 @@ public class ChambreReservation {
 
     @ManyToOne
     @JoinColumn(name="reservation_id", nullable = false)
+    @JsonBackReference
     private Reservation reservation;
 
     @ManyToOne
