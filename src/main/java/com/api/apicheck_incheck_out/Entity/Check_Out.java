@@ -2,6 +2,7 @@ package com.api.apicheck_incheck_out.Entity;
 
 
 import com.api.apicheck_incheck_out.Enums.CheckOutStatut;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,6 +22,7 @@ public class Check_Out {
 
     @OneToOne
     @JoinColumn(name="reservation_id")
+    @JsonBackReference
     private Reservation reservation;
 
     @Enumerated(EnumType.STRING)
