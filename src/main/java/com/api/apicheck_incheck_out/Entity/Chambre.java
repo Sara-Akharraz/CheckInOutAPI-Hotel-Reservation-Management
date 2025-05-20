@@ -2,6 +2,7 @@ package com.api.apicheck_incheck_out.Entity;
 
 import com.api.apicheck_incheck_out.Enums.ChambreStatut;
 import com.api.apicheck_incheck_out.Enums.ChambreType;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -36,6 +37,7 @@ public class Chambre {
     private int capacite;
 
     @OneToMany(mappedBy = "chambre", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<ChambreReservation> chambreReservations;
 
 }
