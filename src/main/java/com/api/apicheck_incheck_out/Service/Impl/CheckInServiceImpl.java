@@ -31,8 +31,9 @@ public class CheckInServiceImpl implements CheckInService {
     private final NotificationRepository notificationRepository;
     private final ChambreReservationRepository chambreReservationRepository;
     private final DocumentScanMapper documentScanMapper;
+    private final ReservationServiceRepository reservationServiceRepository;
 
-    public CheckInServiceImpl(CheckInRepository checkInRepository, DocumentScanRepository documentScanRepository, FactureService factureService, NotificationService notificationService, ReservationRepository reservationRepository, ChambreRepository chambreRepository, FactureRepository factureRepository, NotificationRepository notificationRepository, ChambreReservationRepository chambreReservationRepository, DocumentScanMapper documentScanMapper) {
+    public CheckInServiceImpl(CheckInRepository checkInRepository, DocumentScanRepository documentScanRepository, FactureService factureService, NotificationService notificationService, ReservationRepository reservationRepository, ChambreRepository chambreRepository, FactureRepository factureRepository, NotificationRepository notificationRepository, ChambreReservationRepository chambreReservationRepository, DocumentScanMapper documentScanMapper, ReservationServiceRepository reservationServiceRepository) {
         this.checkInRepository = checkInRepository;
         this.documentScanRepository = documentScanRepository;
         this.factureService = factureService;
@@ -43,6 +44,7 @@ public class CheckInServiceImpl implements CheckInService {
         this.notificationRepository = notificationRepository;
         this.chambreReservationRepository = chambreReservationRepository;
         this.documentScanMapper = documentScanMapper;
+        this.reservationServiceRepository = reservationServiceRepository;
     }
 
     @Override
@@ -135,9 +137,17 @@ public class CheckInServiceImpl implements CheckInService {
             }
         }
 
-
         chambreReservationRepository.saveAll(chambreReservations);
 
+        List<ReservationServices> reservationServices=reservation.getServiceList();
+
+        for(ReservationServices service:reservationServices){
+            if(service.getReservation().getId().equals(reservation.getId())){
+                service.setPaiementStatus(PaiementStatus.paye);
+            }
+        }
+
+        reservationServiceRepository.saveAll(reservationServices);
 
         return true;
     }

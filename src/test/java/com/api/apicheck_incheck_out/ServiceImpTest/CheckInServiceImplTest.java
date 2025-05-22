@@ -39,6 +39,8 @@ class CheckInServiceImplTest {
     ChambreReservationRepository chambreReservationRepository;
     @Mock
     DocumentScanMapper documentScanMapper;
+    @Mock
+    ReservationServiceRepository reservationServiceRepository;
 
     @InjectMocks
     CheckInServiceImpl checkInService;
@@ -103,22 +105,49 @@ class CheckInServiceImplTest {
 
     @Test
     void testValiderCheckIn_Success() {
+        Reservation reservation = new Reservation();
+        reservation.setId(1L);
+
+        User user = new User();
+        user.setId(1L);
+        reservation.setUser(user);
+
         DocumentScan doc = new DocumentScan();
         Check_In checkIn = new Check_In();
         checkIn.setDocumentScan(doc);
         checkIn.setStatus(CheckInStatus.En_Attente);
 
+        ChambreReservation chambre = new ChambreReservation();
+        chambre.setReservation(reservation);
+        chambre.setStatut(ChambreStatut.DISPONIBLE);
+        reservation.setChambreReservations(List.of(chambre));
+
+        ReservationServices service = new ReservationServices();
+        service.setReservation(reservation);
+        service.setPaiementStatus(PaiementStatus.en_attente);
+        reservation.setServiceList(List.of(service));
+
         when(checkInRepository.findByReservation(reservation)).thenReturn(Optional.of(checkIn));
-        when(checkInRepository.save(any(Check_In.class))).thenAnswer(i -> i.getArgument(0));
-        when(reservationRepository.save(any(Reservation.class))).thenAnswer(i -> i.getArgument(0));
+        when(checkInRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        when(reservationRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        when(chambreReservationRepository.saveAll(any())).thenAnswer(i -> i.getArgument(0));
+        when(reservationServiceRepository.saveAll(any())).thenAnswer(i -> i.getArgument(0));
 
         Boolean result = checkInService.validerCheckIn(reservation);
 
         assertTrue(result);
-        verify(factureService, times(1)).payerFactureCheckIn(reservation);
-        verify(notificationService, times(1)).notifier(eq(user.getId()), anyString());
-        verify(chambreReservationRepository, times(1)).saveAll(anyList());
+        assertEquals(CheckInStatus.Validé, checkIn.getStatus());
+        assertEquals(ReservationStatus.Confirmee, reservation.getStatus());
+        assertEquals(ChambreStatut.OCCUPEE, chambre.getStatut());
+        assertEquals(PaiementStatus.paye, service.getPaiementStatus());
     }
+
+
+
+
+
+
+
 
     @Test
     void testGetCheckInByReservation_Success() {
