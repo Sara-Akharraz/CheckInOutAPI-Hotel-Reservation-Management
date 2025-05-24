@@ -268,6 +268,22 @@ public class FactureServiceImpl implements FactureService {
             reservationRepository.save(reservation);
         }
 
+    @Override
+    public Facture validerPaiementCheckOut(Reservation reservation, double total) {
+        try {
+            Facture facture = Facture.builder()
+                    .type(FactureType.Check_Out)
+                    .status(PaiementStatus.paye)
+                    .checkOutMontant(total)
+                    .reservation(reservation)
+                    .build();
+
+            return factureRepository.save(facture);
+        }catch(Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Failed to validate the checout payment");
+        }
+    }
 
 
 }

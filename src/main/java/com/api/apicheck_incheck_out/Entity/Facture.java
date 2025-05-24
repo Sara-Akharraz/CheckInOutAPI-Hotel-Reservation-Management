@@ -5,16 +5,14 @@ import com.api.apicheck_incheck_out.Enums.PaiementMethod;
 import com.api.apicheck_incheck_out.Enums.PaiementStatus;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 @Entity
 @Table(name="facture")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class Facture {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,5 +40,7 @@ public class Facture {
     @ToString.Exclude
     @JsonBackReference
     private Reservation reservation;
+
+
 
 }

@@ -37,9 +37,10 @@ public class ReservationServiceImpl implements ReservationService {
     private final ChambreReservationRepository chambreReservationRepository;
     private final ChambreMapper chambreMapper;
     private final CheckInRepository checkInRepository;
+    private final CheckOutRepository checkOutRepository;
 
 
-    public ReservationServiceImpl(ReservationRepository reservationRepository, ReservationMapper reservationMapper, ChambreRepository chambreRepository, NotificationRepository notificationRepository, NotificationService notificationService, ReservationServiceRepository reservationServiceRepository, ChambreReservationRepository chambreReservationRepository, ChambreMapper chambreMapper, CheckInRepository checkInRepository) {
+    public ReservationServiceImpl(ReservationRepository reservationRepository, ReservationMapper reservationMapper, ChambreRepository chambreRepository, NotificationRepository notificationRepository, NotificationService notificationService, ReservationServiceRepository reservationServiceRepository, ChambreReservationRepository chambreReservationRepository, ChambreMapper chambreMapper, CheckInRepository checkInRepository, CheckOutRepository checkOutRepository) {
         this.reservationRepository = reservationRepository;
 
         this.reservationMapper = reservationMapper;
@@ -51,6 +52,7 @@ public class ReservationServiceImpl implements ReservationService {
         this.chambreReservationRepository = chambreReservationRepository;
         this.chambreMapper = chambreMapper;
         this.checkInRepository = checkInRepository;
+        this.checkOutRepository = checkOutRepository;
     }
 
     @Override
@@ -292,7 +294,7 @@ public class ReservationServiceImpl implements ReservationService {
         Map<String, Long> stats = new HashMap<>();
         stats.put("reservations", reservationRepository.count());
         stats.put("checkins", checkInRepository.count());
-//        stats.put("checkouts", checkOutRepository.count());
+        stats.put("checkouts", checkOutRepository.count());
         return stats;
     }
 

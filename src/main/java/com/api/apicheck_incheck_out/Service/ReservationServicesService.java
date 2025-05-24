@@ -12,4 +12,5 @@ public interface ReservationServicesService {
     public void addSejourServicesToReservation(Long idReservation,List<Long> serviceIds);
     public List<ReservationServices> addResService(Long id_reservation,List<Long> serviceIds);
     public List<Services> getAvailableServices(Long id_reservation);
+    public List<Services> getRsrvServicesSejourUnpaid(Long id);
 }

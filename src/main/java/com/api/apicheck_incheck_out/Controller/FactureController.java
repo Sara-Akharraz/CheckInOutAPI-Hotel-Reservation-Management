@@ -1,15 +1,16 @@
 package com.api.apicheck_incheck_out.Controller;
 
 import com.api.apicheck_incheck_out.DTO.PaiementRequestDTO;
-import com.api.apicheck_incheck_out.Entity.Facture;
-import com.api.apicheck_incheck_out.Entity.FacturePDF;
-import com.api.apicheck_incheck_out.Entity.Reservation;
+import com.api.apicheck_incheck_out.Entity.*;
 import com.api.apicheck_incheck_out.Enums.FactureType;
 import com.api.apicheck_incheck_out.Enums.PaiementMethod;
+import com.api.apicheck_incheck_out.Enums.PhaseAjoutService;
 import com.api.apicheck_incheck_out.Repository.FactureRepository;
 import com.api.apicheck_incheck_out.Repository.ReservationRepository;
+import com.api.apicheck_incheck_out.Service.CheckOutService;
 import com.api.apicheck_incheck_out.Service.FactureService;
 import com.api.apicheck_incheck_out.Service.ReservationService;
+import com.api.apicheck_incheck_out.Service.ReservationServicesService;
 import com.api.apicheck_incheck_out.Stripe.Service.Impl.StripeServiceImpl;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
@@ -37,6 +38,10 @@ public class FactureController {
     private StripeServiceImpl stripeService;
     @Autowired
     private FactureRepository factureRepository;
+    @Autowired
+    private ReservationServicesService reservationServicesService;
+    @Autowired
+    private CheckOutService checkOutService;
 
     @GetMapping("Montant_checkin")
     public ResponseEntity<Double> getMontantCheck_In(@RequestParam Long id_reservation){
@@ -46,7 +51,14 @@ public class FactureController {
 
         return ResponseEntity.ok(montantCheckIn);
     }
+    @GetMapping("Montant_checkOut")
+    public ResponseEntity<Double> getMontantCheck_Out(@RequestParam Long id_reservation){
+        Reservation reservation=reservationRepository.findById(id_reservation)
+                .orElseThrow(()->new RuntimeException("Reservation non trouvée par l'id :"+id_reservation));
+        double montantCheckOut = checkOutService.getAmount(reservation.getCheckOut().getId());
 
+        return ResponseEntity.ok(montantCheckOut);
+    }
 //    @PostMapping("payer_checkin")
 //    public ResponseEntity<String> payerFactureCheckIn(@RequestBody PaiementRequestDTO paiementRequestDTO){
 ////        try{
@@ -88,13 +100,28 @@ public ResponseEntity<byte[]> afficherFactureDansNavigateur(@PathVariable Long f
     if (reservation == null) {
         throw new RuntimeException("Aucune réservation trouvée pour la facture avec ID : " + factureId);
     }
+    List<ReservationServices> reservationsServicesSejour = reservationServicesService.getServicesByPhase(
+            reservation.getId(),
+            PhaseAjoutService.sejour
+    );
+    List<Services> services = reservationsServicesSejour
+            .stream()
+            .map(reservationService -> reservationService.getService())
+            .collect(Collectors.toList());
 
-    byte[] pdfBytes = FacturePDF.gerercheckinFacturePDF(reservation);
+    byte[] pdfBytes;
+    if(facture.getType().equals(FactureType.Check_In)){
+         pdfBytes = FacturePDF.gerercheckinFacturePDF(reservation);
+
+    }else{
+        pdfBytes = FacturePDF.gerercheckOutFacturePDF(reservation, services, checkOutService.getAmount(reservation.getCheckOut().getId()));
+    }
+
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_PDF);
     headers.setContentDisposition(ContentDisposition.builder("inline")
-            .filename("facture_checkin_" + factureId + ".pdf")
+            .filename("facture "+ facture.getType().toString() + " .pdf")
             .build());
 
     return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
@@ -148,7 +175,7 @@ public ResponseEntity<byte[]> afficherFactureDansNavigateur(@PathVariable Long f
         }
     }
 
-    @GetMapping("/facturescheckin/{reservationId}/{userId}")
+    @GetMapping("/factures/{reservationId}/{userId}")
     public ResponseEntity<List<Facture>> getAllFacture(
             @PathVariable Long reservationId,
             @PathVariable Long userId) {
@@ -160,24 +187,23 @@ public ResponseEntity<byte[]> afficherFactureDansNavigateur(@PathVariable Long f
         if (!reservation.getUser().getId().equals(userId)) {
             throw new RuntimeException("Accès interdit pour l'utilisateur ID : " + userId);
         }
-
-
-        List<Facture> factures = factureRepository.findAllByReservation_IdAndType(reservationId, FactureType.Check_In);
+        List<Facture> factures = factureRepository.findAllByReservation_Id(reservationId);
 
 
         return new ResponseEntity<>(factures, HttpStatus.OK);
     }
-    @GetMapping("/facturescheckin/{reservationId}")
+    @GetMapping("/factures/{reservationId}")
     public ResponseEntity<List<Facture>> getAllFactureCheckin(@PathVariable Long reservationId) {
 
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new RuntimeException("Réservation introuvable avec ID : " + reservationId));
 
-        // Si tu veux toujours ajouter une couche de sécurité, utilise Spring Security ou une session utilisateur ici
 
-        List<Facture> factures = factureRepository.findAllByReservation_IdAndType(reservationId, FactureType.Check_In);
+
+        List<Facture> factures = factureRepository.findAllByReservation_Id(reservationId);
 
         return new ResponseEntity<>(factures, HttpStatus.OK);
     }
+
 
 }

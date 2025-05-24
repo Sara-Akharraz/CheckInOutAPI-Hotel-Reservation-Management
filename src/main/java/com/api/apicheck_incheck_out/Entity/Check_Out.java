@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name="check_out")
 @Builder
@@ -21,11 +23,10 @@ public class Check_Out {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name="reservation_id")
-    @JsonBackReference
     private Reservation reservation;
-
+    @Column(name="date_checkOut")
+    private LocalDate dateCheckOut;
     @Enumerated(EnumType.STRING)
     private CheckOutStatut checkOutStatut;
-
 }
+

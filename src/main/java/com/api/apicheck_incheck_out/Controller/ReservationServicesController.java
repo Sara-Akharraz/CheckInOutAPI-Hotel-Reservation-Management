@@ -137,4 +137,13 @@ public class ReservationServicesController {
         List<Services> availableServices = reservationServicesService.getAvailableServices(id_reservation);
         return ResponseEntity.ok(availableServices);
     }
+    @GetMapping("/during-stay/{id_rsrv}")
+    public ResponseEntity<List<Services>> findUnpaidServicesDuringStay(@PathVariable("id_rsrv") Long id_rsrvr){
+        try{
+            return ResponseEntity.ok(reservationServicesService.getRsrvServicesSejourUnpaid(id_rsrvr));
+        }catch(Exception e){
+            e.printStackTrace();
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,e.getMessage());
+        }
+    }
 }

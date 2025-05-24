@@ -43,7 +43,7 @@ public class User {
     @Column(name="cin")
     private String cin;
 
-    @Column(name="numeroPassport")
+    @Column(name="numeroPassport",nullable = true)
     private String numeroPassport;
 
     @Column(name = "stripe_id")

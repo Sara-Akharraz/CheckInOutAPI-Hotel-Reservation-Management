@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/chambres")
+@RequestMapping("/api/chambre")
 public class ChambreController {
     @Autowired
     private ChambreService chambreService;

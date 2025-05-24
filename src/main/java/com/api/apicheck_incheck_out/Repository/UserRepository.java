@@ -16,11 +16,14 @@ public interface UserRepository extends JpaRepository<User,Long> {
     @Query("SELECT u FROM User u WHERE u.email = :email and u.password=:password")
     Optional<User> logIn(@Param("email") String email, @Param("password") String password);
 
-    List<User> findByRole(Role role);
-//    @Query("SELECT u FROM User u WHERE u.role = com.api.apicheck_incheck_out.Entity.Role.RECEPTIONIST")
-//    List<User> findReceptionists();
-//
-//    // Query for clients using the Role Enum
-//    @Query("SELECT u FROM User u WHERE u.role = com.api.apicheck_incheck_out.Entity.Role.CLIENT")
-//    List<User> findClients();
+    @Query("SELECT u from User u where u.role='RECEPTIONIST'")
+    List<User> findReceptionists();
+
+    @Query("SELECT u from User u where u.role='CLIENT'")
+    List<User> findClients();
+
+    User findByEmail(String email);
+
+    @Query("SELECT u from User u where u.role='ADMIN'")
+    List<User> findAdmins();
 }

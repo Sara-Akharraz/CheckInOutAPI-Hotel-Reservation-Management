@@ -20,5 +20,9 @@ public interface ReservationServiceRepository extends JpaRepository<ReservationS
             @Param("reservationId") Long reservationId,
             @Param("phase") PhaseAjoutService phase
     );
-
+    @Query("SELECT rs FROM ReservationServices rs " +
+            "WHERE rs.reservation.id = :reservationId " +
+            "AND rs.phaseAjoutService = 'sejour' " +
+            "AND rs.paiementStatus != 'paye'")
+    List<ReservationServices> getRsrvServicesSejourUnpaid(@Param("reservationId") Long reservationId);
 }

@@ -20,12 +20,13 @@ public class UserMapper {
 
 
         user.id(dto.getId());
-        user.nom(dto.getName());
+        user.nom(dto.getNom());
         user.prenom(dto.getPrenom());
         user.password(dto.getPassword());
         user.email(dto.getEmail());
         user.cin(dto.getCin());
         user.numeroPassport(dto.getNumeroPassport());
+        user.role(dto.getRole());
 
 
         List<Notification> list = dto.getNotifications();
@@ -45,10 +46,11 @@ public class UserMapper {
 
 
         userDto.setId(entity.getId());
-        userDto.setName(entity.getNom());
+        userDto.setNom(entity.getNom());
         userDto.setPrenom(entity.getPrenom());
         userDto.setEmail(entity.getEmail());
         userDto.setPassword(entity.getPassword());
+        userDto.setRole(entity.getRole());
 
         List<Notification> list = entity.getNotifications();
         if (list != null) {

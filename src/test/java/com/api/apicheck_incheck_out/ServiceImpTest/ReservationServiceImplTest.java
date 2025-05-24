@@ -31,6 +31,7 @@ class ReservationServiceImplTest {
     @Mock private ChambreReservationRepository chambreReservationRepository;
     @Mock private ChambreMapper chambreMapper;
     @Mock private CheckInRepository checkInRepository;
+    @Mock private CheckOutRepository checkOutRepository;
 
     @BeforeEach
     void setUp() {

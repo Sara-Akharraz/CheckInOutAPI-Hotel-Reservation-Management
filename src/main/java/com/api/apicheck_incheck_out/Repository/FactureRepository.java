@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface FactureRepository extends JpaRepository<Facture,Long> {
     List<Facture> findAllByReservation_IdAndType(Long reservationId, FactureType type);
-    Facture findByReservationAndType(Reservation reservation, FactureType type);
+    List<Facture> findAllByReservation_Id(Long reservationId);
+
 
 }

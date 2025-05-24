@@ -114,4 +114,11 @@ public class ReservationServicesServiceImpl implements ReservationServicesServic
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<Services> getRsrvServicesSejourUnpaid(Long id) {
+        return reservationServiceRepository.getRsrvServicesSejourUnpaid(id).stream()
+                .map(reservationService -> reservationService.getService())
+                .collect(Collectors.toList());
+    }
+
 }
