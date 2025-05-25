@@ -26,6 +26,7 @@ public class UserMapper {
         user.email(dto.getEmail());
         user.cin(dto.getCin());
         user.numeroPassport(dto.getNumeroPassport());
+        user.telephone(dto.getTelephone());
         user.role(dto.getRole());
 
 
@@ -49,6 +50,7 @@ public class UserMapper {
         userDto.setNom(entity.getNom());
         userDto.setPrenom(entity.getPrenom());
         userDto.setEmail(entity.getEmail());
+        userDto.setTelephone(entity.getTelephone());
         userDto.setPassword(entity.getPassword());
         userDto.setRole(entity.getRole());
 

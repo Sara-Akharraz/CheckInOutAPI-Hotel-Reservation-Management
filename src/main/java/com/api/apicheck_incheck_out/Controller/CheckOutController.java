@@ -64,17 +64,17 @@ public class CheckOutController {
     @GetMapping("/reservation/{Id_reservation}")
     public ResponseEntity<?> getCheckOutByReservation(@PathVariable Long Id_reservation) {
         try {
-            System.out.println("===> Recherche Check-in pour réservation ID: " + Id_reservation);
+            System.out.println("===> Recherche Check-out pour réservation ID: " + Id_reservation);
             Check_Out checkOut = checkOutService.getCheckOutByReservation(Id_reservation);
             if (checkOut != null) {
                 CheckOutDTO checkOutDTO = checkOutMapper.toDTO(checkOut);
                 return ResponseEntity.ok(checkOutDTO);
             } else {
-                System.out.println("===> checkIn is null, checking reservation existence...");
+                System.out.println("===> checkOut is null, checkOut reservation existence...");
                 boolean exists = reservationService.existsById(Id_reservation);
                 System.out.println("===> Reservation exists? " + exists);
                 if (reservationService.existsById(Id_reservation)) {
-                    return ResponseEntity.ok("Check-in non encore effectué.");
+                    return ResponseEntity.ok("Check-out non encore effectué.");
                 } else {
                     return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Réservation introuvable.");
                 }

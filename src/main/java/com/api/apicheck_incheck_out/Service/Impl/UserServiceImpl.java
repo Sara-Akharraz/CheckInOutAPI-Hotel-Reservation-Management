@@ -136,9 +136,10 @@ public class UserServiceImpl implements UserService {
             userEntity.setCin(user.getCin());
             userEntity.setEmail(user.getEmail());
             userEntity.setNom(user.getNom());
-            userEntity.setPassword(user.getPassword());
+            userEntity.setPassword(encoder.encode(user.getPassword()));
             userEntity.setPrenom(user.getPrenom());
             userEntity.setRole(user.getRole());
+            userEntity.setTelephone(user.getTelephone());
             return userMapper.toDTO(
                     userRepository.save(userEntity));
         }

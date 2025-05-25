@@ -17,6 +17,7 @@ public class UserDto {
     private String prenom;
     private String email;
     private String password;
+    private String telephone;
     @JsonIgnore
     private List<Notification> notifications;
     private String cin;
