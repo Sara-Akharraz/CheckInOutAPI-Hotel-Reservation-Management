@@ -39,7 +39,8 @@ public class SecurityConfig {
                                 "/api/reservation-services/**",
                                 "/api/facture/**",
                                 "/api/check_in/**",
-                                "/api/mock_documents/**"
+                                "/api/mock_documents/**",
+                                "/api/services/**"
                         ).hasAnyAuthority("CLIENT", "RECEPTIONIST")
 
                         .requestMatchers(
