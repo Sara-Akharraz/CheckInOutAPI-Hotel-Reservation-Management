@@ -27,6 +27,7 @@ public class UserMapper {
         user.cin(dto.getCin());
         user.numeroPassport(dto.getNumeroPassport());
         user.role(dto.getRole());
+        user.telephone(dto.getTelephone());
 
 
         List<Notification> list = dto.getNotifications();
@@ -51,6 +52,7 @@ public class UserMapper {
         userDto.setEmail(entity.getEmail());
         userDto.setPassword(entity.getPassword());
         userDto.setRole(entity.getRole());
+        userDto.setTelephone(entity.getTelephone());
 
         List<Notification> list = entity.getNotifications();
         if (list != null) {

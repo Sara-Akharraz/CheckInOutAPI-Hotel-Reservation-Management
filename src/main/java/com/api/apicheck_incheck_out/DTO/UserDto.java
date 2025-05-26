@@ -22,5 +22,6 @@ public class UserDto {
     private String cin;
     private String numeroPassport;
     private Role role;
+    private String telephone;
 
 }

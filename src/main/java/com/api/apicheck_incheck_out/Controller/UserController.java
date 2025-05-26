@@ -43,7 +43,7 @@ public class UserController {
         //return "success";
     }
 
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUser(@PathVariable("id") Long id){
         try{
             return ResponseEntity.ok(userService.getUser(id));

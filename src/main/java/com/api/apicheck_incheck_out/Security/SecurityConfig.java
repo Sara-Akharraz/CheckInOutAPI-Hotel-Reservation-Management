@@ -1,14 +1,11 @@
 package com.api.apicheck_incheck_out.Security;
 
-import com.api.apicheck_incheck_out.Enums.Role;
-import org.springdoc.core.service.RequestBodyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -19,37 +16,40 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     @Autowired
     CustomUserDetailsService userDetailsService;
+
     @Autowired
     private JWTFilter jwtFilter;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .cors(withDefaults())
                 .csrf(csrf -> csrf.disable())
+                .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/user/**").permitAll()
-                        .requestMatchers("/api/notification/**").hasAuthority("ADMIN")
                         .requestMatchers(
                                 "/api/checkout/**",
-                                "/api/reservation/**",
                                 "/api/reservation-services/**",
                                 "/api/facture/**",
                                 "/api/check_in/**",
-                                "/api/mock_documents/**",
-                                "/api/notification/**"
+                                "/api/mock_documents/**"
                         ).hasAnyAuthority("CLIENT", "RECEPTIONIST")
+
                         .requestMatchers(
                                 "/api/services/**",
+                                "/api/notification/**",
                                 "/api/chambres/**",
-                                "/api/chambre/**"
+                                "/api/chambre/**",
+                                "/api/reservation/**"
                         ).hasAnyAuthority("ADMIN", "CLIENT", "RECEPTIONIST")
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
@@ -58,6 +58,7 @@ public class SecurityConfig {
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
+
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
