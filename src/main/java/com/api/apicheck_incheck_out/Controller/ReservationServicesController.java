@@ -105,7 +105,7 @@ public class ReservationServicesController {
                 ()->new RuntimeException("Réservation non trouvée avec l'id :"+id_reservation)
         );
         List<ReservationServices> reservationServices=new ArrayList<>();
-        List<String> servicesNames =new ArrayList<>();
+//        List<String> servicesNames =new ArrayList<>();
 
         if(!serviceIds.isEmpty()){
             reservationServices=reservationServicesService.addResService(id_reservation, serviceIds);
@@ -115,6 +115,11 @@ public class ReservationServicesController {
         List<String> chambresNames = reservation.getChambreReservations().stream()
                 .map(chambreReservation -> chambreReservation.getChambre().getNom())
                 .collect(Collectors.toList());
+
+        List<String> servicesNames = reservation.getServiceList().stream()
+                .map(serviceReservation -> serviceReservation.getService().getNom())
+                .collect(Collectors.toList());
+
 
         String chambresList = String.join(", ", chambresNames);
         String servicesList=String.join(" , ",servicesNames);

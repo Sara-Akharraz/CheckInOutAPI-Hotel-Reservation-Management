@@ -18,10 +18,12 @@ import com.paypal.api.payments.Payment;
 import com.paypal.base.rest.PayPalRESTException;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -122,13 +124,22 @@ public class CheckOutController {
 
     @PostMapping("/validate-payment/{id_checkout}")
     public void handlePaymentSuccess(@PathVariable("id_checkout") Long id) {
+        System.out.println("Validation paiement check-out pour id : " + id);
         try {
             checkOutService.handlePaymentSuccess(id);
+            System.out.println("Validation réussie pour check-out id: " + id);
         } catch (Exception e) {
+            System.err.println("Erreur validation paiement: " + e.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
-
-
+    }
+    @GetMapping("/today-checkouts")
+    public ResponseEntity<List<CheckOutDTO>> checkoutsForToday(    @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        List<Check_Out> checkouts = checkOutService.checkoutsForToday(date);
+        List<CheckOutDTO> dtos = checkouts.stream()
+                .map(checkout -> checkOutMapper.toDTO(checkout)) // Using class mapper
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/facture/{reservationId}")

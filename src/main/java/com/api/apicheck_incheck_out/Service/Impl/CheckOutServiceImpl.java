@@ -1,11 +1,13 @@
 package com.api.apicheck_incheck_out.Service.Impl;
 
+import com.api.apicheck_incheck_out.DTO.UserDto;
 import com.api.apicheck_incheck_out.Entity.*;
 import com.api.apicheck_incheck_out.Enums.CheckOutStatut;
 import com.api.apicheck_incheck_out.Enums.PaiementStatus;
 import com.api.apicheck_incheck_out.Enums.PhaseAjoutService;
 import com.api.apicheck_incheck_out.Enums.ReservationStatus;
 import com.api.apicheck_incheck_out.Repository.CheckOutRepository;
+import com.api.apicheck_incheck_out.Repository.NotificationRepository;
 import com.api.apicheck_incheck_out.Repository.ReservationRepository;
 import com.api.apicheck_incheck_out.Repository.ReservationServiceRepository;
 import com.api.apicheck_incheck_out.Service.*;
@@ -49,6 +51,12 @@ public class CheckOutServiceImpl implements CheckOutService {
     @Autowired
     ReservationRepository reservationRepository;
 
+    @Autowired
+    NotificationRepository notificationRepository;
+
+
+    @Autowired
+    UserService userService;
     public Check_Out addCheckOut(Check_Out checkout) {
         if (checkout == null) {
             throw new IllegalArgumentException("Check_Out object cannot be null");
@@ -120,14 +128,34 @@ public class CheckOutServiceImpl implements CheckOutService {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
         Reservation r = checkOut.getReservation();
-        notificationService.notifier(r.getUser().getId(),"Votre paiement pour le checkout de réservation numéro "+ r.getId()+ " est confirmé !");
+
         double total = this.getAmount(checkOut.getId());
         factureService.validerPaiementCheckOut(r,total);
         FacturePDF.gerercheckOutFacturePDF(checkOut.getReservation(),services,total);
         rsrvServices.stream().forEach(service -> {
             service.setPaiementStatus(PaiementStatus.paye);
         });
+        notificationService.notifier(r.getUser().getId(),"Votre paiement pour le checkout de réservation numéro "+ r.getId()+ " est confirmé !");
+        List<User> admins = userService.getAdmins();
+        admins.stream().forEach(admin -> {
+            notificationService.notifier(admin.getId(),"Check-Out validé pour la réservation numéro ; "+ r.getId());
+
+        });
+        List<UserDto> receps = userService.getReceptionists();
+        receps.stream().forEach(recep -> {
+            notificationService.notifier(recep.getId(),"Check-Out validé pour la réservation numéro ; "+ r.getId());
+        });
+
         reservationServiceRepository.saveAll(rsrvServices);
+
+    }
+    @Override
+    public List<Check_Out> checkoutsForToday(LocalDate today) {
+        List<Reservation> reservations = reservationRepository.findByDateFin(today);
+        return reservations.stream()
+                .map(reservation -> reservation.getCheckOut())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
     @Override
     public Check_Out getCheckOutByReservation(Long Id_reservation) {

@@ -20,9 +20,9 @@ public class CheckInDTO {
         private CheckInStatus status;
 
 
-        private Long Id_reservation;
+        private Long id_reservation;
 
 
-        private Long Id_documentScan;
+        private Long id_documentScan;
 
 }

@@ -4,6 +4,7 @@ import com.api.apicheck_incheck_out.DTO.CheckInDTO;
 import com.api.apicheck_incheck_out.DTO.DocumentScanDTO;
 import com.api.apicheck_incheck_out.Entity.DocumentScan;
 import com.api.apicheck_incheck_out.Mapper.DocumentScanMapper;
+import com.api.apicheck_incheck_out.Repository.ReservationRepository;
 import com.api.apicheck_incheck_out.Service.DocumentScanService;
 import com.api.apicheck_incheck_out.Entity.Check_In;
 import com.api.apicheck_incheck_out.Entity.Reservation;
@@ -12,6 +13,9 @@ import com.api.apicheck_incheck_out.Enums.DocumentScanType;
 import com.api.apicheck_incheck_out.Mapper.CheckInMapper;
 import com.api.apicheck_incheck_out.Service.CheckInService;
 import com.api.apicheck_incheck_out.Service.ReservationService;
+import com.api.apicheck_incheck_out.Service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +23,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -30,12 +38,26 @@ public class CheckInController {
     private final DocumentScanService documentScanService;
     private final ReservationService reservationService;
     private final DocumentScanMapper documentScanMapper;
+    private final CheckInMapper checkInMapper;
+    private final ReservationRepository reservationRepository;
 
-    public CheckInController(CheckInService checkInService, DocumentScanService documentScanService, ReservationService reservationService, DocumentScanMapper documentScanMapper) {
+
+    public CheckInController(CheckInService checkInService, DocumentScanService documentScanService, ReservationService reservationService, DocumentScanMapper documentScanMapper, CheckInMapper checkInMapper, ReservationRepository reservationRepository) {
         this.checkInService = checkInService;
         this.documentScanService = documentScanService;
         this.reservationService = reservationService;
         this.documentScanMapper = documentScanMapper;
+        this.checkInMapper = checkInMapper;
+        this.reservationRepository = reservationRepository;
+    }
+
+    @GetMapping("/today-checkins")
+    public ResponseEntity<List<CheckInDTO>> checkInsForToday(@RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        List<Check_In> checkouts = checkInService.checkinsForToday(date);
+        List<CheckInDTO> dtos = checkouts.stream()
+                .map(checkout -> checkInMapper.toDTO(checkout))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 
     @PostMapping("/validerScan")
@@ -203,6 +225,24 @@ public class CheckInController {
         return ResponseEntity.ok("Check-in validé avec succès");
     }
 
+    @GetMapping("/status")
+    public ResponseEntity<String> getCheckInStatus(@RequestParam Long reservationId) {
+        Optional<Reservation> reservationOptional = reservationRepository.findById(reservationId);
+
+        if (reservationOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("not_found");
+        }
+
+        Reservation reservation = reservationOptional.get();
+
+        if (reservation.getCheckIn() == null) {
+            return ResponseEntity.ok("no_checkin");
+        }
+
+        CheckInStatus statutCheckIn = reservation.getCheckIn().getStatus();
+
+        return ResponseEntity.ok(statutCheckIn.toString());
+    }
     @PostMapping(value = "ajoutercheckin", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> ajoutercheckin(
             @RequestParam Long id_reservation,

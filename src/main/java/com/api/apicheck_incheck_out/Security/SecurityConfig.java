@@ -33,22 +33,25 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
+
+
                         .requestMatchers("/api/user/**").permitAll()
+
+
                         .requestMatchers(
-                                "/api/checkout/**",
                                 "/api/reservation-services/**",
                                 "/api/facture/**",
                                 "/api/check_in/**",
                                 "/api/mock_documents/**",
-                                "/api/services/**"
+                                "/api/checkout/**"
                         ).hasAnyAuthority("CLIENT", "RECEPTIONIST")
 
                         .requestMatchers(
-                                "/api/services/**",
                                 "/api/notification/**",
                                 "/api/chambres/**",
                                 "/api/chambre/**",
-                                "/api/reservation/**"
+                                "/api/reservation/**",
+                                "/api/services/**"
                         ).hasAnyAuthority("ADMIN", "CLIENT", "RECEPTIONIST")
 
                         .anyRequest().authenticated()

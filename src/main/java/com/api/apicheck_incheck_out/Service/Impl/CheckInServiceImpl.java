@@ -1,6 +1,7 @@
 package com.api.apicheck_incheck_out.Service.Impl;
 
 import com.api.apicheck_incheck_out.DTO.DocumentScanDTO;
+import com.api.apicheck_incheck_out.DTO.UserDto;
 import com.api.apicheck_incheck_out.Entity.DocumentScan;
 import com.api.apicheck_incheck_out.Mapper.DocumentScanMapper;
 import com.api.apicheck_incheck_out.Repository.DocumentScanRepository;
@@ -12,12 +13,16 @@ import com.api.apicheck_incheck_out.Repository.*;
 import com.api.apicheck_incheck_out.Service.CheckInService;
 import com.api.apicheck_incheck_out.Service.FactureService;
 import com.api.apicheck_incheck_out.Service.NotificationService;
+import com.api.apicheck_incheck_out.Service.UserService;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CheckInServiceImpl implements CheckInService {
@@ -32,6 +37,8 @@ public class CheckInServiceImpl implements CheckInService {
     private final ChambreReservationRepository chambreReservationRepository;
     private final DocumentScanMapper documentScanMapper;
     private final ReservationServiceRepository reservationServiceRepository;
+    @Autowired
+    UserService userService;
 
     public CheckInServiceImpl(CheckInRepository checkInRepository, DocumentScanRepository documentScanRepository, FactureService factureService, NotificationService notificationService, ReservationRepository reservationRepository, ChambreRepository chambreRepository, FactureRepository factureRepository, NotificationRepository notificationRepository, ChambreReservationRepository chambreReservationRepository, DocumentScanMapper documentScanMapper, ReservationServiceRepository reservationServiceRepository) {
         this.checkInRepository = checkInRepository;
@@ -146,10 +153,26 @@ public class CheckInServiceImpl implements CheckInService {
                 service.setPaiementStatus(PaiementStatus.paye);
             }
         }
+        List<User> admins = userService.getAdmins();
+        admins.stream().forEach(admin -> {
+            notificationService.notifier(admin.getId(),"Check-In validé pour la réservation numméro ; "+ reservation.getId());
 
+        });
+        List<UserDto> receps = userService.getReceptionists();
+        receps.stream().forEach(recep -> {
+            notificationService.notifier(recep.getId(),"Check-In validé pour la réservation numméro ; "+ reservation.getId());
+        });
         reservationServiceRepository.saveAll(reservationServices);
 
         return true;
+    }
+    @Override
+    public List<Check_In> checkinsForToday(LocalDate today){
+        List<Reservation> reservations = reservationRepository.findByDateDebut(today);
+        return reservations.stream()
+                .map(reservation -> reservation.getCheckIn())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
     @Override
     public Check_In getCheckInByReservation(Long Id_reservation) {
@@ -186,6 +209,16 @@ public class CheckInServiceImpl implements CheckInService {
         checkIn.setStatus(CheckInStatus.Validé);
 
         checkInRepository.save(checkIn);
+        notificationService.notifier(reservation.getUser().getId(),"Réservation Confirmée ,Numéro de reservation :"+reservation.getId());
+        List<User> admins = userService.getAdmins();
+        admins.stream().forEach(admin -> {
+            notificationService.notifier(admin.getId(),"Check-In validé pour la réservation numéro ; "+ reservation.getId());
+
+        });
+        List<UserDto> receps = userService.getReceptionists();
+        receps.stream().forEach(recep -> {
+            notificationService.notifier(recep.getId(),"Check-In validé pour la réservation numéro ; "+ reservation.getId());
+        });
 
     }
 
@@ -206,7 +239,17 @@ public class CheckInServiceImpl implements CheckInService {
         checkInRepository.save(checkIn);
 
         reservation.setStatus(ReservationStatus.Confirmee);
+
         reservationRepository.save(reservation);
+        List<User> admins = userService.getAdmins();
+        admins.stream().forEach(admin -> {
+            notificationService.notifier(admin.getId(),"Check-In ajouté pour la réservation numéro ; "+ reservation.getId());
+
+        });
+        List<UserDto> receps = userService.getReceptionists();
+        receps.stream().forEach(recep -> {
+            notificationService.notifier(recep.getId(),"Check-In ajouté pour la réservation numéro ; "+ reservation.getId());
+        });
 
     }
 

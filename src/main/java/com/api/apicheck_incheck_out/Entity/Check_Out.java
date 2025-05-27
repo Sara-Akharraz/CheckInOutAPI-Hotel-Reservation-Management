@@ -27,6 +27,7 @@ public class Check_Out {
     @Column(name="date_checkOut")
     private LocalDate dateCheckOut;
     @Enumerated(EnumType.STRING)
+    @Column(name = "status")
     private CheckOutStatut checkOutStatut;
 }
 

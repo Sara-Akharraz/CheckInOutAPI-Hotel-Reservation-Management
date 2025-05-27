@@ -4,6 +4,7 @@ import com.api.apicheck_incheck_out.Entity.Check_Out;
 import com.api.apicheck_incheck_out.Enums.CheckOutStatut;
 import com.api.apicheck_incheck_out.Stripe.StripeResponse;
 
+import java.time.LocalDate;
 import java.util.List;
 
     public interface CheckOutService {
@@ -15,4 +16,5 @@ import java.util.List;
         public StripeResponse payer(Long id);
         public Check_Out getCheckOutByReservation(Long Id_reservation);
         public void handlePaymentSuccess(Long id);
+        public List<Check_Out> checkoutsForToday(LocalDate today);
     }

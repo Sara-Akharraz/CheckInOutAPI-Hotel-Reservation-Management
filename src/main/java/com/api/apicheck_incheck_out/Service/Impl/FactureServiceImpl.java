@@ -2,10 +2,7 @@ package com.api.apicheck_incheck_out.Service.Impl;
 
 import com.api.apicheck_incheck_out.DTO.PaiementRequestDTO;
 import com.api.apicheck_incheck_out.Entity.*;
-import com.api.apicheck_incheck_out.Enums.FactureType;
-import com.api.apicheck_incheck_out.Enums.PaiementMethod;
-import com.api.apicheck_incheck_out.Enums.PaiementStatus;
-import com.api.apicheck_incheck_out.Enums.PhaseAjoutService;
+import com.api.apicheck_incheck_out.Enums.*;
 import com.api.apicheck_incheck_out.Repository.FactureRepository;
 import com.api.apicheck_incheck_out.Repository.ReservationRepository;
 import com.api.apicheck_incheck_out.Repository.ReservationServiceRepository;
@@ -264,7 +261,7 @@ public class FactureServiceImpl implements FactureService {
                 service.setPaiementStatus(PaiementStatus.paye);
                 reservationServiceRepository.save(service);
             }
-
+        reservation.setStatus(ReservationStatus.Confirmee);
             reservationRepository.save(reservation);
         }
 
