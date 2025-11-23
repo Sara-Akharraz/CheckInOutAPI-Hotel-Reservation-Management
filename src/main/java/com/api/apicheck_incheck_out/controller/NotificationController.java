@@ -1,0 +1,47 @@
+package com.api.apicheck_incheck_out.controller;
+
+import com.api.apicheck_incheck_out.dto.NotificationDTO;
+import com.api.apicheck_incheck_out.entity.Notification;
+import com.api.apicheck_incheck_out.mapper.NotificationMapper;
+import com.api.apicheck_incheck_out.service.NotificationService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+
+@RestController
+@RequestMapping("/api/notification")
+public class NotificationController {
+    private final NotificationService notificationService;
+    private final NotificationMapper notificationMapper;
+
+    public NotificationController(NotificationService notificationService, NotificationMapper notificationMapper) {
+        this.notificationService = notificationService;
+        this.notificationMapper = notificationMapper;
+    }
+
+    @PostMapping
+    public ResponseEntity<NotificationDTO> notifier(@RequestBody NotificationDTO notificationDTO) {
+        try {
+            Notification newNotification = notificationService.notifier(notificationDTO.getUserId(), notificationDTO.getMessage());
+            return new ResponseEntity<>(notificationMapper.toDTO(newNotification), HttpStatus.CREATED);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<List<NotificationDTO>> getAllNotificationsByUser(@PathVariable Long id){
+        List<NotificationDTO> notificationList=notificationService.getAllNotificationsByUser(id).stream()
+                .map(notificationMapper::toDTO)
+                .toList();
+        return ResponseEntity.ok(notificationList);
+
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteNotification(@PathVariable Long id){
+        notificationService.deleteNotification(id);
+        return ResponseEntity.noContent().build();
+    }
+}
