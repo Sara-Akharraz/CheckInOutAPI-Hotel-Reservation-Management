@@ -123,10 +123,10 @@ public class CheckOutServiceImpl implements CheckOutService {
         CheckOut checkOut = getCheckOutById(id);
         checkOut.setDateCheckOut(LocalDate.now());
         checkOut.setCheckOutStatut(CheckOutStatut.CONFIRMEE);
-        checkOut.getReservation().setStatus(ReservationStatus.Terminee);
+        checkOut.getReservation().setStatus(ReservationStatus.TERMINEE);
         checkOutRepository.save(checkOut);
         Long idrsrv = checkOut.getReservation().getId();
-        List<ReservationServices> rsrvServices = reservationServicesService.getServicesByPhase(idrsrv, PhaseAjoutService.sejour);
+        List<ReservationServices> rsrvServices = reservationServicesService.getServicesByPhase(idrsrv, PhaseAjoutService.SEJOUR);
         List<Services> services = rsrvServices.stream()
                 .map(rs -> rs.getService())
                 .filter(Objects::nonNull)
@@ -136,19 +136,19 @@ public class CheckOutServiceImpl implements CheckOutService {
         double total = this.getAmount(checkOut.getId());
         factureService.validerPaiementCheckOut(r,total);
         FacturePDF.gerercheckOutFacturePDF(checkOut.getReservation(),services,total);
-        rsrvServices.stream().forEach(service -> {
-            service.setPaiementStatus(PaiementStatus.paye);
-        });
+        rsrvServices.stream().forEach(service ->
+            service.setPaiementStatus(PaiementStatus.PAYE)
+        );
         notificationService.notifier(r.getUser().getId(),"Votre paiement pour le checkout de réservation numéro "+ r.getId()+ " est confirmé !");
         List<User> admins = userService.getAdmins();
-        admins.stream().forEach(admin -> {
-            notificationService.notifier(admin.getId(),"Check-Out validé pour la réservation numéro ; "+ r.getId());
+        admins.stream().forEach(admin ->
+            notificationService.notifier(admin.getId(),"Check-Out validé pour la réservation numéro ; "+ r.getId())
 
-        });
+        );
         List<UserDto> receps = userService.getReceptionists();
-        receps.stream().forEach(recep -> {
-            notificationService.notifier(recep.getId(),"Check-Out validé pour la réservation numéro ; "+ r.getId());
-        });
+        receps.stream().forEach(recep ->
+            notificationService.notifier(recep.getId(),"Check-Out validé pour la réservation numéro ; "+ r.getId())
+        );
 
         reservationServiceRepository.saveAll(rsrvServices);
 

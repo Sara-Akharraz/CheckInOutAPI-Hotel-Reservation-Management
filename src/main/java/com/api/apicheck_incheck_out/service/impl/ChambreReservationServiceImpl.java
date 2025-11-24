@@ -57,7 +57,7 @@ public class ChambreReservationServiceImpl implements ChambreReservationService 
 
         Reservation reservation = reservationRepository.findById(idReservation)
                 .orElseThrow(() -> new RuntimeException(RSVNOTFOUND + idReservation));
-        if (reservation.getStatus() != ReservationStatus.Confirmee) {
+        if (reservation.getStatus() != ReservationStatus.CONFIRMEE) {
             throw new InvalidReservationStatusException("La réservation n'est pas confirmée, statut actuel : " + reservation.getStatus());
         }
         List<ChambreReservation> chambreReservations = chambreReservationRepository.findByReservation_Id(idReservation);
@@ -80,7 +80,7 @@ public class ChambreReservationServiceImpl implements ChambreReservationService 
         Reservation reservation = reservationRepository.findById(idReservation)
                 .orElseThrow(() -> new RuntimeException(RSVNOTFOUND + idReservation));
 
-        if (reservation.getStatus() != ReservationStatus.Confirmee) {
+        if (reservation.getStatus() != ReservationStatus.CONFIRMEE) {
             throw new InvalidReservationStatusException("La réservation n'est pas confirmée, statut actuel : " + reservation.getStatus());
         }
 
@@ -96,7 +96,7 @@ public class ChambreReservationServiceImpl implements ChambreReservationService 
             chambreReservationRepository.save(chambreReservation);
         }
 
-        reservation.setStatus(ReservationStatus.Terminee);
+        reservation.setStatus(ReservationStatus.TERMINEE);
         reservationRepository.save(reservation);
 
     }
@@ -108,7 +108,7 @@ public class ChambreReservationServiceImpl implements ChambreReservationService 
         Reservation reservation = reservationRepository.findById(idReservation)
                 .orElseThrow(() -> new RuntimeException(RSVNOTFOUND + idReservation));
 
-        if (reservation.getStatus() == ReservationStatus.En_Attente) {
+        if (reservation.getStatus() == ReservationStatus.EN_ATTENTE) {
 
             chambreReservation.setStatut(ChambreStatut.RESERVED);
             chambreReservation.setReservation(reservation);

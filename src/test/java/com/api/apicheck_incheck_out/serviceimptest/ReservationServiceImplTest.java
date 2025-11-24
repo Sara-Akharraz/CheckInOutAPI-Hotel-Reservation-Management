@@ -64,8 +64,8 @@ class ReservationServiceImplTest {
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
         when(chambreReservationRepository.findById(2L)).thenReturn(Optional.of(cr));
         when(reservationRepository.save(any())).thenReturn(reservation);
-        Reservation result = reservationService.updateReservationStatus(1L, ReservationStatus.Confirmee);
-        assertEquals(ReservationStatus.Confirmee, result.getStatus());
+        Reservation result = reservationService.updateReservationStatus(1L, ReservationStatus.CONFIRMEE);
+        assertEquals(ReservationStatus.CONFIRMEE, result.getStatus());
     }
 
     @Test
@@ -101,9 +101,9 @@ class ReservationServiceImplTest {
         reservation.setId(1L);
         reservation.setDateDebut(LocalDate.now());
         reservation.setDateFin(LocalDate.now().plusDays(1));
-        reservation.setStatus(ReservationStatus.Confirmee);
+        reservation.setStatus(ReservationStatus.CONFIRMEE);
         when(reservationRepository.findAll()).thenReturn(List.of(reservation));
-        List<Reservation> result = reservationService.searchReservations("sara", LocalDate.now(), LocalDate.now().plusDays(1), ReservationStatus.Confirmee);
+        List<Reservation> result = reservationService.searchReservations("sara", LocalDate.now(), LocalDate.now().plusDays(1), ReservationStatus.CONFIRMEE);
         assertEquals(1, result.size());
     }
 

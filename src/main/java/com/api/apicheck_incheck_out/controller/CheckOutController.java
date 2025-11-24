@@ -13,6 +13,7 @@ import com.api.apicheck_incheck_out.service.ReservationServicesService;
 import com.api.apicheck_incheck_out.stripe.StripeResponse;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDate;
 import java.util.List;
 
-
+@Slf4j
 @CrossOrigin("*")
 @AllArgsConstructor
 @RestController
@@ -60,15 +61,15 @@ public class CheckOutController {
     @GetMapping("/reservation/{idReservation}")
     public ResponseEntity<ApiResponse<CheckOutDTO>> getCheckOutByReservation(@PathVariable Long idReservation) {
         try {
-            System.out.println("===> Recherche Check-out pour réservation ID: " + idReservation);
+            log.debug("===> Recherche Check-out pour réservation ID: " + idReservation);
             CheckOut checkOut = checkOutService.getCheckOutByReservation(idReservation);
             if (checkOut != null) {
                 CheckOutDTO checkOutDTO = checkOutMapper.toDTO(checkOut);
                 return ResponseEntity.ok(new ApiResponse<>(true,"Check-out trouvé.",checkOutDTO));
             } else {
-                System.out.println("===> checkOut is null, checking reservation existence...");
+                log.debug("===> checkOut is null, checking reservation existence...");
                 boolean exists = reservationService.existsById(idReservation);
-                System.out.println("===> Reservation exists? " + exists);
+                log.debug("===> Reservation exists? " + exists);
                 if (reservationService.existsById(idReservation)) {
                     return ResponseEntity.ok(new ApiResponse<>(false,"Check-out non encore effectué.",null));
                 } else {
@@ -122,12 +123,12 @@ public class CheckOutController {
 
     @PostMapping("/validate-payment/{id_checkout}")
     public void handlePaymentSuccess(@PathVariable("id_checkout") Long id) {
-        System.out.println("Validation paiement check-out pour id : " + id);
+        log.debug("Validation paiement check-out pour id : " + id);
         try {
             checkOutService.handlePaymentSuccess(id);
-            System.out.println("Validation réussie pour check-out id: " + id);
+            log.info("Validation réussie pour check-out id: " + id);
         } catch (Exception e) {
-            System.err.println("Erreur validation paiement: " + e.getMessage());
+            log.error("Erreur validation paiement: " + e.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
@@ -146,7 +147,7 @@ public class CheckOutController {
                 .orElseThrow(() -> new RuntimeException("Réservation introuvable avec ID : " + reservationId));
         List<ReservationServices> reservationsServicesSejour = reservationServicesService.getServicesByPhase(
                 reservation.getId(),
-                PhaseAjoutService.sejour
+                PhaseAjoutService.SEJOUR
         );
         List<Services> services = reservationsServicesSejour
                 .stream()

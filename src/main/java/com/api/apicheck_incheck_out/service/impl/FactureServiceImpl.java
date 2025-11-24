@@ -34,8 +34,8 @@ public class FactureServiceImpl implements FactureService {
 
     private final ReservationServiceRepository reservationServiceRepository;
 
-    private static final double tva = 0.2;
-    private static final double tax = 10;
+    private static final double TVA = 0.2;
+    private static final double TAX = 10;
 
     @Value("${paypal.client.id}")
     private String clientId;
@@ -60,12 +60,12 @@ public class FactureServiceImpl implements FactureService {
 
         Facture facture = new Facture();
         facture.setCheckInMontant(montantCheckIn);
-        facture.setTax(tax);
-        facture.setStatus(PaiementStatus.en_attente);
-        facture.setType(FactureType.Check_In);
+        facture.setTax(TAX);
+        facture.setStatus(PaiementStatus.EN_ATTENTE);
+        facture.setType(FactureType.CHECK_IN);
         facture.setReservation(reservation);
 
-            facture.setStatus(PaiementStatus.paye);
+            facture.setStatus(PaiementStatus.PAYE);
             factureRepository.save(facture);
             reservation.getFactureList().add(facture);
             reservationRepository.save(reservation);
@@ -81,8 +81,8 @@ public class FactureServiceImpl implements FactureService {
                 .toList()) {
             montantcheckIn += chambre.getPrix();
         }
-        double montantTotal = montantcheckIn * duree * (1 + tva) + tax;
-        List<ReservationServices> servicesCheckin = reservationServiceRepository.findByReservationAndPhase(reservation.getId(), PhaseAjoutService.check_in);
+        double montantTotal = montantcheckIn * duree * (1 + TVA) + TAX;
+        List<ReservationServices> servicesCheckin = reservationServiceRepository.findByReservationAndPhase(reservation.getId(), PhaseAjoutService.CHECK_IN);
 
         for (ReservationServices service : servicesCheckin) {
             montantTotal += service.getService().getPrix();
@@ -148,9 +148,9 @@ public class FactureServiceImpl implements FactureService {
 
         Facture facture = new Facture();
         facture.setCheckInMontant(montantCheckIn);
-        facture.setTax(tax);
-        facture.setStatus(PaiementStatus.en_attente);
-        facture.setType(FactureType.Check_In);
+        facture.setTax(TAX);
+        facture.setStatus(PaiementStatus.EN_ATTENTE);
+        facture.setType(FactureType.CHECK_IN);
         facture.setReservation(reservation);
 
 
@@ -163,13 +163,13 @@ public class FactureServiceImpl implements FactureService {
 
 
         if (paymentStatus) {
-            facture.setStatus(PaiementStatus.paye);
+            facture.setStatus(PaiementStatus.PAYE);
             factureRepository.save(facture);
 
             reservation.getFactureList().add(facture);
 
             for (ReservationServices service : reservation.getServiceList()) {
-                service.setPaiementStatus(PaiementStatus.paye);
+                service.setPaiementStatus(PaiementStatus.PAYE);
                 reservationServiceRepository.save(service);
             }
 
@@ -192,29 +192,6 @@ public class FactureServiceImpl implements FactureService {
         }
     }
 
-//        public Boolean validerPaiementStripe (PaiementRequestDTO paiementRequest){
-//            String cardNumber = paiementRequest.getCardNumber().replaceAll("\\s", "");
-//
-//            switch (cardNumber) {
-//                case "4242424242424242":
-//                    System.out.println("Paiement réussi");
-//                    return true;
-//                case "4000000000000069":
-//                    throw new RuntimeException("Échec du paiement, carte expirée");
-//                case "4000000000009995":
-//                    throw new RuntimeException("Échec du paiement, fonds insuffisants");
-//                case "4000000000000002":
-//                    throw new RuntimeException("Échec du paiement, carte signalée pour fraude");
-//                case "4000000000000044":
-//                    throw new RuntimeException("Échec du paiement, code postal invalide");
-//                case "4000000000000036":
-//                    throw new RuntimeException("Échec du paiement, erreur de réseau");
-//                default:
-//                    throw new RuntimeException("Paiement échoué, numéro de carte invalide");
-//            }
-//        }
-
-
     @Override
     public void payerFactureCheckInCache(Reservation reservation) {
 
@@ -225,9 +202,9 @@ public class FactureServiceImpl implements FactureService {
 
         Facture facture = new Facture();
         facture.setCheckInMontant(montantCheckIn);
-        facture.setTax(tax);
-        facture.setStatus(PaiementStatus.paye);
-        facture.setType(FactureType.Check_In);
+        facture.setTax(TAX);
+        facture.setStatus(PaiementStatus.PAYE);
+        facture.setType(FactureType.CHECK_IN);
         facture.setReservation(reservation);
 
             factureRepository.save(facture);
@@ -235,10 +212,10 @@ public class FactureServiceImpl implements FactureService {
             reservation.getFactureList().add(facture);
 
             for (ReservationServices service : reservation.getServiceList()) {
-                service.setPaiementStatus(PaiementStatus.paye);
+                service.setPaiementStatus(PaiementStatus.PAYE);
                 reservationServiceRepository.save(service);
             }
-        reservation.setStatus(ReservationStatus.Confirmee);
+        reservation.setStatus(ReservationStatus.CONFIRMEE);
             reservationRepository.save(reservation);
         }
 
@@ -246,8 +223,8 @@ public class FactureServiceImpl implements FactureService {
     public Facture validerPaiementCheckOut(Reservation reservation, double total) {
         try {
             Facture facture = Facture.builder()
-                    .type(FactureType.Check_Out)
-                    .status(PaiementStatus.paye)
+                    .type(FactureType.CHECK_OUT)
+                    .status(PaiementStatus.PAYE)
                     .checkOutMontant(total)
                     .reservation(reservation)
                     .build();

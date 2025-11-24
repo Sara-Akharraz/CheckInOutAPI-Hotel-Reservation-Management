@@ -11,12 +11,13 @@ import com.api.apicheck_incheck_out.mapper.ReservationMapper;
 import com.api.apicheck_incheck_out.repository.*;
 import com.api.apicheck_incheck_out.service.ReservationService;
 import jakarta.persistence.EntityExistsException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class ReservationServiceImpl implements ReservationService {
     private final ReservationRepository reservationRepository;
@@ -52,7 +53,7 @@ public class ReservationServiceImpl implements ReservationService {
             throw new EntityExistsException("Une réservation existe déjà pour ces chambres avec les mêmes dates.");
         }
 
-        reservation.setStatus(ReservationStatus.En_Attente);
+        reservation.setStatus(ReservationStatus.EN_ATTENTE);
         Reservation savedReservation = reservationRepository.save(reservation);
 
         for (Long chambreId : chambreIds) {
@@ -79,7 +80,7 @@ public class ReservationServiceImpl implements ReservationService {
         if (prevReservation.isPresent()) {
             Reservation reservation = prevReservation.get();
             reservation.setStatus(status);
-            if (status == ReservationStatus.Confirmee) {
+            if (status == ReservationStatus.CONFIRMEE) {
                 List<Long> chambreIds = reservation.getChambreReservations().stream()
                         .map(ChambreReservation::getId)
                         .toList();
@@ -120,7 +121,7 @@ public class ReservationServiceImpl implements ReservationService {
 
     public List<Reservation> getReservationsByUserId(Long userId) {
         List<Reservation> reservations = reservationRepository.findByUserId(userId);
-        System.out.println("Réservations trouvées : " + reservations);  // Debug
+        log.debug("Réservations trouvées : " + reservations);  // Debug
         return reservations;
     }
 

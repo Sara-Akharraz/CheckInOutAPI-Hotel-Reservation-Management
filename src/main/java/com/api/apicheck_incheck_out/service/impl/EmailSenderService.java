@@ -1,10 +1,11 @@
 package com.api.apicheck_incheck_out.service.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
-
+@Slf4j
 @Service
 public class EmailSenderService {
 
@@ -26,6 +27,6 @@ public class EmailSenderService {
         message.setText(body);
 
         mailSender.send(message);
-        System.out.println("Mail Sent Successfully to " + to);
+        log.info("Mail Sent Successfully to " + to);
     }
 }

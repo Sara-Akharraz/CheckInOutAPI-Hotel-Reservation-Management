@@ -52,8 +52,8 @@ public class ReservationServicesServiceImpl implements ReservationServicesServic
             ReservationServices resService = new ReservationServices();
             resService.setReservation(reservation);
             resService.setService(service);
-            resService.setPhaseAjoutService(PhaseAjoutService.check_in);
-            resService.setPaiementStatus(PaiementStatus.en_attente);
+            resService.setPhaseAjoutService(PhaseAjoutService.CHECK_IN);
+            resService.setPaiementStatus(PaiementStatus.EN_ATTENTE);
 
             reservationServiceRepository.save(resService);
             addedServices.add(resService);
@@ -80,8 +80,8 @@ public class ReservationServicesServiceImpl implements ReservationServicesServic
                 ReservationServices reservationService = new ReservationServices();
                 reservationService.setReservation(reservation);
                 reservationService.setService(service);
-                reservationService.setPaiementStatus(PaiementStatus.en_attente);
-                reservationService.setPhaseAjoutService(PhaseAjoutService.sejour);
+                reservationService.setPaiementStatus(PaiementStatus.EN_ATTENTE);
+                reservationService.setPhaseAjoutService(PhaseAjoutService.SEJOUR);
 
                 newReservationServices.add(reservationService);
 

@@ -77,7 +77,7 @@ public ResponseEntity<byte[]> afficherFactureDansNavigateur(@PathVariable Long f
     }
     List<ReservationServices> reservationsServicesSejour = reservationServicesService.getServicesByPhase(
             reservation.getId(),
-            PhaseAjoutService.sejour
+            PhaseAjoutService.SEJOUR
     );
     List<Services> services = reservationsServicesSejour
             .stream()
@@ -85,7 +85,7 @@ public ResponseEntity<byte[]> afficherFactureDansNavigateur(@PathVariable Long f
             .toList();
 
     byte[] pdfBytes;
-    if(facture.getType().equals(FactureType.Check_In)){
+    if(facture.getType().equals(FactureType.CHECK_IN)){
          pdfBytes = FacturePDF.gerercheckinFacturePDF(reservation);
 
     }else{
@@ -101,25 +101,26 @@ public ResponseEntity<byte[]> afficherFactureDansNavigateur(@PathVariable Long f
 
     return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
 }
+    private double parseAmount(Object amountObj) throws IllegalArgumentException {
+        if (amountObj == null) {
+            throw new IllegalArgumentException("Le montant est requis.");
+        }
+        double amount;
+        try {
+            amount = Double.parseDouble(amountObj.toString());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Montant invalide.");
+        }
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Le montant doit être supérieur à zéro.");
+        }
+        return amount;
+    }
     @PostMapping("/create-intent")
     public ResponseEntity<Map<String, String>> createPaymentIntent(@RequestBody Map<String, Object> request) {
         try {
 
-            Object amountObj = request.get("amount");
-            if (amountObj == null) {
-                return ResponseEntity.badRequest().body(Map.of(ERROR, "Le montant est requis."));
-            }
-
-            double amount;
-            try {
-                amount = Double.parseDouble(amountObj.toString());
-            } catch (NumberFormatException e) {
-                return ResponseEntity.badRequest().body(Map.of(ERROR, "Montant invalide."));
-            }
-
-            if (amount <= 0) {
-                return ResponseEntity.badRequest().body(Map.of(ERROR, "Le montant doit être supérieur à zéro."));
-            }
+            double amount = parseAmount(request.get("amount"));
 
             // Création du PaymentIntent
             PaymentIntent paymentIntent = stripeService.createPaymentIntent(amount);

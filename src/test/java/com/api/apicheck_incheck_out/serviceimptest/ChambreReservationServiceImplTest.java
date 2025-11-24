@@ -68,7 +68,7 @@ class ChambreReservationServiceImplTest {
         Long reservationId = 1L;
 
         Reservation reservation = new Reservation();
-        reservation.setStatus(ReservationStatus.Confirmee);
+        reservation.setStatus(ReservationStatus.CONFIRMEE);
 
         ChambreReservation cr = new ChambreReservation();
         cr.setStatut(ChambreStatut.DISPONIBLE);
@@ -90,7 +90,7 @@ class ChambreReservationServiceImplTest {
         Long reservationId = 1L;
 
         Reservation reservation = new Reservation();
-        reservation.setStatus(ReservationStatus.En_Attente);
+        reservation.setStatus(ReservationStatus.EN_ATTENTE);
 
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
 

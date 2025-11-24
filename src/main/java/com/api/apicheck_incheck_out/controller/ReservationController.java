@@ -10,6 +10,7 @@ import com.api.apicheck_incheck_out.enums.ReservationStatus;
 import com.api.apicheck_incheck_out.mapper.ReservationMapper;
 import com.api.apicheck_incheck_out.mapper.UserMapper;
 import com.api.apicheck_incheck_out.service.ReservationService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-
+@Slf4j
 @RestController
 @RequestMapping("/api/reservation")
 public class ReservationController {
@@ -38,8 +39,8 @@ public class ReservationController {
         ReservationDTO reservationDTO = reservationRequestDTO.getReservationDTO();
         List<Long> chambresId = reservationRequestDTO.getChambresId();
 
-        System.out.println("Données reçues : " + reservationDTO);
-        System.out.println("Données reçues chambres : " + chambresId);
+        log.info("Données reçues : " + reservationDTO);
+        log.info("Données reçues chambres : " + chambresId);
 
         Reservation reservation = reservationMapper.toEntity(reservationDTO);
         Reservation newReservation = reservationService.addReservation(reservation, chambresId);

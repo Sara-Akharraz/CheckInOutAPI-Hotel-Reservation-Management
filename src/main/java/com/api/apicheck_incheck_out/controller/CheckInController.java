@@ -13,6 +13,8 @@ import com.api.apicheck_incheck_out.enums.DocumentScanType;
 import com.api.apicheck_incheck_out.mapper.CheckInMapper;
 import com.api.apicheck_incheck_out.service.CheckInService;
 import com.api.apicheck_incheck_out.service.ReservationService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.EnumUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,7 +26,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
 
-
+@Slf4j
 @RestController
 @RequestMapping("/api/check_in")
 public class CheckInController {
@@ -94,15 +96,12 @@ public class CheckInController {
             }
 
             // Type de document
-            DocumentScanType documentType;
-            try {
-                documentType = DocumentScanType.valueOf(type.toUpperCase());
-            } catch (IllegalArgumentException e) {
+            if (!EnumUtils.isValidEnum(DocumentScanType.class, type.toUpperCase())) {
                 response.put(SUCCESS, false);
                 response.put(ERROR, "Type de document invalide.");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
             }
-
+            DocumentScanType documentType = DocumentScanType.valueOf(type.toUpperCase());
 
             DocumentScanDTO doc = new DocumentScanDTO();
             doc.setNom(nom);
@@ -152,32 +151,32 @@ public class CheckInController {
     public ResponseEntity<String> validerCheckIn(@RequestParam Long reservationId) {
         try {
 
-            System.out.println("Début de la validation du check-in pour la réservation ID: " + reservationId);
+            log.info("Début de la validation du check-in pour la réservation ID: " + reservationId);
 
 
             Reservation reservation = reservationService.getReservationById(reservationId);
             if (reservation == null) {
-                System.out.println("Réservation non trouvée pour l'ID: " + reservationId);
+                log.debug("Réservation non trouvée pour l'ID: " + reservationId);
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Réservation non trouvée.");
             }
 
 
-            System.out.println("Réservation trouvée : " + reservation);
+            log.debug("Réservation trouvée : " + reservation);
 
 
             boolean result = checkInService.validerCheckIn(reservation);
 
 
             if (result) {
-                System.out.println("Check-in validé avec succès pour la réservation ID: " + reservationId);
+                log.info("Check-in validé avec succès pour la réservation ID: " + reservationId);
                 return ResponseEntity.ok("Check-in validé avec succès.");
             } else {
-                System.out.println("Échec de la validation du check-in pour la réservation ID: " + reservationId);
+                log.error("Échec de la validation du check-in pour la réservation ID: " + reservationId);
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Échec de validation du check-in.");
             }
         } catch (Exception e) {
 
-            System.out.println("Erreur lors de la validation du check-in pour la réservation ID: " + reservationId);
+            log.error("Erreur lors de la validation du check-in pour la réservation ID: " + reservationId);
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Une erreur interne s'est produite.");
         }
@@ -186,14 +185,14 @@ public class CheckInController {
     @GetMapping("/reservation/{idReservation}")
     public ResponseEntity<ApiResponse<CheckInDTO>> getCheckInByReservation(@PathVariable Long idReservation) {
         try {
-            System.out.println("===> Recherche Check-in pour réservation ID: " + idReservation);
+            log.info("===> Recherche Check-in pour réservation ID: " + idReservation);
             CheckIn checkIn = checkInService.getCheckInByReservation(idReservation);
             if (checkIn != null) {
                 return ResponseEntity.ok(new ApiResponse<>(true, "Check-in trouvé.", checkInMapper.toDTO(checkIn)));
             } else {
-                System.out.println("===> checkIn is null, checking reservation existence...");
+                log.debug("===> checkIn is null, checking reservation existence...");
                 boolean exists = reservationService.existsById(idReservation);
-                System.out.println("===> Reservation exists? " + exists);
+                log.debug("===> Reservation exists? " + exists);
                 if (reservationService.existsById(idReservation)) {
                     return ResponseEntity.ok(new ApiResponse<>(true,"Check-in non encore effectué.",null));
                 } else {

@@ -82,7 +82,7 @@ public class CheckInServiceImpl implements CheckInService {
         checkIn.setDateCheckIn(LocalDate.now());
         checkIn.setReservation(reservation);
         checkIn.setDocumentScan(documentScan);
-        checkIn.setStatus(CheckInStatus.En_Attente);
+        checkIn.setStatus(CheckInStatus.EN_ATTENTE);
         documentScan.setCheckIn(checkIn);
 
         checkInRepository.save(checkIn);
@@ -108,7 +108,7 @@ public class CheckInServiceImpl implements CheckInService {
         if(checkIn.getDocumentScan()==null){
             throw new DocumentNotScannedException("Le scan du document n'a pas été effectué.");
         }
-        if(checkIn.getStatus()!=CheckInStatus.En_Attente){
+        if(checkIn.getStatus()!=CheckInStatus.EN_ATTENTE){
             throw new InvalidCheckInStatusException("Le check-in n'est pas en attente.");
 
         }
@@ -117,10 +117,10 @@ public class CheckInServiceImpl implements CheckInService {
         factureService.payerFactureCheckIn(reservation);
 
 
-        checkIn.setStatus(CheckInStatus.Validé);
+        checkIn.setStatus(CheckInStatus.VALIDE);
         checkInRepository.save(checkIn);
 
-        reservation.setStatus(ReservationStatus.Confirmee);
+        reservation.setStatus(ReservationStatus.CONFIRMEE);
         reservationRepository.save(reservation);
 
         notificationService.notifier(reservation.getUser().getId(),"Réservation Confirmée ,Numéro de reservation :"+reservation.getId());
@@ -142,18 +142,17 @@ public class CheckInServiceImpl implements CheckInService {
 
         for(ReservationServices service:reservationServices){
             if(service.getReservation().getId().equals(reservation.getId())){
-                service.setPaiementStatus(PaiementStatus.paye);
+                service.setPaiementStatus(PaiementStatus.PAYE);
             }
         }
         List<User> admins = userService.getAdmins();
-        admins.stream().forEach(admin -> {
-            notificationService.notifier(admin.getId(),"Check-In validé pour la réservation numméro ; "+ reservation.getId());
-
-        });
+        admins.stream().forEach(admin ->
+            notificationService.notifier(admin.getId(),"Check-In validé pour la réservation numméro ; "+ reservation.getId())
+        );
         List<UserDto> receps = userService.getReceptionists();
-        receps.stream().forEach(recep -> {
-            notificationService.notifier(recep.getId(),"Check-In validé pour la réservation numméro ; "+ reservation.getId());
-        });
+        receps.stream().forEach(recep ->
+            notificationService.notifier(recep.getId(),"Check-In validé pour la réservation numméro ; "+ reservation.getId())
+        );
         reservationServiceRepository.saveAll(reservationServices);
 
         return true;
@@ -198,19 +197,19 @@ public class CheckInServiceImpl implements CheckInService {
 
         factureService.payerFactureCheckInCache(reservation);
 
-        checkIn.setStatus(CheckInStatus.Validé);
+        checkIn.setStatus(CheckInStatus.VALIDE);
 
         checkInRepository.save(checkIn);
         notificationService.notifier(reservation.getUser().getId(),"Réservation Confirmée ,Numéro de reservation :"+reservation.getId());
         List<User> admins = userService.getAdmins();
-        admins.stream().forEach(admin -> {
-            notificationService.notifier(admin.getId(),"Check-In validé pour la réservation numéro ; "+ reservation.getId());
+        admins.stream().forEach(admin ->
+            notificationService.notifier(admin.getId(),"Check-In validé pour la réservation numéro ; "+ reservation.getId())
 
-        });
+        );
         List<UserDto> receps = userService.getReceptionists();
-        receps.stream().forEach(recep -> {
-            notificationService.notifier(recep.getId(),"Check-In validé pour la réservation numéro ; "+ reservation.getId());
-        });
+        receps.stream().forEach(recep ->
+            notificationService.notifier(recep.getId(),"Check-In validé pour la réservation numéro ; "+ reservation.getId())
+        );
 
     }
 
@@ -226,22 +225,22 @@ public class CheckInServiceImpl implements CheckInService {
         checkIn.setReservation(reservation);
         checkIn.setDocumentScan(documentScan);
         checkIn.setDateCheckIn(LocalDate.now());
-        checkIn.setStatus(CheckInStatus.Validé);
+        checkIn.setStatus(CheckInStatus.VALIDE);
 
         checkInRepository.save(checkIn);
 
-        reservation.setStatus(ReservationStatus.Confirmee);
+        reservation.setStatus(ReservationStatus.CONFIRMEE);
 
         reservationRepository.save(reservation);
         List<User> admins = userService.getAdmins();
-        admins.stream().forEach(admin -> {
-            notificationService.notifier(admin.getId(),"Check-In ajouté pour la réservation numéro ; "+ reservation.getId());
+        admins.stream().forEach(admin ->
+            notificationService.notifier(admin.getId(),"Check-In ajouté pour la réservation numéro ; "+ reservation.getId())
 
-        });
+        );
         List<UserDto> receps = userService.getReceptionists();
-        receps.stream().forEach(recep -> {
-            notificationService.notifier(recep.getId(),"Check-In ajouté pour la réservation numéro ; "+ reservation.getId());
-        });
+        receps.stream().forEach(recep ->
+            notificationService.notifier(recep.getId(),"Check-In ajouté pour la réservation numéro ; "+ reservation.getId())
+        );
 
     }
 

@@ -7,7 +7,6 @@ import com.api.apicheck_incheck_out.exceptionhandling.UserNotFoundException;
 import com.api.apicheck_incheck_out.repository.NotificationRepository;
 import com.api.apicheck_incheck_out.repository.UserRepository;
 import com.api.apicheck_incheck_out.service.NotificationService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;

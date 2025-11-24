@@ -43,7 +43,7 @@ public class ReservationServicesImplTest {
         reservationServices=new ReservationServices();
         reservationServices.setId(1L);
         reservationServices.setReservation(reservation);
-        reservationServices.setPhaseAjoutService(PhaseAjoutService.check_in);
+        reservationServices.setPhaseAjoutService(PhaseAjoutService.CHECK_IN);
     }
 //    @Test
 //    void TestgetAllServicesByReservation(){
@@ -57,7 +57,7 @@ public class ReservationServicesImplTest {
 //    }
     @Test
     void TestgetServicesByPhase(){
-        PhaseAjoutService phase=PhaseAjoutService.check_in;
+        PhaseAjoutService phase=PhaseAjoutService.CHECK_IN;
         List<ReservationServices> serviceList= Arrays.asList(reservationServices);
         when(reservationServiceRepository.findByReservationAndPhase(1L,phase)).thenReturn(serviceList);
 

@@ -55,7 +55,7 @@ public class ChambreServiceImplTest {
         Chambre updated=new Chambre();
         updated.setNom("Chambre 102");
         updated.setPrix(200.0);
-        updated.setType(ChambreType.Double);
+        updated.setType(ChambreType.DOUBLE);
 
 
         when(chambreRepository.findById(1L)).thenReturn(Optional.of(chambre));

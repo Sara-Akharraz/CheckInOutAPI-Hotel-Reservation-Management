@@ -27,7 +27,7 @@ public class FacturePDF {
         }
 
         Optional<Facture> factureCheckin = factures.stream()
-                .filter(f -> f.getType() == FactureType.Check_In)
+                .filter(f -> f.getType() == FactureType.CHECK_IN)
                 .findFirst();
 
         if (!factureCheckin.isPresent()) {
@@ -130,7 +130,7 @@ public class FacturePDF {
             serviceTable.addCell(new Phrase(PRIX+"("+MAD+")", bodyFont));
 
             reservation.getServiceList().forEach(service -> {
-                if (service.getPhaseAjoutService().equals(PhaseAjoutService.check_in)) {
+                if (service.getPhaseAjoutService().equals(PhaseAjoutService.CHECK_IN)) {
                     serviceTable.addCell(new Phrase("  - " + service.getService().getNom(), bodyFont));
                     serviceTable.addCell(new Phrase(String.valueOf(service.getService().getPrix()), bodyFont));
                 }
@@ -154,7 +154,7 @@ public class FacturePDF {
         }
 
         Optional<Facture> factureCheckOut = factures.stream()
-                .filter(f -> f.getType() == FactureType.Check_Out)
+                .filter(f -> f.getType() == FactureType.CHECK_OUT)
                 .findFirst();
 
         if (!factureCheckOut.isPresent()) {
