@@ -1,6 +1,7 @@
 package com.api.apicheck_incheck_out.serviceimptest;
 
 import com.api.apicheck_incheck_out.entity.Services;
+import com.api.apicheck_incheck_out.exceptionhandling.ServiceNotFoundException;
 import com.api.apicheck_incheck_out.repository.ServiceRepository;
 import com.api.apicheck_incheck_out.service.impl.ServicesServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,10 +16,11 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class ServicesImplTest {
+class ServicesImplTest {
     @Mock
     private ServiceRepository serviceRepository;
     @InjectMocks
@@ -60,6 +62,20 @@ public class ServicesImplTest {
         verify(serviceRepository,times(1)).save(any());
     }
     @Test
+    void TestupdateServiceThrowsException(){
+        Services updated=new Services();
+        updated.setNom("WiFi");
+        updated.setDescription("Internet ultra rapide");
+        updated.setPrix(55.0);
+
+        when(serviceRepository.findById(2L)).thenReturn(Optional.empty());
+        ServiceNotFoundException ex=assertThrows(ServiceNotFoundException.class,()->servicesService.updateService(2L,updated));
+        assertEquals("Service non trouvé avec l'id 2",ex.getMessage());
+
+        verify(serviceRepository,times(1)).findById(2L);
+        verify(serviceRepository,never()).save(any(Services.class));
+    }
+    @Test
     void TestdeleteService(){
         when(serviceRepository.findById(1L)).thenReturn(Optional.of(service));
         doNothing().when(serviceRepository).deleteById(1L);
@@ -68,6 +84,16 @@ public class ServicesImplTest {
 
         assertEquals(service,result);
         verify(serviceRepository,times(1)).deleteById(1L);
+    }
+    @Test
+    void TestdeleteServiceThrowsException(){
+        when(serviceRepository.findById(2L)).thenReturn(Optional.empty());
+
+        ServiceNotFoundException ex=assertThrows(ServiceNotFoundException.class,()->servicesService.deleteService(2L));
+
+        assertEquals("Service non trouvé avec l'id 2",ex.getMessage());
+        verify(serviceRepository,times(1)).findById(2L);
+        verify(serviceRepository,never()).deleteById(2L);
     }
     @Test
     void TestgetAllServices(){
