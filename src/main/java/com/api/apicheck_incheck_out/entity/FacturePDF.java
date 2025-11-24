@@ -8,16 +8,32 @@ import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-
+@Slf4j
 public class FacturePDF {
     private static final String MAD = "MAD";
     private static final String PRIX = "Prix";
     private FacturePDF(){
         throw new UnsupportedOperationException("Cette classe ne doit pas étre instanciée");
+    }
+    private static Image loadLogo() throws IOException, BadElementException {
+        return Image.getInstance("src/main/resources/logo.png");
+    }
+
+    public static void generateDocument(Document document) {
+        try {
+            Image logo = loadLogo();
+            logo.scaleAbsolute(30f, 30f);
+            logo.setAlignment(Element.ALIGN_CENTER);
+            document.add(logo);
+        } catch (Exception e) {
+            log.error("Erreur lors du chargement de l'image du logo: {}", e.getMessage());
+        }
     }
     public static byte[] gerercheckinFacturePDF(Reservation reservation) {
         List<Facture> factures = reservation.getFactureList();
@@ -51,16 +67,7 @@ public class FacturePDF {
             document.add(title);
             document.add(Chunk.NEWLINE);
 
-            // Tentative de chargement du logo
-            try {
-                Image logo = Image.getInstance("src/main/resources/logo.png"); // Absolute or classpath
-                logo.scaleAbsolute(30f, 30f);
-                logo.setAlignment(Element.ALIGN_CENTER);
-                document.add(logo);
-            } catch (Exception e) {
-                System.out.println("Erreur lors du chargement de l'image du logo: " + e.getMessage());
-            }
-
+            generateDocument(document);
             // Infos hôtel
             Paragraph hotelInfo = new Paragraph();
             hotelInfo.setAlignment(Element.ALIGN_CENTER);
@@ -178,15 +185,7 @@ public class FacturePDF {
             document.add(title);
             document.add(Chunk.NEWLINE);
 
-            // Tentative de chargement du logo
-            try {
-                Image logo = Image.getInstance("src/main/resources/logo.png"); // Absolute or classpath
-                logo.scaleAbsolute(30f, 30f);
-                logo.setAlignment(Element.ALIGN_CENTER);
-                document.add(logo);
-            } catch (Exception e) {
-                System.out.println("Erreur lors du chargement de l'image du logo: " + e.getMessage());
-            }
+            generateDocument(document);
 
             // Infos hôtel
             Paragraph hotelInfo = new Paragraph();
