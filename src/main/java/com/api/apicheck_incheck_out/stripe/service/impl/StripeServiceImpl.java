@@ -10,13 +10,14 @@ import com.stripe.model.checkout.Session;
 import com.stripe.param.PaymentIntentCreateParams;
 import com.stripe.param.checkout.SessionCreateParams;
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+@Slf4j
 @Service
 public class StripeServiceImpl implements StripeService {
 
@@ -25,7 +26,7 @@ public class StripeServiceImpl implements StripeService {
 
     @PostConstruct
     public void init() {
-        System.out.println("Stripe API Key configured: " + stripeApiKey);
+        log.debug("Stripe API Key configured: " + stripeApiKey);
         Stripe.apiKey = stripeApiKey;
     }
 
@@ -44,7 +45,7 @@ public class StripeServiceImpl implements StripeService {
             PaymentIntent paymentIntent = PaymentIntent.create(params);
 
 
-            System.out.println("Status du paiement StripeMock: " + paymentIntent.getStatus());
+            log.info("Status du paiement StripeMock: " + paymentIntent.getStatus());
 
             return "succeeded".equals(paymentIntent.getStatus()) || "requires_payment_method".equals(paymentIntent.getStatus());
         } catch(StripeException e) {
@@ -88,7 +89,7 @@ public class StripeServiceImpl implements StripeService {
         try {
             session = Session.create(params);
         } catch (StripeException e) {
-            System.err.println("Error creating session: " + e.getMessage());
+            log.error("Error creating session: " + e.getMessage());
             e.printStackTrace();
             return StripeResponse.builder()
                     .status("ERROR")
