@@ -6,9 +6,7 @@ import com.api.apicheck_incheck_out.enums.Role;
 import com.api.apicheck_incheck_out.mapper.UserMapper;
 import com.api.apicheck_incheck_out.repository.UserRepository;
 import com.api.apicheck_incheck_out.security.JwtService;
-import com.api.apicheck_incheck_out.service.UserService;
 import com.api.apicheck_incheck_out.service.impl.UserServiceImpl;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,9 +15,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,8 +39,6 @@ public class UserServiceImplTest {
     UserMapper userMapper;
     @Mock
     private JwtService jwtService;
-    @Mock
-    private PasswordEncoder encoder;
     private User user, user1, user2;
     List<User> users = new ArrayList<>();
 

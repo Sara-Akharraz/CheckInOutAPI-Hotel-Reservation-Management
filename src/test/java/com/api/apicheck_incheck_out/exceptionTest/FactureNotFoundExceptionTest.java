@@ -1,6 +1,5 @@
 package com.api.apicheck_incheck_out.exceptionTest;
 
-import com.api.apicheck_incheck_out.exceptionhandling.ChambreNotFoundException;
 import com.api.apicheck_incheck_out.exceptionhandling.FactureNotFoundException;
 import org.junit.jupiter.api.Test;
 

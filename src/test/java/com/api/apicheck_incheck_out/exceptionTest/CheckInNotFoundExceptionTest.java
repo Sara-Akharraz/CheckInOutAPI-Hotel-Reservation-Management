@@ -1,6 +1,5 @@
 package com.api.apicheck_incheck_out.exceptionTest;
 
-import com.api.apicheck_incheck_out.exceptionhandling.ChambreReservationNotFoundException;
 import com.api.apicheck_incheck_out.exceptionhandling.CheckInNotFoundException;
 import org.junit.jupiter.api.Test;
 
