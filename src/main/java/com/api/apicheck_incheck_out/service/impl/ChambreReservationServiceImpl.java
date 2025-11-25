@@ -8,6 +8,7 @@ import com.api.apicheck_incheck_out.enums.ChambreType;
 import com.api.apicheck_incheck_out.enums.ReservationStatus;
 import com.api.apicheck_incheck_out.exceptionhandling.ChambreReservationNotFoundException;
 import com.api.apicheck_incheck_out.exceptionhandling.InvalidReservationStatusException;
+import com.api.apicheck_incheck_out.exceptionhandling.ReservationNotFoundException;
 import com.api.apicheck_incheck_out.repository.ChambreRepository;
 import com.api.apicheck_incheck_out.repository.ChambreReservationRepository;
 import com.api.apicheck_incheck_out.repository.ReservationRepository;
@@ -21,7 +22,7 @@ import java.util.List;
 @Service
 public class ChambreReservationServiceImpl implements ChambreReservationService {
 
-    private static final String RSVNOTFOUND="Réservation non trouvée avec l'id";
+    private static final String RSVNOTFOUND="Réservation non trouvée avec l'id ";
 
     private final ChambreReservationRepository chambreReservationRepository;
     private final ChambreRepository chambreRepository;
@@ -56,7 +57,7 @@ public class ChambreReservationServiceImpl implements ChambreReservationService 
     public void setChambreOccupee(Long idReservation) {
 
         Reservation reservation = reservationRepository.findById(idReservation)
-                .orElseThrow(() -> new RuntimeException(RSVNOTFOUND + idReservation));
+                .orElseThrow(() -> new ReservationNotFoundException(RSVNOTFOUND + idReservation));
         if (reservation.getStatus() != ReservationStatus.CONFIRMEE) {
             throw new InvalidReservationStatusException("La réservation n'est pas confirmée, statut actuel : " + reservation.getStatus());
         }
@@ -78,7 +79,7 @@ public class ChambreReservationServiceImpl implements ChambreReservationService 
     @Override
     public void setChambreDisponible(Long idReservation) {
         Reservation reservation = reservationRepository.findById(idReservation)
-                .orElseThrow(() -> new RuntimeException(RSVNOTFOUND + idReservation));
+                .orElseThrow(() -> new ReservationNotFoundException(RSVNOTFOUND + idReservation));
 
         if (reservation.getStatus() != ReservationStatus.CONFIRMEE) {
             throw new InvalidReservationStatusException("La réservation n'est pas confirmée, statut actuel : " + reservation.getStatus());
@@ -104,9 +105,9 @@ public class ChambreReservationServiceImpl implements ChambreReservationService 
     @Override
     public void setChambreReserved(Long idChambre, Long idReservation) {
         ChambreReservation chambreReservation = chambreReservationRepository.findByReservation_IdAndChambre_Id(idReservation, idChambre)
-                .orElseThrow(() -> new RuntimeException("ChambreReservation non trouvée pour la réservation ID : " + idReservation + " et chambre ID : " + idChambre));
+                .orElseThrow(() -> new ChambreReservationNotFoundException("ChambreReservation non trouvée pour la réservation ID : " + idReservation + " et chambre ID : " + idChambre));
         Reservation reservation = reservationRepository.findById(idReservation)
-                .orElseThrow(() -> new RuntimeException(RSVNOTFOUND + idReservation));
+                .orElseThrow(() -> new ReservationNotFoundException(RSVNOTFOUND + idReservation));
 
         if (reservation.getStatus() == ReservationStatus.EN_ATTENTE) {
 

@@ -2,5 +2,5 @@ projectKey=mini_projet
 serverUrl=http://localhost:9000
 serverVersion=25.10.0.114319
 dashboardUrl=http://localhost:9000/dashboard?id=mini_projet
-ceTaskId=544e773f-1a32-4b44-bb37-b27016694344
-ceTaskUrl=http://localhost:9000/api/ce/task?id=544e773f-1a32-4b44-bb37-b27016694344
+ceTaskId=6a206956-b2b4-43ac-a5dd-35dae566d0d9
+ceTaskUrl=http://localhost:9000/api/ce/task?id=6a206956-b2b4-43ac-a5dd-35dae566d0d9
