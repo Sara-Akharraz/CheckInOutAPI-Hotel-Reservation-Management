@@ -245,7 +245,7 @@ public class UserServiceImplTest {
     }
 
     @Test
-    void verify() {
+    void verifyTest() {
         Authentication authenticationMock = mock(Authentication.class);
 
         when(authManager.authenticate(any())).thenReturn(authenticationMock);
