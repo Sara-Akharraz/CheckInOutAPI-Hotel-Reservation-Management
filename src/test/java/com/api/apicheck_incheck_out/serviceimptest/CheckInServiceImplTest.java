@@ -207,4 +207,6 @@ package com.api.apicheck_incheck_out.serviceimptest;
 //        verify(reservationRepository, times(1)).save(reservation);
 //        assertEquals(ReservationStatus.Confirmee, reservation.getStatus());
 //    }
+
 //}
+
