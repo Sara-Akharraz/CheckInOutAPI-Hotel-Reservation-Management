@@ -44,8 +44,6 @@ import static org.mockito.Mockito.when;
     @Mock
     private ReservationRepository reservationRepository;
 
-    @Mock
-    private ReservationServiceImpl reservationService;
 
     @Mock
     private CheckOutRepository checkOutRepository;
@@ -265,12 +263,6 @@ import static org.mockito.Mockito.when;
                 .sessionId("1111")
                 .sessionUrl("session-url")
                 .build();
-        CheckOutRequest checkoutRequest = CheckOutRequest.builder()
-                .idCheckQOut(1L)
-                .checkOutName("Services consommés pendant le séjour")
-                .amount((long) 180.0)
-                .build();
-
 
         when(checkOutRepository.findById(1L)).thenReturn(Optional.ofNullable(checkOut));
         when(stripeService.checkoutServices(any(CheckOutRequest.class))).thenReturn(stripeResponse);

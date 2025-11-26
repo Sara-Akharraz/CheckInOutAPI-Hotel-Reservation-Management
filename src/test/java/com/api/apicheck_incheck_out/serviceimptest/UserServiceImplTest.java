@@ -213,8 +213,6 @@ import static org.mockito.Mockito.*;
     @Test
     void updateUserTest() {
 
-        // DTO for update
-        UserDto dtoMock = new UserDto();
         dtoMock.setId(1L);
         dtoMock.setEmail("alami-salma22@gmail.com");
         dtoMock.setNom("AlamiUpdated");
