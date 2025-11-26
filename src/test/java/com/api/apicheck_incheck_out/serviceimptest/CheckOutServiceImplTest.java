@@ -36,7 +36,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class CheckOutServiceImplTest {
+ class CheckOutServiceImplTest {
 
     @InjectMocks
     private CheckOutServiceImpl checkOutService;

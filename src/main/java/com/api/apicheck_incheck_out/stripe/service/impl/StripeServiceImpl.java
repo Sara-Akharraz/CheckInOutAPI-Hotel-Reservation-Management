@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 @Slf4j
 @Service
 public class StripeServiceImpl implements StripeService {
@@ -27,7 +26,9 @@ public class StripeServiceImpl implements StripeService {
 
     @PostConstruct
     public void init() {
-        log.info("Stripe API Key configured: " + stripeApiKey);
+
+        log.debug("Stripe API Key configured: " + stripeApiKey);
+
         Stripe.apiKey = stripeApiKey;
     }
 
@@ -46,7 +47,9 @@ public class StripeServiceImpl implements StripeService {
             PaymentIntent paymentIntent = PaymentIntent.create(params);
 
 
-            log.debug("Status du paiement StripeMock: " + paymentIntent.getStatus());
+
+            log.info("Status du paiement StripeMock: " + paymentIntent.getStatus());
+
 
             return "succeeded".equals(paymentIntent.getStatus()) || "requires_payment_method".equals(paymentIntent.getStatus());
         } catch(StripeException e) {

@@ -1,4 +1,4 @@
-package com.api.apicheck_incheck_out.exceptionTest;
+package com.api.apicheck_incheck_out.exceptiontest;
 
 import com.api.apicheck_incheck_out.exceptionhandling.FactureNotFoundException;
 import org.junit.jupiter.api.Test;
@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class FactureNotFoundExceptionTest {
+ class FactureNotFoundExceptionTest {
 
 
 

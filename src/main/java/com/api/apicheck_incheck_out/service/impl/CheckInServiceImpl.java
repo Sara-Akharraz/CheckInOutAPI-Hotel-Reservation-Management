@@ -35,6 +35,8 @@ public class CheckInServiceImpl implements CheckInService {
 
     private final UserService userService;
 
+    public static final String CHECKINVALID="Check-In validé pour la réservation numéro : ";
+
     public CheckInServiceImpl(CheckInRepository checkInRepository, DocumentScanRepository documentScanRepository, FactureService factureService, NotificationService notificationService, ReservationRepository reservationRepository,ChambreReservationRepository chambreReservationRepository,ReservationServiceRepository reservationServiceRepository, UserService userService) {
         this.checkInRepository = checkInRepository;
         this.documentScanRepository = documentScanRepository;
@@ -147,11 +149,11 @@ public class CheckInServiceImpl implements CheckInService {
         }
         List<User> admins = userService.getAdmins();
         admins.stream().forEach(admin ->
-            notificationService.notifier(admin.getId(),"Check-In validé pour la réservation numméro ; "+ reservation.getId())
+            notificationService.notifier(admin.getId(),CHECKINVALID+ reservation.getId())
         );
         List<UserDto> receps = userService.getReceptionists();
         receps.stream().forEach(recep ->
-            notificationService.notifier(recep.getId(),"Check-In validé pour la réservation numméro ; "+ reservation.getId())
+            notificationService.notifier(recep.getId(),CHECKINVALID+ reservation.getId())
         );
         reservationServiceRepository.saveAll(reservationServices);
 
@@ -181,19 +183,19 @@ public class CheckInServiceImpl implements CheckInService {
     @Override
     public CheckInStatus getStatusCheckIn(Long idReservation) {
         Reservation reservation = reservationRepository.findById(idReservation)
-                .orElseThrow(() -> new EntityNotFoundException("Réservation non trouvée avec l'id : " + idReservation));
+                .orElseThrow(() -> new ReservationNotFoundException("Réservation non trouvée avec l'id : " + idReservation));
 
         CheckIn checkIn = checkInRepository.findByReservation(reservation)
-                .orElseThrow(() -> new EntityNotFoundException("Aucun check-in trouvé pour la réservation avec l'id : " + idReservation));
+                .orElseThrow(() -> new CheckInNotFoundException("Aucun check-in trouvé pour la réservation avec l'id : " + idReservation));
 
         return checkIn.getStatus();
     }
     @Override
     public void validerCheckinReception(Long idCheckin){
-        CheckIn checkIn=checkInRepository.findById(idCheckin).orElseThrow(()->new RuntimeException("check_in non effectué!"));
+        CheckIn checkIn=checkInRepository.findById(idCheckin).orElseThrow(()->new CheckInNotFoundException("check_in non effectué!"));
 
         Reservation reservation = reservationRepository.findById(checkIn.getReservation().getId())
-                .orElseThrow(() -> new RuntimeException("Reservation non trouvée"));
+                .orElseThrow(() -> new ReservationNotFoundException("Reservation non trouvée"));
 
         factureService.payerFactureCheckInCache(reservation);
 
@@ -203,12 +205,12 @@ public class CheckInServiceImpl implements CheckInService {
         notificationService.notifier(reservation.getUser().getId(),"Réservation Confirmée ,Numéro de reservation :"+reservation.getId());
         List<User> admins = userService.getAdmins();
         admins.stream().forEach(admin ->
-            notificationService.notifier(admin.getId(),"Check-In validé pour la réservation numéro ; "+ reservation.getId())
+            notificationService.notifier(admin.getId(),CHECKINVALID+ reservation.getId())
 
         );
         List<UserDto> receps = userService.getReceptionists();
         receps.stream().forEach(recep ->
-            notificationService.notifier(recep.getId(),"Check-In validé pour la réservation numéro ; "+ reservation.getId())
+            notificationService.notifier(recep.getId(),CHECKINVALID+ reservation.getId())
         );
 
     }
@@ -216,7 +218,7 @@ public class CheckInServiceImpl implements CheckInService {
     @Override
     public void ajoutercheckinReception(Long idReservation,DocumentScan documentScan){
         Reservation reservation = reservationRepository.findById(idReservation)
-                .orElseThrow(() -> new RuntimeException("Reservation non trouvée"));
+                .orElseThrow(() -> new ReservationNotFoundException("Reservation non trouvée"));
 
         documentScanRepository.save(documentScan);
         factureService.payerFactureCheckInCache(reservation);
@@ -234,12 +236,12 @@ public class CheckInServiceImpl implements CheckInService {
         reservationRepository.save(reservation);
         List<User> admins = userService.getAdmins();
         admins.stream().forEach(admin ->
-            notificationService.notifier(admin.getId(),"Check-In ajouté pour la réservation numéro ; "+ reservation.getId())
+            notificationService.notifier(admin.getId(),"Check-In ajouté pour la réservation numéro : "+ reservation.getId())
 
         );
         List<UserDto> receps = userService.getReceptionists();
         receps.stream().forEach(recep ->
-            notificationService.notifier(recep.getId(),"Check-In ajouté pour la réservation numéro ; "+ reservation.getId())
+            notificationService.notifier(recep.getId(),"Check-In ajouté pour la réservation numéro : "+ reservation.getId())
         );
 
     }

@@ -8,10 +8,8 @@ public interface FactureService {
 
 
     void payerFactureCheckIn(Reservation reservation);
-
     public double calculerMontantCheckIn(Reservation reservation);
 
-    public Boolean validerPaiementPaypal(double montant, Reservation reservation);
     public Boolean payerFactureCheckIn(PaiementRequestDTO paiementRequest);
     public boolean validerPaiementStripe (PaiementRequestDTO paiementRequest);
     public void payerFactureCheckInCache(Reservation reservation);

@@ -4,24 +4,18 @@ import com.api.apicheck_incheck_out.dto.PaiementRequestDTO;
 import com.api.apicheck_incheck_out.entity.*;
 import com.api.apicheck_incheck_out.enums.*;
 import com.api.apicheck_incheck_out.exceptionhandling.PaymentValidationException;
+import com.api.apicheck_incheck_out.exceptionhandling.ReservationNotFoundException;
 import com.api.apicheck_incheck_out.repository.FactureRepository;
 import com.api.apicheck_incheck_out.repository.ReservationRepository;
 import com.api.apicheck_incheck_out.repository.ReservationServiceRepository;
 import com.api.apicheck_incheck_out.service.FactureService;
-import com.paypal.api.payments.*;
-import com.paypal.base.rest.APIContext;
-import com.paypal.base.rest.OAuthTokenCredential;
-import com.paypal.base.rest.PayPalRESTException;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
 
 @Service
 public class FactureServiceImpl implements FactureService {
@@ -36,15 +30,6 @@ public class FactureServiceImpl implements FactureService {
 
     private static final double TVA = 0.2;
     private static final double TAX = 10;
-
-    @Value("${paypal.client.id}")
-    private String clientId;
-
-    @Value("${paypal.client.secret}")
-    private String clientSecret;
-
-    @Value("${paypal.mode}")
-    private String paypalMode;
 
     public FactureServiceImpl(FactureRepository factureRepository, ReservationRepository reservationRepository, ReservationServiceRepository reservationServiceRepository) {
         this.factureRepository = factureRepository;
@@ -90,57 +75,10 @@ public class FactureServiceImpl implements FactureService {
         return montantTotal;
     }
 
-    @Override
-    public Boolean validerPaiementPaypal(double montant, Reservation reservation) {
-        try {
-            Map<String, String> sdkConfig = new HashMap<>();
-            sdkConfig.put("mode", paypalMode);
-
-            OAuthTokenCredential authTokenCredential = new OAuthTokenCredential(clientId, clientSecret, sdkConfig);
-            String accessToken = authTokenCredential.getAccessToken();
-
-            APIContext apiContext = new APIContext(accessToken);
-            apiContext.setConfigurationMap(sdkConfig);
-
-            Amount amount = new Amount();
-            amount.setCurrency("MDH");
-            amount.setTotal(String.format("%.2f", montant));
-
-            Transaction transaction = new Transaction();
-            transaction.setDescription("Paiement de check-in");
-            transaction.setAmount(amount);
-
-            List<Transaction> transactionList = new ArrayList<>();
-            transactionList.add(transaction);
-
-            Payer payer = new Payer();
-            payer.setPaymentMethod("paypal");
-
-            RedirectUrls redirectUrls = new RedirectUrls();
-            redirectUrls.setCancelUrl("http://localhost:8080/paypal/cancel");
-            redirectUrls.setReturnUrl("http://localhost:8080/paypal/return");
-
-            Payment payment = new Payment();
-            payment.setIntent("sale");
-            payment.setPayer(payer);
-            payment.setTransactions(transactionList);
-            payment.setRedirectUrls(redirectUrls);
-
-            Payment createdPayment = payment.create(apiContext);
-
-            return createdPayment != null && "created".equals(createdPayment.getState());
-
-        } catch (PayPalRESTException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-
     public Boolean payerFactureCheckIn(PaiementRequestDTO paiementRequest) {
 
         Reservation reservation = reservationRepository.findById(paiementRequest.getReservationId())
-                .orElseThrow(() -> new RuntimeException("Reservation not found"));
+                .orElseThrow(() -> new ReservationNotFoundException("Reservation not found"));
 
 
         double montantCheckIn = calculerMontantCheckIn(reservation);

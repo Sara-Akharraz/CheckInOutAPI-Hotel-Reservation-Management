@@ -1,11 +1,11 @@
-package com.api.apicheck_incheck_out.exceptionTest;
+package com.api.apicheck_incheck_out.exceptiontest;
 
 import com.api.apicheck_incheck_out.exceptionhandling.FileExtractionException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class FileExtractionExceptionTest {
+ class FileExtractionExceptionTest {
 
     @Test
     void fileExtractionExceptionMessage() {

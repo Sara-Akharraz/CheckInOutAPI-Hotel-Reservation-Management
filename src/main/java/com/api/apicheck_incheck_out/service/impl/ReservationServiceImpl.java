@@ -4,6 +4,7 @@ import com.api.apicheck_incheck_out.dto.*;
 import com.api.apicheck_incheck_out.entity.*;
 import com.api.apicheck_incheck_out.enums.ChambreStatut;
 import com.api.apicheck_incheck_out.enums.ReservationStatus;
+import com.api.apicheck_incheck_out.exceptionhandling.ChambreNotFoundException;
 import com.api.apicheck_incheck_out.exceptionhandling.ReservationNotFoundException;
 import com.api.apicheck_incheck_out.mapper.ChambreMapper;
 import com.api.apicheck_incheck_out.mapper.ReservationMapper;
@@ -58,7 +59,7 @@ public class ReservationServiceImpl implements ReservationService {
 
         for (Long chambreId : chambreIds) {
             Chambre chambreEntity = chambreRepository.findById(chambreId)
-                    .orElseThrow(() -> new RuntimeException("Chambre non trouvée dans la base de données : " + chambreId));
+                    .orElseThrow(() -> new ChambreNotFoundException("Chambre non trouvée dans la base de données : " + chambreId));
 
             ChambreReservation chambreReservation = new ChambreReservation();
             chambreReservation.setChambre(chambreEntity);
@@ -87,7 +88,8 @@ public class ReservationServiceImpl implements ReservationService {
 
                 for (Long chambreId : chambreIds) {
                     ChambreReservation chambreEntity = chambreReservationRepository.findById(chambreId)
-                            .orElseThrow(() -> new RuntimeException("Chambre non trouvée dans la base de données : " + chambreId));
+                            .orElseThrow(() -> new ChambreNotFoundException("Chambre non trouvée dans la base de données : " + chambreId));
+
 
 
                     chambreEntity.setStatut(ChambreStatut.OCCUPEE);
@@ -172,7 +174,7 @@ public class ReservationServiceImpl implements ReservationService {
     public DetailReservationRequestDTO getReservationDetail(Long reservationId) {
 
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new RuntimeException("Réservation introuvable avec l'ID : " + reservationId));
+                .orElseThrow(() -> new ReservationNotFoundException("Réservation introuvable avec l'id : " + reservationId));
 
 
         ReservationDTO reservationDTO = reservationMapper.toDTO(reservation);

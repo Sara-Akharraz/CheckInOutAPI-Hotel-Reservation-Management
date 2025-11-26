@@ -1,11 +1,11 @@
-package com.api.apicheck_incheck_out.exceptionTest;
+package com.api.apicheck_incheck_out.exceptiontest;
 
 import com.api.apicheck_incheck_out.exceptionhandling.EncryptionException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class EncryptionExceptionTest {
+ class EncryptionExceptionTest {
 
     @Test
     void encryptionExceptionMessage() {

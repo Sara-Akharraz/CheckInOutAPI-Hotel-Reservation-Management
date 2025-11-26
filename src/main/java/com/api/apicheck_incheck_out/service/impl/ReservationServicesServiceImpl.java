@@ -5,6 +5,8 @@ import com.api.apicheck_incheck_out.entity.ReservationServices;
 import com.api.apicheck_incheck_out.entity.Services;
 import com.api.apicheck_incheck_out.enums.PaiementStatus;
 import com.api.apicheck_incheck_out.enums.PhaseAjoutService;
+import com.api.apicheck_incheck_out.exceptionhandling.ReservationNotFoundException;
+import com.api.apicheck_incheck_out.exceptionhandling.ServiceNotFoundException;
 import com.api.apicheck_incheck_out.repository.ReservationRepository;
 import com.api.apicheck_incheck_out.repository.ReservationServiceRepository;
 import com.api.apicheck_incheck_out.repository.ServiceRepository;
@@ -41,13 +43,16 @@ public class ReservationServicesServiceImpl implements ReservationServicesServic
     @Override
     public List<ReservationServices> addResService(Long idReservation,List<Long> serviceIds){
         Reservation reservation= reservationRepository.findById(idReservation).orElseThrow(
-                ()->new RuntimeException("Reservation non trouvée avec l'id :" +idReservation)
+                ()->new ReservationNotFoundException("Reservation non trouvée avec l'id :" +idReservation)
+
         );
         List<ReservationServices> addedServices = new ArrayList<>();
 
         for (Long serviceId : serviceIds) {
             Services service = serviceRepository.findById(serviceId)
-                    .orElseThrow(() -> new RuntimeException("Service not found: " + serviceId));
+
+                    .orElseThrow(() -> new ServiceNotFoundException("Service not found: " + serviceId));
+
 
             ReservationServices resService = new ReservationServices();
             resService.setReservation(reservation);
@@ -65,7 +70,8 @@ public class ReservationServicesServiceImpl implements ReservationServicesServic
     @Override
     public void addSejourServicesToReservation(Long idReservation,List<Long> serviceIds){
         Reservation reservation =reservationRepository.findById(idReservation)
-                .orElseThrow(()->new RuntimeException("Reservation non trouvée avec l'id : "+idReservation));
+                .orElseThrow(()->new ReservationNotFoundException("Reservation non trouvée avec l'id : "+idReservation));
+
 
         List<ReservationServices> newReservationServices= new ArrayList<>();
 
@@ -75,7 +81,8 @@ public class ReservationServicesServiceImpl implements ReservationServicesServic
                     .anyMatch(rs->rs.getService().getId().equals(serviceId));
             if(!alreadyExists){
                 Services service =serviceRepository.findById(serviceId)
-                        .orElseThrow(()->new RuntimeException("Service non trouvée avec l'id :"+serviceId));
+                        .orElseThrow(()->new ServiceNotFoundException("Service non trouvée avec l'id :"+serviceId));
+
 
                 ReservationServices reservationService = new ReservationServices();
                 reservationService.setReservation(reservation);
@@ -86,20 +93,25 @@ public class ReservationServicesServiceImpl implements ReservationServicesServic
                 newReservationServices.add(reservationService);
 
             }
-            if (!newReservationServices.isEmpty()) {
-
-                reservationServiceRepository.saveAll(newReservationServices);
 
 
-                reservation.getServiceList().addAll(newReservationServices);
-                reservationRepository.save(reservation);
-            }
+        }
+        if (!newReservationServices.isEmpty()) {
+
+            reservationServiceRepository.saveAll(newReservationServices);
+
+
+            reservation.getServiceList().addAll(newReservationServices);
+            reservationRepository.save(reservation);
+
         }
     }
     @Override
     public List<Services> getAvailableServices(Long idReservation) {
         Reservation reservation = reservationRepository.findById(idReservation)
-                .orElseThrow(() -> new RuntimeException("Reservation non trouvée avec l'id :" + idReservation));
+
+                .orElseThrow(() -> new ReservationNotFoundException("Reservation non trouvée avec l'id :" + idReservation));
+
 
         List<Long> servicesIds = reservation.getServiceList()
                 .stream()

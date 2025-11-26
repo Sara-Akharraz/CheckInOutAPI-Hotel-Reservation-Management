@@ -2,6 +2,9 @@ package com.api.apicheck_incheck_out.serviceimptest;
 
 import com.api.apicheck_incheck_out.entity.Notification;
 import com.api.apicheck_incheck_out.entity.User;
+
+import com.api.apicheck_incheck_out.exceptionhandling.NotificationNotFoundException;
+import com.api.apicheck_incheck_out.exceptionhandling.UserNotFoundException;
 import com.api.apicheck_incheck_out.repository.NotificationRepository;
 import com.api.apicheck_incheck_out.repository.UserRepository;
 import com.api.apicheck_incheck_out.service.impl.NotificationServiceImpl;
@@ -17,13 +20,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class NotificationServiceImplTest {
+ class NotificationServiceImplTest {
     @Mock
     private NotificationRepository notificationRepository;
     @Mock
@@ -35,7 +37,7 @@ public class NotificationServiceImplTest {
 
     private User user;
     @BeforeEach
-    public void setup(){
+     void setup(){
          user=new User();
          user.setId(1L);
          user.setNom("aman");
@@ -43,7 +45,7 @@ public class NotificationServiceImplTest {
          notification=new Notification(1L,"test notif", LocalDate.now(),user);
     }
     @Test
-    public void notifier() {
+     void notifier() {
         Long userId = user.getId();
         String message = "test notif";
 
@@ -62,7 +64,18 @@ public class NotificationServiceImplTest {
     }
 
     @Test
-    public void getAllNotificationByUser(){
+    void notifierThrowsException(){
+        String message = "test notif";
+        when(userRepository.findById(2L)).thenReturn(Optional.empty());
+
+        UserNotFoundException ex=assertThrows(UserNotFoundException.class,()->notificationService.notifier(2L,message));
+        assertEquals("Client introuvable pour l'id 2",ex.getMessage());
+        verify(userRepository,times(1)).findById(2L);
+        verify(notificationRepository,never()).save(any(Notification.class));
+    }
+
+    @Test
+     void getAllNotificationByUser(){
         List<Notification> notificationList= Arrays.asList(notification,
                 new Notification(2L,"test notif 2",LocalDate.now().plusDays(2),user));
         when(notificationRepository.findByUserId(user.getId())).thenReturn(notificationList);
@@ -73,8 +86,20 @@ public class NotificationServiceImplTest {
         assertEquals("test notif",result.get(0).getMessage());
     }
     @Test
-    public void deleteNotification(){
+
+     void deleteNotification(){
         when(notificationRepository.findById(notification.getId())).thenReturn(Optional.of(notification));
         notificationService.deleteNotification(notification.getId());
     }
+    @Test
+    void deleteNotificationThrowsException(){
+        when(notificationRepository.findById(2L)).thenReturn(Optional.empty());
+        NotificationNotFoundException ex=assertThrows(NotificationNotFoundException.class,()->notificationService.deleteNotification(2L));
+
+        assertEquals("Notification introuvable pour l'id 2",ex.getMessage());
+        verify(notificationRepository,times(1)).findById(2L);
+        verify(notificationRepository,never()).deleteById(2L);
+    }
+
+
 }
