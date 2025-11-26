@@ -3,19 +3,20 @@ package com.api.apicheck_incheck_out.serviceimptest;
 import com.api.apicheck_incheck_out.dto.*;
 import com.api.apicheck_incheck_out.entity.*;
 import com.api.apicheck_incheck_out.enums.*;
+
 import com.api.apicheck_incheck_out.exceptionhandling.ChambreNotFoundException;
 import com.api.apicheck_incheck_out.exceptionhandling.ReservationNotFoundException;
+
 import com.api.apicheck_incheck_out.mapper.ChambreMapper;
 import com.api.apicheck_incheck_out.mapper.ReservationMapper;
 import com.api.apicheck_incheck_out.repository.*;
 import com.api.apicheck_incheck_out.service.impl.ReservationServiceImpl;
 import com.api.apicheck_incheck_out.service.NotificationService;
+
 import jakarta.persistence.EntityExistsException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
-
-
 
 import java.time.LocalDate;
 import java.util.*;
@@ -59,6 +60,7 @@ class ReservationServiceImplTest {
         Reservation result = reservationService.addReservation(reservation, chambreIds);
         assertNotNull(result);
     }
+
     @Test
     void testAddReservationThrowsException(){
         Reservation reservation=new Reservation();
@@ -90,6 +92,7 @@ class ReservationServiceImplTest {
 
         verify(chambreReservationRepository, never()).save(any(ChambreReservation.class));
     }
+
     @Test
     void testUpdateReservationStatus() {
         Reservation reservation = new Reservation();
@@ -103,6 +106,7 @@ class ReservationServiceImplTest {
         Reservation result = reservationService.updateReservationStatus(1L, ReservationStatus.CONFIRMEE);
         assertEquals(ReservationStatus.CONFIRMEE, result.getStatus());
     }
+
     @Test
     void testUpdateReservationStatusThrowsException(){
         when(reservationRepository.findById(2L)).thenReturn(Optional.empty());
@@ -143,12 +147,14 @@ class ReservationServiceImplTest {
 
         verify(chambreReservationRepository, never()).save(any());
     }
+
     @Test
     void testDeleteReservation() {
         when(reservationRepository.existsById(1L)).thenReturn(true);
         reservationService.deleteReservation(1L);
         verify(reservationRepository).deleteById(1L);
     }
+
     @Test
     void testDeleteReservationThrowsException(){
         when(reservationRepository.existsById(2L)).thenReturn(false);
@@ -158,6 +164,7 @@ class ReservationServiceImplTest {
         verify(reservationRepository,never()).deleteById(2L);
     }
 
+
     @Test
     void testGetReservationById() {
         Reservation reservation = new Reservation();
@@ -166,6 +173,7 @@ class ReservationServiceImplTest {
         Reservation result = reservationService.getReservationById(1L);
         assertEquals(1L, result.getId());
     }
+
     @Test
     void testGetReservationByIdThrowsException(){
         when(reservationRepository.findById(2L)).thenReturn(Optional.empty());
@@ -175,6 +183,7 @@ class ReservationServiceImplTest {
 
     }
 
+
     @Test
     void testGetReservationsByUserId() {
         Reservation r = new Reservation();
@@ -182,6 +191,7 @@ class ReservationServiceImplTest {
         List<Reservation> result = reservationService.getReservationsByUserId(1L);
         assertEquals(1, result.size());
     }
+
 
 
     @Test
@@ -240,6 +250,7 @@ class ReservationServiceImplTest {
 
         assertEquals(1, result.size());
     }
+
     @Test
     void testGetReservationDetail() {
         Reservation reservation = new Reservation();
@@ -286,6 +297,7 @@ class ReservationServiceImplTest {
 
         assertEquals("Réservation introuvable avec l'id : 2",ex.getMessage());
         verify(reservationRepository,times(1)).findById(2L);
+
     }
 
     @Test

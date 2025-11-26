@@ -26,7 +26,9 @@ public class StripeServiceImpl implements StripeService {
 
     @PostConstruct
     public void init() {
+
         log.debug("Stripe API Key configured: " + stripeApiKey);
+
         Stripe.apiKey = stripeApiKey;
     }
 
@@ -45,7 +47,9 @@ public class StripeServiceImpl implements StripeService {
             PaymentIntent paymentIntent = PaymentIntent.create(params);
 
 
+
             log.info("Status du paiement StripeMock: " + paymentIntent.getStatus());
+
 
             return "succeeded".equals(paymentIntent.getStatus()) || "requires_payment_method".equals(paymentIntent.getStatus());
         } catch(StripeException e) {

@@ -21,7 +21,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+
  class ChambreServiceImplTest {
+
     @Mock
     private ChambreRepository chambreRepository;
     @Mock
@@ -53,16 +55,20 @@ import static org.mockito.Mockito.*;
     }
     @Test
     void TestupdateChmabre(){
+
         Chambre existed=new Chambre();
         existed.setNom("old name");
         existed.setPrix(100.0);
+
 
         Chambre updated=new Chambre();
         updated.setNom("Chambre 102");
         updated.setPrix(200.0);
         updated.setType(ChambreType.DOUBLE);
 
+
         when(chambreRepository.findById(1L)).thenReturn(Optional.of(existed));
+
         when(chambreRepository.save(any(Chambre.class))).thenReturn(updated);
 
         Chambre result=chambreService.updateChambre(1L,updated);
@@ -73,6 +79,7 @@ import static org.mockito.Mockito.*;
 
 
         verify(chambreRepository,times(1)).findById(1L);
+
         verify(chambreRepository,times(1)).save(existed);
 
 
@@ -92,6 +99,7 @@ import static org.mockito.Mockito.*;
 
         verify(chambreRepository,times(1)).findById(2L);
         verify(chambreRepository,never()).save(any(Chambre.class));
+
     }
     @Test
     void TestdeleteChambre(){
@@ -102,6 +110,7 @@ import static org.mockito.Mockito.*;
         verify(chambreRepository,times(1)).existsById(1L);
         verify(chambreRepository,times(1)).deleteById(1L);
 
+
         when(chambreRepository.existsById(2L)).thenReturn(false);
         ChambreNotFoundException ex=assertThrows(ChambreNotFoundException.class,()->chambreService.deleteChambre(2L));
 
@@ -109,6 +118,7 @@ import static org.mockito.Mockito.*;
 
         verify(chambreRepository,times(1)).existsById(2L);
         verify(chambreRepository,never()).deleteById(2L);
+
     }
     @Test
     void TestgetChambres(){
@@ -124,6 +134,7 @@ import static org.mockito.Mockito.*;
         assertEquals(chambre,result);
         verify(chambreRepository).findById(1L);
     }
+
     @Test
     void TestgetChambreThrowsException(){
         when(chambreRepository.findById(2L)).thenReturn(Optional.empty());
@@ -133,6 +144,7 @@ import static org.mockito.Mockito.*;
         assertEquals("Chambre non trouvée avec l'id : 2", ex.getMessage());
         verify(chambreRepository,times(1)).findById(2L);
     }
+
 
 
 }

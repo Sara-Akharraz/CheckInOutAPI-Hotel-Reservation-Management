@@ -63,6 +63,7 @@ public class ChambreServiceImpl implements ChambreService {
     public Chambre getChambre(Long id) {
 
         return chambreRepository.findById(id)
+
                 .orElseThrow(() -> new ChambreNotFoundException("Chambre non trouvée avec l'id : " + id));
     }
 

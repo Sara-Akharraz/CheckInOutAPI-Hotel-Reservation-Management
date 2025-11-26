@@ -1,5 +1,6 @@
 package com.api.apicheck_incheck_out.serviceimptest;
 
+
 import com.api.apicheck_incheck_out.entity.Chambre;
 import com.api.apicheck_incheck_out.entity.ChambreReservation;
 import com.api.apicheck_incheck_out.entity.Reservation;
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.*;
 
 import java.time.LocalDate;
+
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -101,10 +103,12 @@ class ChambreReservationServiceImplTest {
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
 
         InvalidReservationStatusException exception = assertThrows(InvalidReservationStatusException.class,
+
                 () -> chambreReservationService.setChambreOccupee(reservationId));
 
         assertTrue(exception.getMessage().contains("La réservation n'est pas confirmée"));
     }
+
     @Test
     void testSetChambreOccupee_ReservationNotFound(){
         when(reservationRepository.findById(1L)).thenReturn(Optional.empty());
@@ -408,4 +412,5 @@ class ChambreReservationServiceImplTest {
         assertEquals(1, result.size());
         assertEquals(5L, result.get(0).getId());
     }
+
 }

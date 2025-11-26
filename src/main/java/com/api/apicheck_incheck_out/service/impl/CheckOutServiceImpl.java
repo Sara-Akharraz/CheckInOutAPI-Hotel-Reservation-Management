@@ -16,6 +16,7 @@ import com.api.apicheck_incheck_out.stripe.CheckOutRequest;
 import com.api.apicheck_incheck_out.stripe.StripeResponse;
 import com.api.apicheck_incheck_out.stripe.service.StripeService;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -26,15 +27,9 @@ import java.util.Optional;
 
 
 @Service
+
+@RequiredArgsConstructor
 public class CheckOutServiceImpl implements CheckOutService {
-
-
-    private final CheckOutRepository checkOutRepository;
-
-
-
-    private final StripeService stripeService;
-
 
     @Lazy
     private final FactureService factureService;
@@ -47,19 +42,12 @@ public class CheckOutServiceImpl implements CheckOutService {
 
     private final ReservationRepository reservationRepository;
 
+    private final CheckOutRepository checkOutRepository;
+
+    private final StripeService stripeService;
 
     private final UserService userService;
 
-    public CheckOutServiceImpl(CheckOutRepository checkOutRepository,StripeService stripeService, FactureService factureService, NotificationService notificationService, ReservationServicesService reservationServicesService,ReservationServiceRepository reservationServiceRepository, ReservationRepository reservationRepository,UserService userService) {
-        this.checkOutRepository = checkOutRepository;
-        this.stripeService = stripeService;
-        this.factureService = factureService;
-        this.notificationService = notificationService;
-        this.reservationServicesService = reservationServicesService;
-        this.reservationServiceRepository = reservationServiceRepository;
-        this.reservationRepository = reservationRepository;
-        this.userService = userService;
-    }
 
     public CheckOut addCheckOut(CheckOut checkout) {
         if (checkout == null) {

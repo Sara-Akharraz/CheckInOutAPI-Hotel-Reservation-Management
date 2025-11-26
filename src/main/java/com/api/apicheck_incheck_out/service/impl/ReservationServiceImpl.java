@@ -91,6 +91,7 @@ public class ReservationServiceImpl implements ReservationService {
                             .orElseThrow(() -> new ChambreNotFoundException("Chambre non trouvée dans la base de données : " + chambreId));
 
 
+
                     chambreEntity.setStatut(ChambreStatut.OCCUPEE);
                     chambreEntity.setReservation(reservation);
 

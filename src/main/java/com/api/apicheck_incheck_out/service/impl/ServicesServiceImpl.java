@@ -33,7 +33,9 @@ public class ServicesServiceImpl implements ServicesService {
             existedService.setPrix(updatedServices.getPrix());
             return serviceRepository.save(existedService);
         }else{
+
             throw new ServiceNotFoundException("Service non trouvé avec l'id "+id);
+
         }
     }
 

@@ -2,6 +2,7 @@ package com.api.apicheck_incheck_out.serviceimptest;
 
 import com.api.apicheck_incheck_out.entity.Notification;
 import com.api.apicheck_incheck_out.entity.User;
+
 import com.api.apicheck_incheck_out.exceptionhandling.NotificationNotFoundException;
 import com.api.apicheck_incheck_out.exceptionhandling.UserNotFoundException;
 import com.api.apicheck_incheck_out.repository.NotificationRepository;
@@ -61,6 +62,7 @@ import static org.mockito.Mockito.*;
         assertEquals(message, createdNotif.getMessage());
         assertEquals(user, createdNotif.getUser());
     }
+
     @Test
     void notifierThrowsException(){
         String message = "test notif";
@@ -84,6 +86,7 @@ import static org.mockito.Mockito.*;
         assertEquals("test notif",result.get(0).getMessage());
     }
     @Test
+
      void deleteNotification(){
         when(notificationRepository.findById(notification.getId())).thenReturn(Optional.of(notification));
         notificationService.deleteNotification(notification.getId());
@@ -97,5 +100,6 @@ import static org.mockito.Mockito.*;
         verify(notificationRepository,times(1)).findById(2L);
         verify(notificationRepository,never()).deleteById(2L);
     }
+
 
 }

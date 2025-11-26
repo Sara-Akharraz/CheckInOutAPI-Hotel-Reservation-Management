@@ -9,6 +9,7 @@ import com.api.apicheck_incheck_out.mapper.UserMapper;
 import com.api.apicheck_incheck_out.repository.UserRepository;
 import com.api.apicheck_incheck_out.security.JwtService;
 import com.api.apicheck_incheck_out.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,15 +22,13 @@ import java.util.Optional;
 
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
 
     private final UserMapper userMapper;
 
-
     private final UserRepository userRepository;
-
-
 
     private final AuthenticationManager authManager;
 
@@ -39,12 +38,7 @@ public class UserServiceImpl implements UserService {
 
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
-    public UserServiceImpl(UserMapper userMapper, UserRepository userRepository, AuthenticationManager authManager, JwtService jwtService) {
-        this.userMapper = userMapper;
-        this.userRepository = userRepository;
-        this.authManager = authManager;
-        this.jwtService = jwtService;
-    }
+
 
 
     @Override

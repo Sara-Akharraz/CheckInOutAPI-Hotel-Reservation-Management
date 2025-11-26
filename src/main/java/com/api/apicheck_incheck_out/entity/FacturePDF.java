@@ -11,9 +11,11 @@ import com.itextpdf.text.pdf.PdfWriter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayOutputStream;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+
 @Slf4j
 public class FacturePDF {
     private static final String MAD = "MAD";
@@ -21,6 +23,7 @@ public class FacturePDF {
     private FacturePDF(){
         throw new UnsupportedOperationException("Cette classe ne doit pas étre instanciée");
     }
+
     private static Image loadLogo() throws IOException, BadElementException {
         return Image.getInstance("src/main/resources/logo.png");
     }
@@ -28,13 +31,16 @@ public class FacturePDF {
     public static void generateDocument(Document document) {
         try {
             Image logo = loadLogo();
+
             logo.scaleAbsolute(30f, 30f);
             logo.setAlignment(Element.ALIGN_CENTER);
             document.add(logo);
         } catch (Exception e) {
+
             log.error("Erreur lors du chargement de l'image du logo: {}", e.getMessage());
         }
     }
+
     public static byte[] gerercheckinFacturePDF(Reservation reservation) {
         List<Facture> factures = reservation.getFactureList();
 
@@ -186,6 +192,7 @@ public class FacturePDF {
             document.add(Chunk.NEWLINE);
 
             generateDocument(document);
+
 
             // Infos hôtel
             Paragraph hotelInfo = new Paragraph();
