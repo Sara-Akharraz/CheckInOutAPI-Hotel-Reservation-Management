@@ -83,12 +83,6 @@ public class UserServiceImplTest {
         dtoMock.setEmail("alami@gmail.com");
         dtoMock.setPassword("alami123");
 
-
-
-        //when(userMapper.toEntity(dtoMock)).thenReturn(user);
-        //when(userMapper.toEntity(dtoMock1)).thenReturn(user1);
-
-
     }
 
     @Test
@@ -151,7 +145,6 @@ public class UserServiceImplTest {
 
         List<UserDto> foundedReceptionists = userService.getReceptionists();
 
-        List<UserDto> foundedUsers = userService.getAllUsers();
         assertEquals(2,foundedReceptionists.size());
         assertEquals(user1.getId(),foundedReceptionists.get(0).getId());
         assertEquals(user2.getId(),foundedReceptionists.get(1).getId());
@@ -191,6 +184,23 @@ public class UserServiceImplTest {
         assertEquals(user2.getEmail(),foundedReceptionists.get(1).getEmail());
     }
 
+    @Test
+    void getAdmins(){
+
+        users.add(user1);
+        users.add(user2);
+
+        when(userRepository.findAdmins()).thenReturn(users);
+
+        List<User> foundedAdmins = userService.getAdmins();
+
+        assertEquals(2,foundedAdmins.size());
+        assertEquals(user1.getId(),foundedAdmins.get(0).getId());
+        assertEquals(user2.getId(),foundedAdmins.get(1).getId());
+        assertEquals(user1.getEmail(),foundedAdmins.get(0).getEmail());
+        assertEquals(user2.getEmail(),foundedAdmins.get(1).getEmail());
+    }
+
 
     @Test
     void deleteUser(){
@@ -212,7 +222,6 @@ public class UserServiceImplTest {
         dtoMock.setPassword("alami123");
         dtoMock.setTelephone("0611111111");
 
-        // New user after save
         User newUserInfo = User.builder()
                 .id(1L)
                 .cin("AB1111")
@@ -269,7 +278,6 @@ public class UserServiceImplTest {
         assertEquals(user.getEmail(), savedUser.getEmail());
         assertEquals(user.getTelephone(), savedUser.getTelephone());
 
-        //Mockito.verify(encoder).encode(dtoMock.getPassword());
         Mockito.verify(userRepository).save(user);
         Mockito.verify(userMapper).toEntity(dtoMock);
         Mockito.verify(userMapper).toDTO(user);

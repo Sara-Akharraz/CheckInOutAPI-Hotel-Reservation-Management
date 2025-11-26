@@ -21,7 +21,10 @@ public class SecurityConfig {
 
 
     private final CustomUserDetailsService userDetailsService;
-
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
     private final JWTFilter jwtFilter;
 

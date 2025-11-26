@@ -93,11 +93,10 @@ public class CheckOutServiceImpl implements CheckOutService {
 
     @Override
     public StripeResponse payer(Long id) {
-
         CheckOutRequest checkoutRequest = CheckOutRequest.builder()
                 .idCheckQOut(id)
                 .checkOutName("Services consommés pendant le séjour")
-                .amount(Math.round(this.getAmount(id) * 100))
+                .amount(Math.round(getAmount(id) * 100))
                 .build();
         StripeResponse stripeResponse = stripeService.checkoutServices(checkoutRequest);
         if (stripeResponse != null && "SUCCESS".equals(stripeResponse.getStatus())) {
@@ -105,6 +104,7 @@ public class CheckOutServiceImpl implements CheckOutService {
         }else
             throw new PaymentValidationException("Stripe payment failed");
     }
+
     @Override
     public void handlePaymentSuccess(Long id){
         CheckOut checkOut = getCheckOutById(id);

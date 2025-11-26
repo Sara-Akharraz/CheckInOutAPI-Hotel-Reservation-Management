@@ -11,10 +11,12 @@ import com.api.apicheck_incheck_out.security.JwtService;
 import com.api.apicheck_incheck_out.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -36,8 +38,7 @@ public class UserServiceImpl implements UserService {
     private final JwtService jwtService;
 
     @Autowired
-    private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
-
+    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(12);
 
 
     @Override
