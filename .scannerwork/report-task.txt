@@ -1,6 +1,6 @@
-projectKey=bugs
+projectKey=mini_projet
 serverUrl=http://localhost:9000
 serverVersion=25.10.0.114319
-dashboardUrl=http://localhost:9000/dashboard?id=bugs
-ceTaskId=3b13e669-0734-4257-89b6-04bcbd16f8a5
-ceTaskUrl=http://localhost:9000/api/ce/task?id=3b13e669-0734-4257-89b6-04bcbd16f8a5
+dashboardUrl=http://localhost:9000/dashboard?id=mini_projet
+ceTaskId=63625b8e-2c4b-4c3b-bb15-112283fb6b22
+ceTaskUrl=http://localhost:9000/api/ce/task?id=63625b8e-2c4b-4c3b-bb15-112283fb6b22

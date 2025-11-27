@@ -9,6 +9,8 @@ import com.api.apicheck_incheck_out.repository.ReservationRepository;
 import com.api.apicheck_incheck_out.service.CheckOutService;
 import com.api.apicheck_incheck_out.service.FactureService;
 import com.api.apicheck_incheck_out.service.ReservationServicesService;
+import com.api.apicheck_incheck_out.pdf.CheckInFacturePDF;
+import com.api.apicheck_incheck_out.pdf.CheckoutFacturePDF;
 import com.api.apicheck_incheck_out.stripe.service.impl.StripeServiceImpl;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
@@ -86,10 +88,10 @@ public ResponseEntity<byte[]> afficherFactureDansNavigateur(@PathVariable Long f
 
     byte[] pdfBytes;
     if(facture.getType().equals(FactureType.CHECK_IN)){
-         pdfBytes = FacturePDF.gerercheckinFacturePDF(reservation);
+         pdfBytes = CheckInFacturePDF.gerercheckinFacturePDF(reservation);
 
     }else{
-        pdfBytes = FacturePDF.gerercheckOutFacturePDF(reservation, services, checkOutService.getAmount(reservation.getCheckOut().getId()));
+        pdfBytes = CheckoutFacturePDF.gerercheckOutFacturePDF(reservation, services, checkOutService.getAmount(reservation.getCheckOut().getId()));
     }
 
 

@@ -10,6 +10,7 @@ import com.api.apicheck_incheck_out.repository.ReservationRepository;
 import com.api.apicheck_incheck_out.service.CheckOutService;
 import com.api.apicheck_incheck_out.service.ReservationService;
 import com.api.apicheck_incheck_out.service.ReservationServicesService;
+import com.api.apicheck_incheck_out.pdf.CheckoutFacturePDF;
 import com.api.apicheck_incheck_out.stripe.StripeResponse;
 
 import lombok.AllArgsConstructor;
@@ -153,7 +154,7 @@ public class CheckOutController {
                 .stream()
                 .map(ReservationServices::getService)
                 .toList();
-        byte[] pdfBytes = FacturePDF.gerercheckOutFacturePDF(reservation, services, checkOutService.getAmount(reservation.getCheckOut().getId()));
+        byte[] pdfBytes = CheckoutFacturePDF.gerercheckOutFacturePDF(reservation, services, checkOutService.getAmount(reservation.getCheckOut().getId()));
 
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_PDF)

@@ -267,7 +267,6 @@ import static org.mockito.Mockito.*;
     void registerTest(){
         when(userMapper.toEntity(dtoMock)).thenReturn(user);
         when(userMapper.toDTO(user)).thenReturn(dtoMock);
-        //when(encoder.encode(anyString())).thenReturn("encoded_psswd");
         when(userRepository.save(any(User.class))).thenReturn(user);
         UserDto savedUser = userService.register(dtoMock);
 

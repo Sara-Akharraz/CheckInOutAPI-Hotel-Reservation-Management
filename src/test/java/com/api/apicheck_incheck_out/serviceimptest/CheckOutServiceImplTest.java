@@ -6,16 +6,13 @@ import com.api.apicheck_incheck_out.repository.CheckOutRepository;
 import com.api.apicheck_incheck_out.repository.ReservationRepository;
 import com.api.apicheck_incheck_out.repository.ReservationServiceRepository;
 import com.api.apicheck_incheck_out.service.NotificationService;
-import com.api.apicheck_incheck_out.service.ReservationService;
 import com.api.apicheck_incheck_out.service.ReservationServicesService;
 import com.api.apicheck_incheck_out.service.impl.CheckOutServiceImpl;
 import com.api.apicheck_incheck_out.service.impl.FactureServiceImpl;
-import com.api.apicheck_incheck_out.service.impl.ReservationServiceImpl;
 import com.api.apicheck_incheck_out.service.impl.UserServiceImpl;
 import com.api.apicheck_incheck_out.stripe.CheckOutRequest;
 import com.api.apicheck_incheck_out.stripe.StripeResponse;
 import com.api.apicheck_incheck_out.stripe.service.impl.StripeServiceImpl;
-import com.stripe.net.StripeRequest;
 import kotlin.collections.ArrayDeque;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +29,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
