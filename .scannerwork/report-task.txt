@@ -2,5 +2,5 @@ projectKey=bugs
 serverUrl=http://localhost:9000
 serverVersion=25.10.0.114319
 dashboardUrl=http://localhost:9000/dashboard?id=bugs
-ceTaskId=3b13e669-0734-4257-89b6-04bcbd16f8a5
-ceTaskUrl=http://localhost:9000/api/ce/task?id=3b13e669-0734-4257-89b6-04bcbd16f8a5
+ceTaskId=c326abc4-4733-426c-abd2-ee2f983665d8
+ceTaskUrl=http://localhost:9000/api/ce/task?id=c326abc4-4733-426c-abd2-ee2f983665d8

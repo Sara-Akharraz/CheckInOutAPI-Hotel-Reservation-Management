@@ -228,6 +228,18 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.8</version>
+				<configuration>
+					<excludes>
+						<exclude>**/entity/**</exclude>
+						<exclude>**/dto/**</exclude>
+						<exclude>**/dto/*.class</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
 
 			<!-- Kotlin Maven Plugin -->
 			<plugin>

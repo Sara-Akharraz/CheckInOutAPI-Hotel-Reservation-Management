@@ -1,8 +1,11 @@
 package com.api.apicheck_incheck_out.controller;
 
 import com.api.apicheck_incheck_out.dto.UserDto;
+import com.api.apicheck_incheck_out.exceptionhandling.UserNotFoundException;
+import com.api.apicheck_incheck_out.exceptionhandling.UserRegistrationException;
 import com.api.apicheck_incheck_out.service.UserService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -11,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
+@Slf4j
 @CrossOrigin("*")
 @AllArgsConstructor
 @RestController
@@ -22,12 +26,7 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<UserDto> register(@RequestBody UserDto user){
-        try{
             return ResponseEntity.ok(userService.register(user));
-        }catch(Exception e){
-            e.printStackTrace();
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
     }
 
     @PostMapping("/login")
@@ -38,63 +37,33 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUser(@PathVariable("id") Long id){
-        try{
             return ResponseEntity.ok(userService.getUser(id));
-        }
-        catch(Exception e){
-            e.printStackTrace();
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,e.getMessage());
-        }
     }
+
 
     @GetMapping
     public ResponseEntity<List<UserDto>> getUsers() {
-        try{
             return ResponseEntity.ok(userService.getAllUsers());
-        }catch(Exception e){
-            e.printStackTrace();
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,e.getMessage());
-        }
     }
 
     @GetMapping("/receptionists")
     public ResponseEntity<List<UserDto>> getReceptionists(){
-        try{
             return ResponseEntity.ok(userService.getReceptionists());
-        }catch(Exception e){
-            e.printStackTrace();
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,e.getMessage());
-        }
     }
 
     @GetMapping("/clients")
     public ResponseEntity<List<UserDto>> getClients(){
-        try{
-            return ResponseEntity.ok(userService.getClients());
-        }catch(Exception e){
-            e.printStackTrace();
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,e.getMessage());
-        }
+        return ResponseEntity.ok(userService.getClients());
     }
 
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable("id") Long id){
-        try {
             userService.deleteUser(id);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,e.getMessage());
-        }
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<UserDto> updateUser(@PathVariable("id") Long id,@RequestBody UserDto user){
-        try{
             return ResponseEntity.ok(userService.updateUser(id, user));
-        }
-        catch(Exception e){
-            e.printStackTrace();
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,e.getMessage());
-        }
+
     }
 }

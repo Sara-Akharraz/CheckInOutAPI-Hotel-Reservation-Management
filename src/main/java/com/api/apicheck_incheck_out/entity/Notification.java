@@ -1,16 +1,14 @@
 package com.api.apicheck_incheck_out.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDate;
 
 @Entity
 @Table(name="notification")
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 

@@ -11,12 +11,15 @@ import com.api.apicheck_incheck_out.repository.ReservationServiceRepository;
 import com.api.apicheck_incheck_out.service.FactureService;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Duration;
 import java.util.List;
 
-
+@Slf4j
 @Service
 public class FactureServiceImpl implements FactureService {
 
@@ -168,9 +171,9 @@ public class FactureServiceImpl implements FactureService {
                     .build();
 
             return factureRepository.save(facture);
-        }catch(Exception e) {
-            e.printStackTrace();
-            throw new PaymentValidationException("Failed to validate the checout payment");
+        } catch(Exception e) {
+          log.error("Erreur dans la validation de paiement du check-out pour la réservation d'ID {}",reservation.getId(),e);
+          throw new PaymentValidationException("Failed to validate the checout payment");
         }
     }
 

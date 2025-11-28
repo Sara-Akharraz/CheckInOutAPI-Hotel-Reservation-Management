@@ -177,7 +177,6 @@ public class CheckInController {
         } catch (Exception e) {
 
             log.error("Erreur lors de la validation du check-in pour la réservation ID: " + reservationId);
-            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Une erreur interne s'est produite.");
         }
     }

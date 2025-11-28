@@ -4,19 +4,21 @@ import com.api.apicheck_incheck_out.dto.ReservationServiceRequestDTO;
 import com.api.apicheck_incheck_out.dto.ReservationServicesDTO;
 import com.api.apicheck_incheck_out.entity.*;
 import com.api.apicheck_incheck_out.enums.PhaseAjoutService;
+import com.api.apicheck_incheck_out.exceptionhandling.ReservationNotFoundException;
 import com.api.apicheck_incheck_out.mapper.ReservationServicesMapper;
 import com.api.apicheck_incheck_out.repository.NotificationRepository;
 import com.api.apicheck_incheck_out.repository.ReservationRepository;
 import com.api.apicheck_incheck_out.service.impl.EmailSenderService;
 import com.api.apicheck_incheck_out.service.NotificationService;
 import com.api.apicheck_incheck_out.service.ReservationServicesService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
-
+@Slf4j
 @RestController
 @RequestMapping("/api/reservation-services")
 public class ReservationServicesController {
@@ -140,9 +142,9 @@ public class ReservationServicesController {
     public ResponseEntity<List<Services>> findUnpaidServicesDuringStay(@PathVariable("idReservationService") Long idReservationService){
         try{
             return ResponseEntity.ok(reservationServicesService.getRsrvServicesSejourUnpaid(idReservationService));
-        }catch(Exception e){
-            e.printStackTrace();
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,e.getMessage());
+        }catch (ReservationNotFoundException e){
+            log.error("Reservation not found with ID: {}", idReservationService);
+            throw new ReservationNotFoundException("Resrvation not found");
         }
     }
 }

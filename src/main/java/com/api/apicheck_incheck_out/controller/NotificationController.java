@@ -24,13 +24,10 @@ public class NotificationController {
 
     @PostMapping
     public ResponseEntity<NotificationDTO> notifier(@RequestBody NotificationDTO notificationDTO) {
-        try {
             Notification newNotification = notificationService.notifier(notificationDTO.getUserId(), notificationDTO.getMessage());
             return new ResponseEntity<>(notificationMapper.toDTO(newNotification), HttpStatus.CREATED);
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
     }
+
     @GetMapping("/{id}")
     public ResponseEntity<List<NotificationDTO>> getAllNotificationsByUser(@PathVariable Long id){
         List<NotificationDTO> notificationList=notificationService.getAllNotificationsByUser(id).stream()

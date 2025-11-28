@@ -26,7 +26,7 @@ public class JWTFilter extends OncePerRequestFilter {
     private final ApplicationContext context;
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
+    public boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
         return path.startsWith("/v3/api-docs")||
         path.startsWith("/swagger-ui")||
@@ -37,7 +37,7 @@ public class JWTFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         //Barear token
         String authHeader = request.getHeader("Authorization");
         String token = null;

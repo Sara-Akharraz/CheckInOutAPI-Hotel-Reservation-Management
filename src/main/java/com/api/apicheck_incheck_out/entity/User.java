@@ -48,10 +48,6 @@ public class User {
     @Column(name = "stripe_id")
     private String stripeId;
 
-    @Column(name="paypal_id")
-    private String paypalId;
-
-
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
     private List<Notification> notifications;
