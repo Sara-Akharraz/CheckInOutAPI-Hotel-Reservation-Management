@@ -151,7 +151,7 @@ public class CheckInController {
     public ResponseEntity<String> validerCheckIn(@RequestParam Long reservationId) {
         try {
 
-            log.info("Début de la validation du check-in pour la réservation ID: " + reservationId);
+            log.debug("Début de la validation du check-in pour la réservation ID: " + reservationId);
 
 
             Reservation reservation = reservationService.getReservationById(reservationId);
