@@ -234,7 +234,6 @@ public class CheckOutControllerTest {
     void checkOutForTodayTest() throws Exception {
         LocalDate date = LocalDate.of(2025,11,25);
         List<CheckOut> checkOutList = List.of(checkOut,checkOut1);
-        List<CheckOutDTO> dtoList = List.of(checkOutDTO, checkOutDTO1);
         when(checkOutService.checkoutsForToday(date)).thenReturn(checkOutList);
         when(checkOutMapper.toDTO(any(CheckOut.class))).thenReturn(checkOutDTO);
 

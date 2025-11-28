@@ -18,7 +18,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class JWTFilterTest {
+class JwtFilterTest {
 
     private JWTFilter jwtFilter;
     private JwtService jwtService;

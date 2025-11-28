@@ -22,7 +22,6 @@ import static org.mockito.Mockito.*;
 public class JwtServiceTest {
 
     private String base64Key;
-    JwtService jwtService;
 
     private String makeBase64SecretKey() {
         SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
@@ -130,7 +129,8 @@ public class JwtServiceTest {
             mocked.when(() -> KeyGenerator.getInstance("HmacSHA256"))
                     .thenThrow(new NoSuchAlgorithmException("Algorithm not found"));
 
-            assertThrows(EncryptionException.class, () -> new JwtService());
+            assertThrows(EncryptionException.class, JwtService::new);
+
         }
     }
 }
