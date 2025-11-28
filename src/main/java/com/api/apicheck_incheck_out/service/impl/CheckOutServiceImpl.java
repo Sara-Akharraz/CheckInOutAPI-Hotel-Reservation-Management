@@ -12,6 +12,7 @@ import com.api.apicheck_incheck_out.repository.CheckOutRepository;
 import com.api.apicheck_incheck_out.repository.ReservationRepository;
 import com.api.apicheck_incheck_out.repository.ReservationServiceRepository;
 import com.api.apicheck_incheck_out.service.*;
+import com.api.apicheck_incheck_out.pdf.CheckoutFacturePDF;
 import com.api.apicheck_incheck_out.stripe.CheckOutRequest;
 import com.api.apicheck_incheck_out.stripe.StripeResponse;
 import com.api.apicheck_incheck_out.stripe.service.StripeService;
@@ -123,7 +124,7 @@ public class CheckOutServiceImpl implements CheckOutService {
 
         double total = this.getAmount(checkOut.getId());
         factureService.validerPaiementCheckOut(r,total);
-        FacturePDF.gerercheckOutFacturePDF(checkOut.getReservation(),services,total);
+        CheckoutFacturePDF.gerercheckOutFacturePDF(checkOut.getReservation(),services,total);
         rsrvServices.stream().forEach(service ->
             service.setPaiementStatus(PaiementStatus.PAYE)
         );

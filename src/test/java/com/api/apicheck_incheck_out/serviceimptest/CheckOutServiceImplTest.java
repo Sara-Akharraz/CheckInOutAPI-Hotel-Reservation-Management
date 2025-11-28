@@ -40,7 +40,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
- class CheckOutServiceImplTest {
+class CheckOutServiceImplTest {
 
     @InjectMocks
     private CheckOutServiceImpl checkOutService;
@@ -294,13 +294,13 @@ import static org.mockito.Mockito.*;
         reservations.add(reservation1);
 
         when(reservationRepository.findByDateFin(LocalDate.of(2025,11,25))).thenReturn(reservations);
-         List<CheckOut> foundedCheckOutsForToday = checkOutService.checkoutsForToday(LocalDate.of(2025,11,25));
+        List<CheckOut> foundedCheckOutsForToday = checkOutService.checkoutsForToday(LocalDate.of(2025,11,25));
 
-         assertEquals(2,foundedCheckOutsForToday.size());
-         assertEquals(LocalDate.of(2025, 11, 30),foundedCheckOutsForToday.get(0).getDateCheckOut());
-         assertEquals(LocalDate.of(2025, 11, 30),foundedCheckOutsForToday.get(1).getDateCheckOut());
-         assertEquals(checkOut.getId(),foundedCheckOutsForToday.get(0).getId());
-         assertEquals(checkOut1.getId(),foundedCheckOutsForToday.get(1).getId());
+        assertEquals(2,foundedCheckOutsForToday.size());
+        assertEquals(LocalDate.of(2025, 11, 30),foundedCheckOutsForToday.get(0).getDateCheckOut());
+        assertEquals(LocalDate.of(2025, 11, 30),foundedCheckOutsForToday.get(1).getDateCheckOut());
+        assertEquals(checkOut.getId(),foundedCheckOutsForToday.get(0).getId());
+        assertEquals(checkOut1.getId(),foundedCheckOutsForToday.get(1).getId());
 
     }
 
@@ -369,15 +369,15 @@ import static org.mockito.Mockito.*;
         when(userService.getReceptionists()).thenReturn(List.of());
 
         when(reservationServiceRepository.saveAll(anyList())).thenReturn(reservationServicesList);
-         facture = Facture.builder()
+        facture = Facture.builder()
                 .type(FactureType.CHECK_OUT)
                 .status(PaiementStatus.PAYE)
                 .checkOutMontant(180.0)
                 .reservation(reservation)
                 .build();
-         Notification notification = new Notification();
-         notification.setId(1L);
-         reservation.getFactureList().add(facture);
+        Notification notification = new Notification();
+        notification.setId(1L);
+        reservation.getFactureList().add(facture);
         when(factureService.validerPaiementCheckOut(any(Reservation.class), anyDouble())).thenReturn(facture);
         when(userService.getAdmins()).thenReturn(List.of(user));
         when(userService.getReceptionists()).thenReturn(List.of(user1));

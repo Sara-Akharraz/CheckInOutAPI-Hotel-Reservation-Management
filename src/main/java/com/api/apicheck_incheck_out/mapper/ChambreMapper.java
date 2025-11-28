@@ -3,6 +3,7 @@ package com.api.apicheck_incheck_out.mapper;
 import com.api.apicheck_incheck_out.dto.ChambreDTO;
 
 import com.api.apicheck_incheck_out.entity.*;
+import com.api.apicheck_incheck_out.exceptionhandling.ChambreReservationNotFoundException;
 import com.api.apicheck_incheck_out.repository.*;
 
 import org.springframework.stereotype.Component;
@@ -43,7 +44,7 @@ public class ChambreMapper {
         if (chambreDTO.getChambreReservationIds() != null && !chambreDTO.getChambreReservationIds().isEmpty()) {
             reservations = chambreDTO.getChambreReservationIds().stream()
                     .map(id -> chambreReservationRepository.findById(id)
-                            .orElseThrow(() -> new RuntimeException("ChambreReservation non trouvée avec l'id : " + id)))
+                            .orElseThrow(() -> new ChambreReservationNotFoundException("ChambreReservation non trouvée avec l'id : " + id)))
                     .toList();
         }
 

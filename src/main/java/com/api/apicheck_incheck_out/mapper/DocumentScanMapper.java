@@ -3,6 +3,7 @@ package com.api.apicheck_incheck_out.mapper;
 import com.api.apicheck_incheck_out.dto.DocumentScanDTO;
 import com.api.apicheck_incheck_out.entity.DocumentScan;
 import com.api.apicheck_incheck_out.entity.CheckIn;
+import com.api.apicheck_incheck_out.exceptionhandling.CheckInNotFoundException;
 import com.api.apicheck_incheck_out.repository.CheckInRepository;
 import org.springframework.stereotype.Component;
 
@@ -43,7 +44,7 @@ public class DocumentScanMapper {
 
         if (idCheckin != null) {
             CheckIn checkIn = checkInRepository.findById(idCheckin)
-                    .orElseThrow(() -> new RuntimeException("Check_in non trouvé"));
+                    .orElseThrow(() -> new CheckInNotFoundException("Check_in non trouvé"));
             documentScan.setCheckIn(checkIn);
             checkIn.setDocumentScan(documentScan);
         }
