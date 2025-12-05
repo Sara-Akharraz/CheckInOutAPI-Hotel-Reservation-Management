@@ -3,29 +3,34 @@ package com.api.apicheck_incheck_out.service.impl;
 import com.api.apicheck_incheck_out.entity.Reservation;
 import com.api.apicheck_incheck_out.entity.ReservationServices;
 import com.api.apicheck_incheck_out.entity.Services;
-import com.api.apicheck_incheck_out.enums.PaiementStatus;
 import com.api.apicheck_incheck_out.enums.PhaseAjoutService;
-import com.api.apicheck_incheck_out.exceptionhandling.ReservationNotFoundException;
-import com.api.apicheck_incheck_out.exceptionhandling.ServiceNotFoundException;
-import com.api.apicheck_incheck_out.repository.ReservationRepository;
 import com.api.apicheck_incheck_out.repository.ReservationServiceRepository;
 import com.api.apicheck_incheck_out.repository.ServiceRepository;
 import com.api.apicheck_incheck_out.service.ReservationServicesService;
+import com.api.apicheck_incheck_out.service.factory.ReservationServicesCreator;
+import com.api.apicheck_incheck_out.service.factory.ReservationServicesFinder;
+import com.api.apicheck_incheck_out.service.factory.ReservationServicesSaver;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+
 import java.util.List;
+
 
 
 @Service
 public class ReservationServicesServiceImpl implements ReservationServicesService {
     private final ReservationServiceRepository reservationServiceRepository;
-    private final ReservationRepository reservationRepository;
     private final ServiceRepository serviceRepository;
-    public ReservationServicesServiceImpl(ReservationServiceRepository reservationServiceRepository, ReservationRepository reservationRepository, ServiceRepository serviceRepository) {
+    private final ReservationServicesFinder finder;
+    private final ReservationServicesCreator creator;
+    private final ReservationServicesSaver saver;
+    public ReservationServicesServiceImpl(ReservationServiceRepository reservationServiceRepository,ServiceRepository serviceRepository, ReservationServicesFinder finder, ReservationServicesCreator creator, ReservationServicesSaver saver) {
         this.reservationServiceRepository = reservationServiceRepository;
-        this.reservationRepository = reservationRepository;
         this.serviceRepository = serviceRepository;
+        this.finder = finder;
+        this.creator = creator;
+        this.saver = saver;
+
     }
 
     @Override
@@ -42,75 +47,30 @@ public class ReservationServicesServiceImpl implements ReservationServicesServic
     }
     @Override
     public List<ReservationServices> addResService(Long idReservation,List<Long> serviceIds){
-        Reservation reservation= reservationRepository.findById(idReservation).orElseThrow(
-                ()->new ReservationNotFoundException("Reservation non trouvée avec l'id :" +idReservation)
+        Reservation reservation=finder.findReservationById(idReservation);
+        List<ReservationServices> addedServices = serviceIds.stream()
+                        .map(serviceId->creator.createReservationService(reservation,serviceId,PhaseAjoutService.CHECK_IN))
+                        .toList();
 
-        );
-        List<ReservationServices> addedServices = new ArrayList<>();
-
-        for (Long serviceId : serviceIds) {
-            Services service = serviceRepository.findById(serviceId)
-
-                    .orElseThrow(() -> new ServiceNotFoundException("Service not found: " + serviceId));
-
-
-            ReservationServices resService = new ReservationServices();
-            resService.setReservation(reservation);
-            resService.setService(service);
-            resService.setPhaseAjoutService(PhaseAjoutService.CHECK_IN);
-            resService.setPaiementStatus(PaiementStatus.EN_ATTENTE);
-
-            reservationServiceRepository.save(resService);
-            addedServices.add(resService);
-        }
-
+        reservationServiceRepository.saveAll(addedServices);
         return addedServices;
 
     }
+
     @Override
     public void addSejourServicesToReservation(Long idReservation,List<Long> serviceIds){
-        Reservation reservation =reservationRepository.findById(idReservation)
-                .orElseThrow(()->new ReservationNotFoundException("Reservation non trouvée avec l'id : "+idReservation));
+        Reservation reservation=finder.findReservationById(idReservation);
 
+        List<ReservationServices> newReservationServices= creator.createNewReservationServices(reservation,serviceIds);
 
-        List<ReservationServices> newReservationServices= new ArrayList<>();
-
-        for(Long serviceId :serviceIds){
-            boolean alreadyExists =reservation.getServiceList()
-                    .stream()
-                    .anyMatch(rs->rs.getService().getId().equals(serviceId));
-            if(!alreadyExists){
-                Services service =serviceRepository.findById(serviceId)
-                        .orElseThrow(()->new ServiceNotFoundException("Service non trouvée avec l'id :"+serviceId));
-
-
-                ReservationServices reservationService = new ReservationServices();
-                reservationService.setReservation(reservation);
-                reservationService.setService(service);
-                reservationService.setPaiementStatus(PaiementStatus.EN_ATTENTE);
-                reservationService.setPhaseAjoutService(PhaseAjoutService.SEJOUR);
-
-                newReservationServices.add(reservationService);
-
-            }
-
-
-        }
-        if (!newReservationServices.isEmpty()) {
-
-            reservationServiceRepository.saveAll(newReservationServices);
-
-
-            reservation.getServiceList().addAll(newReservationServices);
-            reservationRepository.save(reservation);
-
-        }
+        saver.saveNewServicesIfPresent(reservation,newReservationServices);
     }
+
+
+
     @Override
     public List<Services> getAvailableServices(Long idReservation) {
-        Reservation reservation = reservationRepository.findById(idReservation)
-
-                .orElseThrow(() -> new ReservationNotFoundException("Reservation non trouvée avec l'id :" + idReservation));
+        Reservation reservation = finder.findReservationById(idReservation);
 
 
         List<Long> servicesIds = reservation.getServiceList()
