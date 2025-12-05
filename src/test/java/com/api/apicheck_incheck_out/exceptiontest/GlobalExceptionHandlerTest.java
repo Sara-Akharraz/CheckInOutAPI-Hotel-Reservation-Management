@@ -1,6 +1,7 @@
 package com.api.apicheck_incheck_out.exceptiontest;
 
 import com.api.apicheck_incheck_out.exceptionhandling.GlobalExceptionHandler;
+import com.api.apicheck_incheck_out.exceptionhandling.UserRegistrationException;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,4 +49,5 @@ class GlobalExceptionHandlerTest {
         assertEquals(messageErreur, response.getBody(),
                 "Le message d'erreur devrait correspondre");
     }
+
 }

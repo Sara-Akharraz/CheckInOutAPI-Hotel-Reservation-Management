@@ -1,18 +1,26 @@
 package com.api.apicheck_incheck_out.serviceimptest;
 
+import com.api.apicheck_incheck_out.dto.UserDto;
 import com.api.apicheck_incheck_out.entity.*;
 import com.api.apicheck_incheck_out.enums.*;
+import com.api.apicheck_incheck_out.exceptionhandling.CheckOutNotFoundException;
+import com.api.apicheck_incheck_out.exceptionhandling.PaymentValidationException;
+import com.api.apicheck_incheck_out.exceptionhandling.UserRegistrationException;
 import com.api.apicheck_incheck_out.repository.CheckOutRepository;
 import com.api.apicheck_incheck_out.repository.ReservationRepository;
 import com.api.apicheck_incheck_out.repository.ReservationServiceRepository;
 import com.api.apicheck_incheck_out.service.NotificationService;
+import com.api.apicheck_incheck_out.service.ReservationService;
 import com.api.apicheck_incheck_out.service.ReservationServicesService;
 import com.api.apicheck_incheck_out.service.impl.CheckOutServiceImpl;
 import com.api.apicheck_incheck_out.service.impl.FactureServiceImpl;
+import com.api.apicheck_incheck_out.service.impl.ReservationServiceImpl;
 import com.api.apicheck_incheck_out.service.impl.UserServiceImpl;
 import com.api.apicheck_incheck_out.stripe.CheckOutRequest;
 import com.api.apicheck_incheck_out.stripe.StripeResponse;
 import com.api.apicheck_incheck_out.stripe.service.impl.StripeServiceImpl;
+import com.stripe.net.StripeRequest;
+import jakarta.persistence.EntityNotFoundException;
 import kotlin.collections.ArrayDeque;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,10 +37,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
- class CheckOutServiceImplTest {
+class CheckOutServiceImplTest {
 
     @InjectMocks
     private CheckOutServiceImpl checkOutService;
@@ -147,6 +155,16 @@ import static org.mockito.Mockito.when;
     }
 
     @Test
+    void getCheckOutTest_CheckOutNotFoundException(){
+        when(checkOutRepository.findById(1L)).thenReturn(Optional.empty());
+
+        CheckOutNotFoundException e = assertThrows(CheckOutNotFoundException.class,
+                () -> checkOutService.getCheckOutById(1L));
+
+        assertEquals("Check Out not found with id: " + 1L,e.getMessage());
+    }
+
+    @Test
     void addCheckOutTest(){
         when(checkOutRepository.save(any(CheckOut.class))).thenReturn(checkOut);
 
@@ -158,9 +176,16 @@ import static org.mockito.Mockito.when;
         assertEquals(checkOut.getDateCheckOut(), addedCheckOut.getDateCheckOut());
     }
 
+    @Test
+    void addCheckOut_IllegalArgumentException(){
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
+                () -> checkOutService.addCheckOut(null));
+
+        assertEquals("Check_Out object cannot be null", e.getMessage());
+    }
 
     @Test
-    void getAllUsersTest(){
+    void getAllCheckOutsTest(){
         CheckOut checkOut1 = CheckOut.builder()
                 .id(2L)
                 .dateCheckOut(LocalDate.of(2025, 12, 25))
@@ -195,6 +220,13 @@ import static org.mockito.Mockito.when;
     }
 
     @Test
+    void getcheckOutByReservation_EntityNotFoundException(){
+        EntityNotFoundException e = assertThrows(EntityNotFoundException.class,
+                () -> checkOutService.getCheckOutByReservation(1L));
+
+        assertEquals("Réservation non trouvée avec l'id : " + 1L, e.getMessage());
+    }
+    @Test
     void setCheckOutStatutTest(){
         when(checkOutRepository.findById(1L)).thenReturn(Optional.ofNullable(checkOut));
         when(checkOutRepository.save(any(CheckOut.class))).thenReturn(checkOut);
@@ -207,15 +239,36 @@ import static org.mockito.Mockito.when;
     }
 
     @Test
+    void setCheckOutStatusTest_CheckOutNotFound() {
+        when(checkOutRepository.findById(1L)).thenReturn(Optional.empty());
+
+        CheckOutNotFoundException e = assertThrows(CheckOutNotFoundException.class,
+                () -> checkOutService.setCheckOutStatus(1L, CheckOutStatut.CONFIRMEE));
+
+        assertEquals("Check Out not found with id: " + 1L, e.getMessage());
+    }
+
+
+    @Test
     void getAmount(){
         when(checkOutRepository.findById(1L)).thenReturn(Optional.ofNullable(checkOut));
         when(reservationServicesService.getAllServicesByReservation(1L)).thenReturn(reservationServicesList);
 
         double calculatedAmount = checkOutService.getAmount(1L);
 
-        Mockito.verify(checkOutRepository).findById(1L);
-        Mockito.verify(reservationServicesService).getAllServicesByReservation(1L);
+        verify(checkOutRepository).findById(1L);
+        verify(reservationServicesService).getAllServicesByReservation(1L);
         assertEquals(180, calculatedAmount);
+    }
+
+    @Test
+    void getAmountTest_CheckOutNotFound() {
+        when(checkOutRepository.findById(1L)).thenReturn(Optional.empty());
+
+        CheckOutNotFoundException e = assertThrows(CheckOutNotFoundException.class,
+                () -> checkOutService.getAmount(1L));
+
+        assertEquals("Check Out not found with id: " + 1L, e.getMessage());
     }
 
     @Test
@@ -241,13 +294,13 @@ import static org.mockito.Mockito.when;
         reservations.add(reservation1);
 
         when(reservationRepository.findByDateFin(LocalDate.of(2025,11,25))).thenReturn(reservations);
-         List<CheckOut> foundedCheckOutsForToday = checkOutService.checkoutsForToday(LocalDate.of(2025,11,25));
+        List<CheckOut> foundedCheckOutsForToday = checkOutService.checkoutsForToday(LocalDate.of(2025,11,25));
 
-         assertEquals(2,foundedCheckOutsForToday.size());
-         assertEquals(LocalDate.of(2025, 11, 30),foundedCheckOutsForToday.get(0).getDateCheckOut());
-         assertEquals(LocalDate.of(2025, 11, 30),foundedCheckOutsForToday.get(1).getDateCheckOut());
-         assertEquals(checkOut.getId(),foundedCheckOutsForToday.get(0).getId());
-         assertEquals(checkOut1.getId(),foundedCheckOutsForToday.get(1).getId());
+        assertEquals(2,foundedCheckOutsForToday.size());
+        assertEquals(LocalDate.of(2025, 11, 30),foundedCheckOutsForToday.get(0).getDateCheckOut());
+        assertEquals(LocalDate.of(2025, 11, 30),foundedCheckOutsForToday.get(1).getDateCheckOut());
+        assertEquals(checkOut.getId(),foundedCheckOutsForToday.get(0).getId());
+        assertEquals(checkOut1.getId(),foundedCheckOutsForToday.get(1).getId());
 
     }
 
@@ -271,9 +324,39 @@ import static org.mockito.Mockito.when;
         assertEquals(stripeResponse.getSessionUrl(), returnedStripeResponse.getSessionUrl());
     }
 
+    @Test
+    void payerTest_PaymentValidationException(){
+        StripeResponse stripeResponse = null;
+
+        when(checkOutRepository.findById(1L)).thenReturn(Optional.ofNullable(checkOut));
+        when(stripeService.checkoutServices(any(CheckOutRequest.class))).thenReturn(stripeResponse);
+
+        PaymentValidationException e = assertThrows(PaymentValidationException.class,
+                () -> checkOutService.payer(1L));
+
+        assertEquals("Stripe payment failed",e.getMessage());
+    }
 
     @Test
     void handlePaymentSuccess(){
+        User user = User.builder()
+                .id(1L)
+                .cin("AB1111")
+                .nom("Alami")
+                .email("alami@gmail.com")
+                .role(Role.ADMIN)
+                .prenom("Khadija")
+                .password("alami123")
+                .build();
+        UserDto user1 = UserDto.builder()
+                .id(2L)
+                .cin("AB1111")
+                .nom("Alami")
+                .email("alami@gmail.com")
+                .role(Role.RECEPTIONIST)
+                .prenom("Khadija")
+                .password("alami123")
+                .build();
 
         reservationServicesList.get(0).setPaiementStatus(PaiementStatus.PAYE);
         reservationServicesList.get(1).setPaiementStatus(PaiementStatus.PAYE);
@@ -286,20 +369,26 @@ import static org.mockito.Mockito.when;
         when(userService.getReceptionists()).thenReturn(List.of());
 
         when(reservationServiceRepository.saveAll(anyList())).thenReturn(reservationServicesList);
-         facture = Facture.builder()
+        facture = Facture.builder()
                 .type(FactureType.CHECK_OUT)
                 .status(PaiementStatus.PAYE)
                 .checkOutMontant(180.0)
                 .reservation(reservation)
                 .build();
-         Notification notification = new Notification();
-         reservation.getFactureList().add(facture);
+        Notification notification = new Notification();
+        notification.setId(1L);
+        reservation.getFactureList().add(facture);
         when(factureService.validerPaiementCheckOut(any(Reservation.class), anyDouble())).thenReturn(facture);
+        when(userService.getAdmins()).thenReturn(List.of(user));
+        when(userService.getReceptionists()).thenReturn(List.of(user1));
         when(notificationService.notifier(anyLong(),anyString())).thenReturn(notification);
 
         checkOutService.handlePaymentSuccess(1L);
 
         assertEquals(PaiementStatus.PAYE, reservationServicesList.get(0).getPaiementStatus());
+        verify(notificationService).notifier(user.getId(), "Check-Out validé pour la réservation numéro ; " + reservation.getId());
+        verify(notificationService).notifier(user1.getId(), "Check-Out validé pour la réservation numéro ; " + reservation.getId());
+
     }
 
 

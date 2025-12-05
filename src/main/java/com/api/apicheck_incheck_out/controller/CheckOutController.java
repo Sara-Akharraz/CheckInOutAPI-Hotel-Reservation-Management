@@ -61,7 +61,6 @@ public class CheckOutController {
     }
     @GetMapping("/reservation/{idReservation}")
     public ResponseEntity<ApiResponse<CheckOutDTO>> getCheckOutByReservation(@PathVariable Long idReservation) {
-        try {
             log.debug("===> Recherche Check-out pour réservation ID: " + idReservation);
             CheckOut checkOut = checkOutService.getCheckOutByReservation(idReservation);
             if (checkOut != null) {
@@ -71,19 +70,13 @@ public class CheckOutController {
                 log.debug("===> checkOut is null, checking reservation existence...");
                 boolean exists = reservationService.existsById(idReservation);
                 log.debug("===> Reservation exists? " + exists);
-                if (reservationService.existsById(idReservation)) {
+                if (exists) {
                     return ResponseEntity.ok(new ApiResponse<>(false,"Check-out non encore effectué.",null));
                 } else {
                     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(false,"Réservation introuvable.", null));
                 }
             }
-        }
-        catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(null);
-        }
     }
-
 
     @PostMapping
     public ResponseEntity<ApiResponse<CheckOutDTO>> addCheckOut(@RequestBody CheckOutDTO checkOut) {
@@ -98,14 +91,9 @@ public class CheckOutController {
 
     @PutMapping("/{id}/{status}")
     public ResponseEntity<ApiResponse<CheckOutDTO>> setCheckOutStatus(@PathVariable("id") Long id, @PathVariable("status") String status) {
-        try {
             CheckOut checkOut = checkOutService.setCheckOutStatus(id, CheckOutStatut.valueOf(status));
             CheckOutDTO checkOutDTO = checkOutMapper.toDTO(checkOut);
             return ResponseEntity.ok(new ApiResponse<>(true, "Statut du check-out mis à jour.", checkOutDTO));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(new ApiResponse<>(false, e.getMessage(), null));
-        }
     }
 
     @GetMapping("/amount/{id}")
@@ -115,11 +103,7 @@ public class CheckOutController {
 
     @GetMapping("/payer/{id_checkout}")
     public StripeResponse payer(@PathVariable("id_checkout") Long id) {
-        try {
             return checkOutService.payer(id);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
-        }
     }
 
     @PostMapping("/validate-payment/{id_checkout}")
@@ -133,6 +117,7 @@ public class CheckOutController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
+
     @GetMapping("/today-checkouts")
     public ResponseEntity<List<CheckOutDTO>> checkoutsForToday(    @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         List<CheckOut> checkouts = checkOutService.checkoutsForToday(date);
@@ -160,7 +145,5 @@ public class CheckOutController {
                 .contentType(MediaType.APPLICATION_PDF)
                 .header("Content-Disposition", "inline; filename=facture.pdf")
                 .body(pdfBytes);
-
     }
-
 }

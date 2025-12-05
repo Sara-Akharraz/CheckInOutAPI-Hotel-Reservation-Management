@@ -76,7 +76,7 @@ public class CheckOutServiceImpl implements CheckOutService {
     @Override
     public CheckOut setCheckOutStatus(Long id, CheckOutStatut newStatus) {
         CheckOut checkout = checkOutRepository.findById(id)
-                .orElseThrow( () -> new RuntimeException("Check Out not found with id: " + id));
+                .orElseThrow( () -> new CheckOutNotFoundException("Check Out not found with id: " + id));
         checkout.setCheckOutStatut(newStatus);
         return checkOutRepository.save(checkout);
     }
@@ -84,7 +84,7 @@ public class CheckOutServiceImpl implements CheckOutService {
     @Override
     public double getAmount(Long id) {
         CheckOut checkout = checkOutRepository.findById(id)
-                .orElseThrow( () -> new RuntimeException("Check Out not found with id: " + id));
+                .orElseThrow( () -> new CheckOutNotFoundException("Check Out not found with id: " + id));
         Long idReservation = checkout.getReservation().getId();
         List<ReservationServices>  reservationServices = reservationServicesService.getAllServicesByReservation(idReservation);
 
@@ -103,8 +103,8 @@ public class CheckOutServiceImpl implements CheckOutService {
         StripeResponse stripeResponse = stripeService.checkoutServices(checkoutRequest);
         if (stripeResponse != null && "SUCCESS".equals(stripeResponse.getStatus())) {
             return stripeResponse;
-        }else
-            throw new PaymentValidationException("Stripe payment failed");
+        }
+        throw new PaymentValidationException("Stripe payment failed");
     }
 
     @Override

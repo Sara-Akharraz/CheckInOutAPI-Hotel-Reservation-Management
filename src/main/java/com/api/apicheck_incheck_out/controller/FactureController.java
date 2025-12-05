@@ -15,6 +15,7 @@ import com.api.apicheck_incheck_out.stripe.service.impl.StripeServiceImpl;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 
+@Slf4j
 @RestController
 @RequestMapping("/api/facture")
 public class FactureController {
@@ -57,9 +59,9 @@ public class FactureController {
         Reservation reservation=reservationRepository.findById(idReservation)
                 .orElseThrow(()->new RuntimeException("Reservation non trouvée par l'id :"+idReservation));
         double montantCheckIn = factureService.calculerMontantCheckIn(reservation);
-
         return ResponseEntity.ok(montantCheckIn);
     }
+
     @GetMapping("Montant_checkOut")
     public ResponseEntity<Double> getMontantCheckOut(@RequestParam Long idReservation){
         Reservation reservation=reservationRepository.findById(idReservation)
@@ -68,6 +70,7 @@ public class FactureController {
 
         return ResponseEntity.ok(montantCheckOut);
     }
+
 @GetMapping("/checkinfacture/{factureId}")
 public ResponseEntity<byte[]> afficherFactureDansNavigateur(@PathVariable Long factureId) {
     Facture facture = factureRepository.findById(factureId)
@@ -118,12 +121,11 @@ public ResponseEntity<byte[]> afficherFactureDansNavigateur(@PathVariable Long f
         }
         return amount;
     }
+
     @PostMapping("/create-intent")
     public ResponseEntity<Map<String, String>> createPaymentIntent(@RequestBody Map<String, Object> request) {
         try {
-
             double amount = parseAmount(request.get("amount"));
-
             // Création du PaymentIntent
             PaymentIntent paymentIntent = stripeService.createPaymentIntent(amount);
             Map<String, String> response = new HashMap<>();
@@ -136,11 +138,12 @@ public ResponseEntity<byte[]> afficherFactureDansNavigateur(@PathVariable Long f
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of(ERROR, "Erreur Stripe : " + e.getMessage()));
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Erreur dans la création de la facture");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of(ERROR, "Erreur interne : " + e.getMessage()));
         }
     }
+
     @PostMapping("/payer_checkin")
     public ResponseEntity<Map<String, Object>> payerFactureCheckIn(@RequestBody PaiementRequestDTO paiementRequest) {
         try {
@@ -158,7 +161,6 @@ public ResponseEntity<byte[]> afficherFactureDansNavigateur(@PathVariable Long f
             @PathVariable Long reservationId,
             @PathVariable Long userId) {
 
-
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new RuntimeException("Réservation introuvable avec ID : " + reservationId));
 
@@ -167,17 +169,13 @@ public ResponseEntity<byte[]> afficherFactureDansNavigateur(@PathVariable Long f
         }
         List<Facture> factures = factureRepository.findAllByReservation_Id(reservationId);
 
-
         return new ResponseEntity<>(factures, HttpStatus.OK);
     }
+
     @GetMapping("/factures/{reservationId}")
     public ResponseEntity<List<Facture>> getAllFactureCheckin(@PathVariable Long reservationId) {
-
         reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new RuntimeException("Réservation introuvable avec ID : " + reservationId));
-
-
-
         List<Facture> factures = factureRepository.findAllByReservation_Id(reservationId);
 
         return new ResponseEntity<>(factures, HttpStatus.OK);
