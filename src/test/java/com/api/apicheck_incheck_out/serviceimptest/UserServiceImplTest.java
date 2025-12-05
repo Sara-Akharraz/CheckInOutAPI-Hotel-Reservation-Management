@@ -3,6 +3,9 @@ package com.api.apicheck_incheck_out.serviceimptest;
 import com.api.apicheck_incheck_out.dto.UserDto;
 import com.api.apicheck_incheck_out.entity.User;
 import com.api.apicheck_incheck_out.enums.Role;
+import com.api.apicheck_incheck_out.exceptionhandling.EmailAlreadyUsedException;
+import com.api.apicheck_incheck_out.exceptionhandling.UserNotFoundException;
+import com.api.apicheck_incheck_out.exceptionhandling.UserRegistrationException;
 import com.api.apicheck_incheck_out.mapper.UserMapper;
 import com.api.apicheck_incheck_out.repository.UserRepository;
 import com.api.apicheck_incheck_out.security.JwtService;
@@ -18,6 +21,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,8 +35,6 @@ import static org.mockito.Mockito.*;
 
     @Mock
     UserRepository userRepository;
-
-
     @Mock
     private AuthenticationManager authManager;
     @Mock
@@ -41,7 +43,6 @@ import static org.mockito.Mockito.*;
     private JwtService jwtService;
     private User user, user1, user2;
     List<User> users = new ArrayList<>();
-
     UserDto dtoMock = new UserDto();
 
     @InjectMocks
@@ -97,6 +98,14 @@ import static org.mockito.Mockito.*;
     }
 
     @Test
+    void getUserTest_UserNotFoundException(){
+            UserNotFoundException e = assertThrows(UserNotFoundException.class,
+                    () -> userService.getUser(1L));
+
+            assertEquals("User not found", e.getMessage());
+    }
+
+    @Test
     void getAllUsersTest(){
         UserDto dtoMock1 = new UserDto();
         dtoMock1.setId(2L);
@@ -118,6 +127,16 @@ import static org.mockito.Mockito.*;
         assertEquals(user.getEmail(),foundedUsers.get(0).getEmail());
         assertEquals(user1.getEmail(),foundedUsers.get(1).getEmail());
 
+    }
+
+    @Test
+    void getAllUsersTest_NoUser(){
+        when(userRepository.findAll()).thenReturn(Collections.emptyList());
+
+        List<UserDto> foundedUsers = userService.getAllUsers();
+
+        assertNotNull(foundedUsers);
+        assertTrue(foundedUsers.isEmpty());
     }
 
     @Test
@@ -153,6 +172,16 @@ import static org.mockito.Mockito.*;
     }
 
     @Test
+    void getReceptionists_NoReceptionist(){
+        when(userRepository.findReceptionists()).thenReturn(Collections.emptyList());
+
+        List<UserDto> foundedReceptionists = userService.getReceptionists();
+
+        assertNotNull(foundedReceptionists);
+        assertTrue(foundedReceptionists.isEmpty());
+    }
+
+    @Test
     void getClients(){
         UserDto userDto1 = new UserDto();
         userDto1.setId(2L);
@@ -173,15 +202,25 @@ import static org.mockito.Mockito.*;
 
         when(userMapper.toDTO(user1)).thenReturn(userDto1);
         when(userMapper.toDTO(user2)).thenReturn(userDto2);
-        when(userRepository.findReceptionists()).thenReturn(users);
+        when(userRepository.findClients()).thenReturn(users);
 
-        List<UserDto> foundedReceptionists = userService.getReceptionists();
+        List<UserDto> foundedClients = userService.getClients();
 
-        assertEquals(2,foundedReceptionists.size());
-        assertEquals(user1.getId(),foundedReceptionists.get(0).getId());
-        assertEquals(user2.getId(),foundedReceptionists.get(1).getId());
-        assertEquals(user1.getEmail(),foundedReceptionists.get(0).getEmail());
-        assertEquals(user2.getEmail(),foundedReceptionists.get(1).getEmail());
+        assertEquals(2,foundedClients.size());
+        assertEquals(user1.getId(),foundedClients.get(0).getId());
+        assertEquals(user2.getId(),foundedClients.get(1).getId());
+        assertEquals(user1.getEmail(),foundedClients.get(0).getEmail());
+        assertEquals(user2.getEmail(),foundedClients.get(1).getEmail());
+    }
+
+    @Test
+    void getClients_NoClient(){
+        when(userRepository.findClients()).thenReturn(Collections.emptyList());
+
+        List<UserDto> foundedClients = userService.getClients();
+
+        assertNotNull(foundedClients);
+        assertTrue(foundedClients.isEmpty());
     }
 
     @Test
@@ -201,12 +240,31 @@ import static org.mockito.Mockito.*;
         assertEquals(user2.getEmail(),foundedAdmins.get(1).getEmail());
     }
 
+    @Test
+    void getAdminsTest_NoAdmin(){
+        when(userRepository.findAdmins()).thenReturn(Collections.emptyList());
+
+        List<User> foundedAdmins = userService.getAdmins();
+
+        assertNotNull(foundedAdmins);
+        assertTrue(foundedAdmins.isEmpty());
+    }
 
     @Test
     void deleteUser(){
         when(userRepository.findById(1L)).thenReturn(Optional.ofNullable(user));
         userService.deleteUser(1L);
         Mockito.verify(userRepository, times(1)).deleteById(1L);
+    }
+
+    @Test
+    void deleteUserTest_UserNotFoundException(){
+        when(userRepository.findById(1L)).thenReturn(Optional.empty());
+
+        UserNotFoundException e = assertThrows(UserNotFoundException.class,
+                () -> userService.deleteUser(1L));
+
+        assertEquals("User not found with id: "+1L, e.getMessage());
     }
 
 
@@ -242,7 +300,26 @@ import static org.mockito.Mockito.*;
         assertEquals(newUserInfo.getId(), updatedUser.getId());
         assertEquals(newUserInfo.getEmail(), updatedUser.getEmail());
         assertEquals(newUserInfo.getTelephone(), updatedUser.getTelephone());
+    }
 
+    @Test
+    void updateUserTest_EmailAlreadyUsedException(){
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(user1);
+
+        EmailAlreadyUsedException e = assertThrows(EmailAlreadyUsedException.class,
+                () -> userService.updateUser(1L,dtoMock));
+
+        assertEquals("Email is already taken by another user", e.getMessage());
+
+    }
+
+    @Test
+    void testUpdateUser_UserNotFoundException() {
+        when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
+        UserNotFoundException e = assertThrows(UserNotFoundException.class,
+                () -> userService.updateUser(1L,dtoMock));
+
+        assertEquals("User not found with id: " + 1L,  e.getMessage());
     }
 
     @Test
@@ -251,7 +328,7 @@ import static org.mockito.Mockito.*;
 
         when(authManager.authenticate(any())).thenReturn(authenticationMock);
         when(authenticationMock.isAuthenticated()).thenReturn(true);
-        when(authenticationMock.getName()).thenReturn(dtoMock.getEmail() );
+        when(authenticationMock.getName()).thenReturn(dtoMock.getEmail());
 
         when(userRepository.findByEmail(dtoMock.getEmail())).thenReturn(user);
         when(jwtService.generateToken(user)).thenReturn("jwt-token");
@@ -260,6 +337,19 @@ import static org.mockito.Mockito.*;
 
         assertEquals("jwt-token", result);
         Mockito.verify(jwtService, times(1)).generateToken(user);
+
+    }
+
+    @Test
+    void verifyTest_ReturnFail(){
+        Authentication authenticationMock = mock(Authentication.class);
+
+        when(authManager.authenticate(any())).thenReturn(authenticationMock);
+        when(authenticationMock.isAuthenticated()).thenReturn(false);
+
+        String result = userService.verify(dtoMock);
+
+        assertEquals("fail", result);
 
     }
 
@@ -280,4 +370,14 @@ import static org.mockito.Mockito.*;
         Mockito.verify(userMapper).toDTO(user);
     }
 
+    @Test
+    void testRegister_Exception() {
+
+        when(userRepository.save(any(User.class))).thenThrow(new RuntimeException("DB error"));
+
+        UserRegistrationException e = assertThrows(UserRegistrationException.class,
+                () -> userService.register(dtoMock));
+
+        assertEquals("Error in registering the user", e.getMessage());
+    }
 }
