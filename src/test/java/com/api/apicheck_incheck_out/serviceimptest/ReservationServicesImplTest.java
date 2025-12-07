@@ -12,6 +12,9 @@ import com.api.apicheck_incheck_out.exceptionhandling.ServiceNotFoundException;
 import com.api.apicheck_incheck_out.repository.ReservationRepository;
 import com.api.apicheck_incheck_out.repository.ReservationServiceRepository;
 import com.api.apicheck_incheck_out.repository.ServiceRepository;
+import com.api.apicheck_incheck_out.service.factory.ReservationServicesCreator;
+import com.api.apicheck_incheck_out.service.factory.ReservationServicesFinder;
+import com.api.apicheck_incheck_out.service.factory.ReservationServicesSaver;
 import com.api.apicheck_incheck_out.service.impl.ReservationServicesServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
+
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -32,8 +35,15 @@ import static org.mockito.Mockito.*;
 class ReservationServicesImplTest {
     @Mock
     private ReservationServiceRepository reservationServiceRepository;
+
     @Mock
-    private ReservationRepository reservationRepository;
+    private ReservationServicesFinder finder;
+
+    @Mock
+    private ReservationServicesCreator creator;
+
+    @Mock
+    private ReservationServicesSaver saver;
     @Mock
     private ServiceRepository serviceRepository;
 
@@ -75,98 +85,68 @@ class ReservationServicesImplTest {
         verify(reservationServiceRepository, times(1)).findByReservationAndPhase(1L, phase);
 
     }
-//    @Test
-//    void testAddResService(){
-//        Long reservationId = 1L;
-//        List<Long> serviceIds = List.of(10L, 20L);
-//
-//        Reservation reservation = new Reservation();
-//        reservation.setId(reservationId);
-//
-//        Services service1 = new Services();
-//        service1.setId(10L);
-//        Services service2 = new Services();
-//        service2.setId(20L);
-//
-//
-//        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
-//        when(serviceRepository.findById(10L)).thenReturn(Optional.of(service1));
-//        when(serviceRepository.findById(20L)).thenReturn(Optional.of(service2));
-//        when(reservationServiceRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-//
-//
-//        List<ReservationServices> result = reservationService.addResService(reservationId, serviceIds);
-//
-//
-//        assertEquals(2, result.size());
-//        assertEquals(reservation, result.get(0).getReservation());
-//        assertEquals(service1, result.get(0).getService());
-//        assertEquals(PhaseAjoutService.CHECK_IN, result.get(0).getPhaseAjoutService());
-//        assertEquals(PaiementStatus.EN_ATTENTE, result.get(0).getPaiementStatus());
-//    }
-//    @Test
-//    void testAddResService_ReservationNotFound(){
-//        List<Long> serviceIds=List.of(10L);
-//        when(reservationRepository.findById(1L)).thenReturn(Optional.empty());
-//
-//        ReservationNotFoundException ex=assertThrows(ReservationNotFoundException.class,()->reservationService.addResService(1L,serviceIds));
-//
-//        assertEquals("Reservation non trouvée avec l'id :1", ex.getMessage());
-//    }
-//    @Test
-//    void testAddResService_ServiceNotFound(){
-//        List<Long> servicesIds=List.of(10L);
-//
-//        Reservation reservation=new Reservation();
-//        reservation.setId(1L);
-//
-//        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
-//        when(serviceRepository.findById(10L)).thenReturn(Optional.empty());
-//
-//        ServiceNotFoundException ex=assertThrows(ServiceNotFoundException.class,()->reservationService.addResService(1L,servicesIds));
-//
-//        assertEquals("Service not found: 10", ex.getMessage());
-//
-//    }
-//    @Test
-//    void testGetAvailableServices(){
-//
-//        Services service1=new Services();
-//        service1.setId(1L);
-//
-//        ReservationServices rsvServices=new ReservationServices();
-//        rsvServices.setService(service1);
-//
-//        Reservation reservation=new Reservation();
-//        reservation.setId(1L);
-//        reservation.setServiceList(List.of(rsvServices));
-//
-//        Services service2=new Services();
-//        service2.setId(2L);
-//        Services service3=new Services();
-//        service3.setId(3L);
-//
-//        List<Services> allServices=List.of(service1,service2,service3);
-//
-//        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
-//        when(serviceRepository.findAll()).thenReturn(allServices);
-//
-//        List<Services> availableServices=reservationService.getAvailableServices(1L);
-//
-//        assertEquals(2, availableServices.size());
-//        assertTrue(availableServices.contains(service2));
-//        assertTrue(availableServices.contains(service3));
-//        assertFalse(availableServices.contains(service1));
-//    }
-//    @Test
-//    void testGetAvailableServices_ReservationNotFound(){
-//
-//        when(reservationRepository.findById(1L)).thenReturn(Optional.empty());
-//        ReservationNotFoundException ex=assertThrows(ReservationNotFoundException.class,()->reservationService.getAvailableServices(1L));
-//        assertEquals("Reservation non trouvée avec l'id :1",ex.getMessage());
-//        verify(reservationRepository,times(1)).findById(1L);
-//
-//    }
+    @Test
+    void testAddResService(){
+        Long reservationId = 1L;
+        List<Long> serviceIds = List.of(10L, 20L);
+
+        Reservation reservation = new Reservation();
+        reservation.setId(reservationId);
+
+        Services service1 = new Services();
+        service1.setId(10L);
+        Services service2 = new Services();
+        service2.setId(20L);
+
+        ReservationServices rs1 = new ReservationServices();
+        ReservationServices rs2 = new ReservationServices();
+        when(finder.findReservationById(1L)).thenReturn(reservation);
+        when(creator.createReservationService(reservation, service1.getId(), PhaseAjoutService.CHECK_IN))
+                .thenReturn(rs1);
+        when(creator.createReservationService(reservation, service2.getId(), PhaseAjoutService.CHECK_IN))
+                .thenReturn(rs2);
+
+        List<ReservationServices> result = reservationService.addResService(reservationId, serviceIds);
+
+
+        assertEquals(2, result.size());
+        assertEquals(rs1, result.get(0));
+        assertEquals(rs2, result.get(1));
+
+        verify(reservationServiceRepository).saveAll(List.of(rs1, rs2));
+    }
+
+    @Test
+    void testGetAvailableServices(){
+
+        Services service1=new Services();
+        service1.setId(1L);
+
+        ReservationServices rsvServices=new ReservationServices();
+        rsvServices.setService(service1);
+
+        Reservation reservation=new Reservation();
+        reservation.setId(1L);
+        reservation.setServiceList(List.of(rsvServices));
+
+        Services service2=new Services();
+        service2.setId(2L);
+        Services service3=new Services();
+        service3.setId(3L);
+
+        List<Services> allServices=List.of(service1,service2,service3);
+
+        when(finder.findReservationById(1L)).thenReturn(reservation);
+        when(serviceRepository.findAll()).thenReturn(allServices);
+
+        List<Services> availableServices=reservationService.getAvailableServices(1L);
+
+        assertEquals(2, availableServices.size());
+        assertTrue(availableServices.contains(service2));
+        assertTrue(availableServices.contains(service3));
+        assertFalse(availableServices.contains(service1));
+    }
+
     @Test
     void testGetRsvServicesSejourUnpaid(){
         Long reservationId=1L;
@@ -193,65 +173,25 @@ class ReservationServicesImplTest {
         verify(reservationServiceRepository,times(1)).getRsrvServicesSejourUnpaid(reservationId);
 
     }
-//    @Test
-//    void testAddSejourServicesToReservation_Success() {
-//        Long reservationId = 1L;
-//        List<Long> serviceIds = List.of(1L, 2L);
-//
-//        Reservation reservation = new Reservation();
-//        reservation.setId(reservationId);
-//        reservation.setServiceList(new ArrayList<>());
-//
-//        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
-//
-//        Services service1 = new Services();
-//        service1.setId(1L);
-//
-//        Services service2 = new Services();
-//        service2.setId(2L);
-//
-//        when(serviceRepository.findById(1L)).thenReturn(Optional.of(service1));
-//        when(serviceRepository.findById(2L)).thenReturn(Optional.of(service2));
-//
-//        when(reservationServiceRepository.saveAll(anyList())).thenAnswer(invocation -> invocation.getArgument(0));
-//        when(reservationRepository.save(any(Reservation.class))).thenAnswer(invocation -> invocation.getArgument(0));
-//
-//        reservationService.addSejourServicesToReservation(reservationId, serviceIds);
-//
-//        assertEquals(2, reservation.getServiceList().size());
-//        assertTrue(reservation.getServiceList().stream().anyMatch(rs -> rs.getService().getId().equals(1L)));
-//        assertTrue(reservation.getServiceList().stream().anyMatch(rs -> rs.getService().getId().equals(2L)));
-//
-//        verify(reservationRepository, times(1)).findById(reservationId);
-//        verify(serviceRepository, times(1)).findById(1L);
-//        verify(serviceRepository, times(1)).findById(2L);
-//        verify(reservationServiceRepository, times(1)).saveAll(anyList());
-//        verify(reservationRepository, times(1)).save(reservation);
-//    }
-//
-//    @Test
-//    void testAddSejourServicesToReservationNotFound(){
-//        List<Long> servicesIds=List.of(10L);
-//        when(reservationRepository.findById(1L)).thenReturn(Optional.empty());
-//        ReservationNotFoundException ex=assertThrows(ReservationNotFoundException.class,()->reservationService.addSejourServicesToReservation(1L,servicesIds));
-//        assertEquals("Reservation non trouvée avec l'id : 1",ex.getMessage());
-//        verify(reservationRepository,times(1)).findById(1L);
-//    }
-//    @Test
-//    void testAddSejourServicesToReservation_ServiceNotFound(){
-//        List<Long> servicesIds=List.of(10L);
-//
-//        Reservation reservation=new Reservation();
-//        reservation.setId(1L);
-//        reservation.setServiceList(new ArrayList<>());
-//
-//        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
-//        when(serviceRepository.findById(10L)).thenReturn(Optional.empty());
-//
-//        ServiceNotFoundException ex=assertThrows(ServiceNotFoundException.class,()->reservationService.addSejourServicesToReservation(1L,servicesIds));
-//
-//        assertEquals("Service non trouvée avec l'id :10", ex.getMessage());
-//
-//    }
+    @Test
+    void testAddSejourServicesToReservation_Success() {
+        Long reservationId = 1L;
+        List<Long> serviceIds = List.of(1L, 2L);
+
+        Reservation reservation = new Reservation();
+        reservation.setId(reservationId);
+        reservation.setServiceList(new ArrayList<>());
+
+        when(finder.findReservationById(reservationId)).thenReturn(reservation);
+
+        List<ReservationServices> newServices=List.of(new ReservationServices());
+        when(creator.createNewReservationServices(reservation,serviceIds)).thenReturn(newServices);
+
+        reservationService.addSejourServicesToReservation(1L,serviceIds);
+
+        verify(saver).saveNewServicesIfPresent(reservation,newServices);
+
+    }
+
 
 }
