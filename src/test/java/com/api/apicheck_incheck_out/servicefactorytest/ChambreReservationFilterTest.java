@@ -1,4 +1,4 @@
-package com.api.apicheck_incheck_out.servicefactory;
+package com.api.apicheck_incheck_out.servicefactorytest;
 
 import com.api.apicheck_incheck_out.entity.Chambre;
 import com.api.apicheck_incheck_out.entity.ChambreReservation;

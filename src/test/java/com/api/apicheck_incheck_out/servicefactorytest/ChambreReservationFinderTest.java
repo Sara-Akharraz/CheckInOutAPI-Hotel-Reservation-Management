@@ -1,4 +1,4 @@
-package com.api.apicheck_incheck_out.servicefactory;
+package com.api.apicheck_incheck_out.servicefactorytest;
 
 import com.api.apicheck_incheck_out.entity.Chambre;
 import com.api.apicheck_incheck_out.entity.ChambreReservation;
@@ -13,7 +13,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
