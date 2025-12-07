@@ -98,7 +98,7 @@ public class ReservationServicesController {
             @RequestBody List<Long> serviceIds) {
 
         Reservation reservation=reservationRepository.findById(idReservation).orElseThrow(
-                ()->new RuntimeException("Réservation non trouvée avec l'id :"+idReservation)
+                ()->new ReservationNotFoundException("Réservation non trouvée avec l'id :"+idReservation)
         );
 
 
