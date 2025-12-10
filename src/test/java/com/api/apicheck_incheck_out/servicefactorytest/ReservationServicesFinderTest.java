@@ -1,8 +1,7 @@
 package com.api.apicheck_incheck_out.servicefactorytest;
 
-import com.api.apicheck_incheck_out.entity.Chambre;
-import com.api.apicheck_incheck_out.entity.ChambreReservation;
-import com.api.apicheck_incheck_out.entity.Reservation;
+import com.api.apicheck_incheck_out.entity.*;
+import com.api.apicheck_incheck_out.exceptionhandling.ReservationNotFoundException;
 import com.api.apicheck_incheck_out.repository.ChambreRepository;
 import com.api.apicheck_incheck_out.repository.ChambreReservationRepository;
 import com.api.apicheck_incheck_out.repository.ReservationRepository;
@@ -18,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -50,7 +50,15 @@ public class ReservationServicesFinderTest {
         Reservation result = reservationServicesFinder.verifyForSameRooms(reservation, chambreIds);
         assertNotNull(result);
     }
+    @Test
+    void testFindReservationById_ReservationNotFoundException() {
 
+        when(reservationRepository.findById(2L)).thenReturn(Optional.empty());
+
+        assertThrows(ReservationNotFoundException.class, () -> {
+            reservationServicesFinder.findReservationById(2L);
+        });
+    }
     @Test
     void testProcessAddReservationThrowsException(){
         Reservation reservation=new Reservation();
@@ -65,5 +73,53 @@ public class ReservationServicesFinderTest {
         assertEquals("Une réservation existe déjà pour ces chambres avec les mêmes dates.", ex.getMessage());
 
         verify(chambreReservationRepository,times(1)).findByChambre_IdInAndReservation_DateDebutAndReservation_DateFin(any(),any(),any());
+    }
+
+    @Test
+    void testFindReservationById(){
+        Reservation reservation=new Reservation();
+        reservation.setId(1L);
+
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+
+        Reservation result=reservationServicesFinder.findReservationById(1L);
+        assertNotNull(result);
+        assertEquals(1L,result.getId());
+    }
+
+    @Test
+    void testExtractExistingServiceIds() {
+
+        Services service1 = new Services();
+        service1.setId(10L);
+
+        Services service2 = new Services();
+        service2.setId(20L);
+
+        ReservationServices rs1 = new ReservationServices();
+        rs1.setService(service1);
+
+        ReservationServices rs2 = new ReservationServices();
+        rs2.setService(service2);
+
+
+        Reservation reservation = new Reservation();
+        reservation.setServiceList(List.of(rs1, rs2));
+
+        Set<Long> result = reservationServicesFinder.extractExistingServiceIds(reservation);
+
+        assertEquals(Set.of(10L, 20L), result);
+        assertTrue(result.contains(10L));
+        assertTrue(result.contains(20L));
+    }
+    @Test
+    void testExtractExistingServiceIds_EmptyList() {
+
+        Reservation reservation = new Reservation();
+        reservation.setServiceList(List.of());
+
+        Set<Long> result = reservationServicesFinder.extractExistingServiceIds(reservation);
+
+        assertTrue(result.isEmpty());
     }
 }

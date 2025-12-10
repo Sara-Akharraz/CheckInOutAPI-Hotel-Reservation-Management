@@ -18,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
 
@@ -137,8 +136,8 @@ class ReservationMapperTest {
         assertNotNull(dto);
         assertEquals(reservation.getId(), dto.getId());
         assertEquals(user.getId(), dto.getUserId());
-        assertEquals(reservation.getCheckIn(), null);
-        assertEquals(reservation.getCheckOut(), null);
+        assertEquals(null, reservation.getCheckIn());
+        assertEquals(null, reservation.getCheckOut());
         assertEquals(1, dto.getChambreList().size());
         assertEquals(2, dto.getFactureList().size());
         assertEquals(1, dto.getServices().size());

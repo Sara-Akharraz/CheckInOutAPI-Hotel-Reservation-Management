@@ -19,7 +19,7 @@ import java.util.Date;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class JwtServiceTest {
+ class JwtServiceTest {
 
     private String base64Key;
 

@@ -1,6 +1,5 @@
 package com.api.apicheck_incheck_out.controllertest;
 
-
 import com.api.apicheck_incheck_out.controller.NotificationController;
 import com.api.apicheck_incheck_out.dto.NotificationDTO;
 import com.api.apicheck_incheck_out.entity.Notification;
@@ -8,7 +7,6 @@ import com.api.apicheck_incheck_out.entity.User;
 import com.api.apicheck_incheck_out.mapper.NotificationMapper;
 import com.api.apicheck_incheck_out.security.JwtService;
 import com.api.apicheck_incheck_out.service.NotificationService;
-import com.api.apicheck_incheck_out.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,10 +28,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(NotificationController.class)
 @AutoConfigureMockMvc(addFilters = false)
-public class NotificationControllerTest {
+ class NotificationControllerTest {
     @Autowired
     MockMvc mockMvc;
     @Autowired
@@ -42,6 +41,7 @@ public class NotificationControllerTest {
     @MockBean
     private JwtService jwtService;
     @MockBean
+
     NotificationMapper notificationMapper;
     @MockBean
     NotificationService notificationService;

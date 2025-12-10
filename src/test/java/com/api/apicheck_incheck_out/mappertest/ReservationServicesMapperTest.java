@@ -10,7 +10,6 @@ import com.api.apicheck_incheck_out.enums.PhaseAjoutService;
 import com.api.apicheck_incheck_out.mapper.ReservationServicesMapper;
 import com.api.apicheck_incheck_out.repository.ReservationRepository;
 import com.api.apicheck_incheck_out.repository.ServiceRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,7 +21,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class ReservationServicesMapperTest {

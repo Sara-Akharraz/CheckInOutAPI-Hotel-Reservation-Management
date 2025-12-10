@@ -9,12 +9,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.core.userdetails.UserDetails;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.*;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 
-public class CustomUserDetailsTest {
+ class CustomUserDetailsTest {
 
     private UserRepository userRepository;
     private CustomUserDetailsService customUserDetailsService;
