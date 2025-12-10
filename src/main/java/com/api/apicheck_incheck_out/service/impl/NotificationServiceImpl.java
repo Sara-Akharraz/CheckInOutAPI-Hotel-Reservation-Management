@@ -7,38 +7,30 @@ import com.api.apicheck_incheck_out.exceptionhandling.UserNotFoundException;
 import com.api.apicheck_incheck_out.repository.NotificationRepository;
 import com.api.apicheck_incheck_out.repository.UserRepository;
 import com.api.apicheck_incheck_out.service.NotificationService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 @Service
+@RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
 
     private final UserRepository userRepository;
 
-    public NotificationServiceImpl(NotificationRepository notificationRepository, UserRepository userRepository) {
-        this.notificationRepository = notificationRepository;
-        this.userRepository = userRepository;
-    }
-
     @Override
     public Notification notifier(Long userId, String message) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Client introuvable pour l'id " + userId));
 
-        Optional<User> user=userRepository.findById(userId);
-        if(user.isPresent()){
-            User user1=user.get();
-            Notification notif=new Notification();
+        Notification notif=new Notification();
             notif.setMessage(message);
             notif.setDateEnvoi(LocalDate.now());
-            notif.setUser(user1);
+            notif.setUser(user);
             return notificationRepository.save(notif);
-        }else{
-            throw new UserNotFoundException("Client introuvable pour l'id "+ userId);
-        }
-
     }
 
     @Override
@@ -48,13 +40,9 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void deleteNotification(Long id) {
-        Optional<Notification> notification=notificationRepository.findById(id);
-        if(notification.isPresent()){
-            notificationRepository.deleteById(id);
-
-        }else{
-            throw new NotificationNotFoundException("Notification introuvable pour l'id "+id);
-        }
+        notificationRepository.findById(id)
+                .orElseThrow(() -> new NotificationNotFoundException("Notification introuvable pour l'id " + id));
+        notificationRepository.deleteById(id);
 
     }
 }

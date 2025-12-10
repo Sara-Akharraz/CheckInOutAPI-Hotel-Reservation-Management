@@ -128,7 +128,6 @@ public class JwtServiceTest {
         try (var mocked = mockStatic(KeyGenerator.class)) {
             mocked.when(() -> KeyGenerator.getInstance("HmacSHA256"))
                     .thenThrow(new NoSuchAlgorithmException("Algorithm not found"));
-
             assertThrows(EncryptionException.class, JwtService::new);
 
         }

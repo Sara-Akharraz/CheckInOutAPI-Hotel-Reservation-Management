@@ -45,12 +45,7 @@ public class StripeServiceImpl implements StripeService {
                     .build();
 
             PaymentIntent paymentIntent = PaymentIntent.create(params);
-
-
-
             log.info("Status du paiement StripeMock: " + paymentIntent.getStatus());
-
-
             return "succeeded".equals(paymentIntent.getStatus()) || "requires_payment_method".equals(paymentIntent.getStatus());
         } catch(StripeException e) {
             e.printStackTrace();
@@ -67,6 +62,7 @@ public class StripeServiceImpl implements StripeService {
 
         return PaymentIntent.create(params);
     }
+
     @Override
     public StripeResponse checkoutServices(CheckOutRequest checkOutRequest) {
         Stripe.apiKey=stripeApiKey;

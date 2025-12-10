@@ -4,6 +4,8 @@ import com.api.apicheck_incheck_out.entity.Services;
 import com.api.apicheck_incheck_out.exceptionhandling.ServiceNotFoundException;
 import com.api.apicheck_incheck_out.repository.ServiceRepository;
 import com.api.apicheck_incheck_out.service.ServicesService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
@@ -11,13 +13,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ServicesServiceImpl implements ServicesService {
+
     private final ServiceRepository serviceRepository;
-
-    public ServicesServiceImpl(ServiceRepository serviceRepository) {
-        this.serviceRepository = serviceRepository;
-    }
-
     @Override
     public Services addService(Services service) {
         return serviceRepository.save(service);
@@ -25,31 +24,25 @@ public class ServicesServiceImpl implements ServicesService {
 
     @Override
     public Services updateService(Long id, Services updatedServices) {
-        Optional<Services> service=serviceRepository.findById(id);
-        if(service.isPresent()){
-            Services existedService =service.get();
-            existedService.setNom(updatedServices.getNom());
-            existedService.setDescription(updatedServices.getDescription());
-            existedService.setPrix(updatedServices.getPrix());
-            return serviceRepository.save(existedService);
-        }else{
+        Services existedService = serviceRepository.findById(id)
+                .orElseThrow(() -> new ServiceNotFoundException("Service non trouvé avec l'id " + id));
 
-            throw new ServiceNotFoundException("Service non trouvé avec l'id "+id);
+        existedService.setNom(updatedServices.getNom());
+        existedService.setDescription(updatedServices.getDescription());
+        existedService.setPrix(updatedServices.getPrix());
 
-        }
+        return serviceRepository.save(existedService);
     }
 
     @Override
-    public Services deleteService(Long idReservation) {
-        Optional<Services> services=serviceRepository.findById(idReservation);
-        if(services.isPresent()){
-            serviceRepository.deleteById(idReservation);
-            return services.get();
-        }
-        else{
-            throw new ServiceNotFoundException("Service non trouvé avec l'id "+ idReservation);
-        }
+    public Services deleteService(Long id) {
+        Services service = serviceRepository.findById(id)
+                .orElseThrow(() -> new ServiceNotFoundException("Service non trouvé avec l'id " + id));
+
+        serviceRepository.deleteById(id);
+        return service;
     }
+
 
     @Override
     public List<Services> getAllServices() {

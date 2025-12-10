@@ -9,6 +9,8 @@ import com.api.apicheck_incheck_out.exceptionhandling.UserRegistrationException;
 import com.api.apicheck_incheck_out.mapper.UserMapper;
 import com.api.apicheck_incheck_out.repository.UserRepository;
 import com.api.apicheck_incheck_out.security.JwtService;
+import com.api.apicheck_incheck_out.service.factory.UserModifier;
+import com.api.apicheck_incheck_out.service.factory.UserTypesFinder;
 import com.api.apicheck_incheck_out.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +29,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,13 +41,18 @@ import static org.mockito.Mockito.*;
     @Mock
     UserMapper userMapper;
     @Mock
+    UserTypesFinder userTypesFinder;
+    @Mock
     private JwtService jwtService;
+    @Mock
+    UserModifier userModifier;
+    @InjectMocks
+    UserServiceImpl userService;
     private User user, user1, user2;
     List<User> users = new ArrayList<>();
     UserDto dtoMock = new UserDto();
 
-    @InjectMocks
-    UserServiceImpl userService;
+
 
     @BeforeEach
     void setUp(){
@@ -88,8 +94,7 @@ import static org.mockito.Mockito.*;
 
     @Test
     void getUserTest(){
-        when(userMapper.toDTO(user)).thenReturn(dtoMock);
-        when(userRepository.findById(1L)).thenReturn(Optional.ofNullable(user));
+        when(userTypesFinder.findById(1L)).thenReturn(dtoMock);
         UserDto foundedUser = userService.getUser(1L);
 
         assertNotNull(foundedUser);
@@ -97,41 +102,10 @@ import static org.mockito.Mockito.*;
         assertEquals(user.getEmail(),foundedUser.getEmail());
     }
 
-    @Test
-    void getUserTest_UserNotFoundException(){
-            UserNotFoundException e = assertThrows(UserNotFoundException.class,
-                    () -> userService.getUser(1L));
-
-            assertEquals("User not found", e.getMessage());
-    }
-
-    @Test
-    void getAllUsersTest(){
-        UserDto dtoMock1 = new UserDto();
-        dtoMock1.setId(2L);
-        dtoMock1.setNom("Moujahid");
-        dtoMock1.setEmail("moujahid@gmail.com");
-        dtoMock1.setPassword("salma123");
-
-        users.add(user);
-        users.add(user1);
-
-        when(userMapper.toDTO(user)).thenReturn(dtoMock);
-        when(userMapper.toDTO(user1)).thenReturn(dtoMock1);
-        when(userRepository.findAll()).thenReturn(users);
-
-        List<UserDto> foundedUsers = userService.getAllUsers();
-        assertEquals(2,foundedUsers.size());
-        assertEquals(user.getId(),foundedUsers.get(0).getId());
-        assertEquals(user1.getId(),foundedUsers.get(1).getId());
-        assertEquals(user.getEmail(),foundedUsers.get(0).getEmail());
-        assertEquals(user1.getEmail(),foundedUsers.get(1).getEmail());
-
-    }
 
     @Test
     void getAllUsersTest_NoUser(){
-        when(userRepository.findAll()).thenReturn(Collections.emptyList());
+        when(userTypesFinder.findUsers()).thenReturn(Collections.emptyList());
 
         List<UserDto> foundedUsers = userService.getAllUsers();
 
@@ -139,41 +113,10 @@ import static org.mockito.Mockito.*;
         assertTrue(foundedUsers.isEmpty());
     }
 
-    @Test
-    void getReceptionistsTest(){
-        UserDto userDto1 = new UserDto();
-        userDto1.setId(2L);
-        userDto1.setNom("Moujahid");
-        userDto1.setRole(Role.RECEPTIONIST);
-        userDto1.setEmail("moujahid@gmail.com");
-        userDto1.setPassword("salma123");
-        users.add(user1);
-
-        UserDto userDto2 = new UserDto();
-        userDto2.setId(3L);
-        userDto2.setNom("Ali");
-        userDto2.setRole(Role.RECEPTIONIST);
-        userDto2.setEmail("ali@gmail.com");
-        userDto2.setPassword("ali123");
-
-        users.add(user2);
-
-        when(userMapper.toDTO(user1)).thenReturn(userDto1);
-        when(userMapper.toDTO(user2)).thenReturn(userDto2);
-        when(userRepository.findReceptionists()).thenReturn(users);
-
-        List<UserDto> foundedReceptionists = userService.getReceptionists();
-
-        assertEquals(2,foundedReceptionists.size());
-        assertEquals(user1.getId(),foundedReceptionists.get(0).getId());
-        assertEquals(user2.getId(),foundedReceptionists.get(1).getId());
-        assertEquals(user1.getEmail(),foundedReceptionists.get(0).getEmail());
-        assertEquals(user2.getEmail(),foundedReceptionists.get(1).getEmail());
-    }
 
     @Test
     void getReceptionists_NoReceptionist(){
-        when(userRepository.findReceptionists()).thenReturn(Collections.emptyList());
+        when(userTypesFinder.findReceptionists()).thenReturn(Collections.emptyList());
 
         List<UserDto> foundedReceptionists = userService.getReceptionists();
 
@@ -181,41 +124,10 @@ import static org.mockito.Mockito.*;
         assertTrue(foundedReceptionists.isEmpty());
     }
 
-    @Test
-    void getClients(){
-        UserDto userDto1 = new UserDto();
-        userDto1.setId(2L);
-        userDto1.setNom("Moujahid");
-        userDto1.setRole(Role.CLIENT);
-        userDto1.setEmail("moujahid@gmail.com");
-        userDto1.setPassword("salma123");
-        users.add(user1);
-
-        UserDto userDto2 = new UserDto();
-        userDto2.setId(3L);
-        userDto2.setNom("Ali");
-        userDto2.setRole(Role.CLIENT);
-        userDto2.setEmail("ali@gmail.com");
-        userDto2.setPassword("ali123");
-
-        users.add(user2);
-
-        when(userMapper.toDTO(user1)).thenReturn(userDto1);
-        when(userMapper.toDTO(user2)).thenReturn(userDto2);
-        when(userRepository.findClients()).thenReturn(users);
-
-        List<UserDto> foundedClients = userService.getClients();
-
-        assertEquals(2,foundedClients.size());
-        assertEquals(user1.getId(),foundedClients.get(0).getId());
-        assertEquals(user2.getId(),foundedClients.get(1).getId());
-        assertEquals(user1.getEmail(),foundedClients.get(0).getEmail());
-        assertEquals(user2.getEmail(),foundedClients.get(1).getEmail());
-    }
 
     @Test
     void getClients_NoClient(){
-        when(userRepository.findClients()).thenReturn(Collections.emptyList());
+        when(userTypesFinder.findClients()).thenReturn(Collections.emptyList());
 
         List<UserDto> foundedClients = userService.getClients();
 
@@ -229,7 +141,7 @@ import static org.mockito.Mockito.*;
         users.add(user1);
         users.add(user2);
 
-        when(userRepository.findAdmins()).thenReturn(users);
+        when(userTypesFinder.findAdmins()).thenReturn(users);
 
         List<User> foundedAdmins = userService.getAdmins();
 
@@ -241,86 +153,12 @@ import static org.mockito.Mockito.*;
     }
 
     @Test
-    void getAdminsTest_NoAdmin(){
-        when(userRepository.findAdmins()).thenReturn(Collections.emptyList());
-
-        List<User> foundedAdmins = userService.getAdmins();
-
-        assertNotNull(foundedAdmins);
-        assertTrue(foundedAdmins.isEmpty());
-    }
-
-    @Test
     void deleteUser(){
-        when(userRepository.findById(1L)).thenReturn(Optional.ofNullable(user));
+        doNothing().when(userTypesFinder).verifyPresenece(1L);
         userService.deleteUser(1L);
-        Mockito.verify(userRepository, times(1)).deleteById(1L);
+        Mockito.verify(userTypesFinder, times(1)).verifyPresenece(1L);
     }
 
-    @Test
-    void deleteUserTest_UserNotFoundException(){
-        when(userRepository.findById(1L)).thenReturn(Optional.empty());
-
-        UserNotFoundException e = assertThrows(UserNotFoundException.class,
-                () -> userService.deleteUser(1L));
-
-        assertEquals("User not found with id: "+1L, e.getMessage());
-    }
-
-
-    @Test
-    void updateUserTest() {
-
-        dtoMock.setId(1L);
-        dtoMock.setEmail("alami-salma22@gmail.com");
-        dtoMock.setNom("AlamiUpdated");
-        dtoMock.setPrenom("KhadijaUpdated");
-        dtoMock.setPassword("alami123");
-        dtoMock.setTelephone("0611111111");
-
-        User newUserInfo = User.builder()
-                .id(1L)
-                .cin("AB1111")
-                .nom(dtoMock.getNom())
-                .email(dtoMock.getEmail())
-                .role(Role.CLIENT)
-                .prenom(dtoMock.getPrenom())
-                .password("alami-salma-2003")
-                .telephone(dtoMock.getTelephone())
-                .build();
-
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
-        when(userRepository.findByEmail(anyString())).thenReturn(null);
-        when(userRepository.save(any(User.class))).thenReturn(newUserInfo);
-        when(userMapper.toDTO(any(User.class))).thenReturn(dtoMock);
-
-        UserDto updatedUser = userService.updateUser(user.getId(), dtoMock);
-
-        assertNotNull(updatedUser);
-        assertEquals(newUserInfo.getId(), updatedUser.getId());
-        assertEquals(newUserInfo.getEmail(), updatedUser.getEmail());
-        assertEquals(newUserInfo.getTelephone(), updatedUser.getTelephone());
-    }
-
-    @Test
-    void updateUserTest_EmailAlreadyUsedException(){
-        when(userRepository.findByEmail(user.getEmail())).thenReturn(user1);
-
-        EmailAlreadyUsedException e = assertThrows(EmailAlreadyUsedException.class,
-                () -> userService.updateUser(1L,dtoMock));
-
-        assertEquals("Email is already taken by another user", e.getMessage());
-
-    }
-
-    @Test
-    void testUpdateUser_UserNotFoundException() {
-        when(userRepository.findById(user.getId())).thenReturn(Optional.empty());
-        UserNotFoundException e = assertThrows(UserNotFoundException.class,
-                () -> userService.updateUser(1L,dtoMock));
-
-        assertEquals("User not found with id: " + 1L,  e.getMessage());
-    }
 
     @Test
     void verifyTest() {

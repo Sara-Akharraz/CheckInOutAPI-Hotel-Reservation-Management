@@ -46,6 +46,7 @@ import static org.mockito.Mockito.when;
         assertEquals(HttpStatus.OK,response.getStatusCode());
         assertEquals(chambreDTO,response.getBody());
     }
+
     @Test
     void testUpdateChambre(){
         Long id=1L;
@@ -72,6 +73,7 @@ import static org.mockito.Mockito.when;
         ResponseEntity<Void> response=chambreController.deleteChambre(id);
         assertEquals(HttpStatus.NO_CONTENT,response.getStatusCode());
     }
+
     @Test
     void testGetChambreById(){
         Long id=1L;
@@ -90,6 +92,7 @@ import static org.mockito.Mockito.when;
         assertEquals(chambreDTO,response.getBody());
 
     }
+
     @Test
     void testGetAllChambres(){
         Chambre c1=new Chambre();
