@@ -297,6 +297,7 @@
 						<exclude>**/entity/**</exclude>
 						<exclude>**/dto/**</exclude>
 						<exclude>**/dto/*.class</exclude>
+						<exclude>**/stripe/**.class</exclude>
 					</excludes>
 				</configuration>
 				<executions>
