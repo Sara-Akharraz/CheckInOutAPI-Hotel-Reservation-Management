@@ -239,14 +239,14 @@ class CheckOutServiceImplTest {
         reservation.getFactureList().add(facture);
 
         when(factureService.validerPaiementCheckOut(any(Reservation.class), anyDouble())).thenReturn(facture);
-        doNothing().when(checkOutNotificationManager).PaymentConfirmed(1L,1L);
+        doNothing().when(checkOutNotificationManager).paymentConfirmed(1L,1L);
 
         checkOutService.handlePaymentSuccess(1L);
 
         verify(checkOutStatusManager).confirmed(1L);
         verify(servicesPaymentManager).handleServicesPayment(1L);
         verify(factureService).validerPaiementCheckOut(any(Reservation.class), anyDouble());
-        verify(checkOutNotificationManager).PaymentConfirmed(1L, 1L);
+        verify(checkOutNotificationManager).paymentConfirmed(1L, 1L);
     }
 
 

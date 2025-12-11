@@ -4,65 +4,36 @@ import com.api.apicheck_incheck_out.dto.UserDto;
 import com.api.apicheck_incheck_out.entity.User;
 import com.api.apicheck_incheck_out.enums.Role;
 import com.api.apicheck_incheck_out.exceptionhandling.EmailAlreadyUsedException;
-import com.api.apicheck_incheck_out.exceptionhandling.UserNotFoundException;
-import com.api.apicheck_incheck_out.exceptionhandling.UserRegistrationException;
-import com.api.apicheck_incheck_out.mapper.UserMapper;
-import com.api.apicheck_incheck_out.repository.UserRepository;
 import com.api.apicheck_incheck_out.security.JwtService;
 import com.api.apicheck_incheck_out.service.factory.UserModifier;
 import com.api.apicheck_incheck_out.service.factory.UserTypesFinder;
-import com.api.apicheck_incheck_out.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.Authentication;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class UserModifierTest {
 
     @Mock
-    UserRepository userRepository;
-    @Mock
     private AuthenticationManager authManager;
-    @Mock
-    UserMapper userMapper;
+
     @Mock
     UserTypesFinder userTypesFinder;
     @Mock
     private JwtService jwtService;
     @InjectMocks
     UserModifier userModifier;
-    private User user, user1, user2;
-    List<User> users = new ArrayList<>();
-    UserDto dtoMock = new UserDto();
+    UserDto dtoMock;
 
 
     @BeforeEach
     void setUp(){
-        user = User.builder()
-                .id(1L)
-                .cin("AB1111")
-                .nom("Alami")
-                .email("alami@gmail.com")
-                .role(Role.CLIENT)
-                .prenom("Khadija")
-                .password("alami123")
-                .build();
         dtoMock = UserDto.builder()
                 .id(2L)
                 .cin("AC1111")

@@ -17,7 +17,7 @@ public class CheckOutNotificationManager {
 
     String message = "Paiement Confirmé pour la réservation numéro : ";
 
-    public void PaymentConfirmed(Long idUser, Long idReservation){
+    public void paymentConfirmed(Long idUser, Long idReservation){
         notificationService.notifier(idUser,message+ idReservation);
         List<User> admins = userService.getAdmins();
         admins.stream().forEach(admin ->

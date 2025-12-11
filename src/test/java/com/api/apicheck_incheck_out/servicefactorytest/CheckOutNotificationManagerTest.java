@@ -54,7 +54,7 @@ public class CheckOutNotificationManagerTest {
         when(userService.getReceptionists()).thenReturn(List.of(user1));
         when(notificationService.notifier(anyLong(),anyString())).thenReturn(notification);
 
-        checkOutNotificationManager.PaymentConfirmed(1L,1L);
+        checkOutNotificationManager.paymentConfirmed(1L,1L);
 
         String message = "Paiement Confirmé pour la réservation numéro : "+1;
 

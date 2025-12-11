@@ -40,9 +40,6 @@ public class ReservationServiceImpl implements ReservationService {
         return chambreReservationManager.processChambreReservation(reservation,chambreIds);
     }
 
-    //public void updateChambreToUccupee(Reservation reservation){
-      //  chambreStatutManager.occepee(reservation);
-    //}
     @Override
     public Reservation updateReservationStatus(Long id, ReservationStatus status) {
         return chambreStatutManager.newStatut(id,status);

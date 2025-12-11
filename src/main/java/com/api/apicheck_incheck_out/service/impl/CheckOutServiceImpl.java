@@ -73,7 +73,7 @@ public class CheckOutServiceImpl implements CheckOutService {
         servicesPaymentManager.handleServicesPayment(checkOut.getReservation().getId());
         Reservation r = checkOut.getReservation();
         factureService.validerPaiementCheckOut(r,this.getAmount(checkOut.getId()));
-        checkOutNotificationManager.PaymentConfirmed(checkOut.getReservation().getUser().getId(),r.getId());
+        checkOutNotificationManager.paymentConfirmed(checkOut.getReservation().getUser().getId(),r.getId());
     }
 
     @Override
