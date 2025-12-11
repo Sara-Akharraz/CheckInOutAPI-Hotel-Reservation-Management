@@ -10,6 +10,7 @@ import com.stripe.model.checkout.Session;
 import com.stripe.param.PaymentIntentCreateParams;
 import com.stripe.param.checkout.SessionCreateParams;
 import jakarta.annotation.PostConstruct;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 @Slf4j
 @Service
+@Setter
 public class StripeServiceImpl implements StripeService {
 
     @Value("${stripe.api.secretKey}")
@@ -112,4 +114,6 @@ public class StripeServiceImpl implements StripeService {
                     .build();
         }
     }
+
+
 }
